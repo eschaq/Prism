@@ -1,0 +1,34 @@
+import io
+import pandas as pd
+from claude_client import call_claude, load_prompt
+
+
+def process_csv(file_obj: io.BytesIO) -> dict:
+    """Ingest a CSV file and produce a plain-English business summary via Claude."""
+    df = pd.read_csv(file_obj)
+
+    shape = df.shape
+    columns = df.columns.tolist()
+    dtypes = df.dtypes.astype(str).to_dict()
+    nulls = df.isnull().sum().to_dict()
+    preview = df.head(5).to_csv(index=False)
+    describe = df.describe(include="all").to_csv()
+
+    system_prompt = load_prompt("data_analysis.txt")
+    user_message = (
+        f"Dataset shape: {shape[0]} rows × {shape[1]} columns\n"
+        f"Columns: {columns}\n"
+        f"Data types: {dtypes}\n"
+        f"Null counts: {nulls}\n\n"
+        f"Preview (first 5 rows):\n{preview}\n\n"
+        f"Statistical summary:\n{describe}"
+    )
+
+    summary = call_claude(system_prompt, user_message)
+
+    return {
+        "summary": summary,
+        "shape": {"rows": shape[0], "columns": shape[1]},
+        "columns": columns,
+        "preview": df.head(5).to_dict(orient="records"),
+    }

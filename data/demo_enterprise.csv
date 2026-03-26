@@ -1,0 +1,19 @@
+month,region,product_line,revenue,units_sold,returns,customer_satisfaction,support_tickets,churn_rate
+2025-01,North America,Analytics Suite,842000,312,14,4.2,87,0.031
+2025-01,Europe,Analytics Suite,621000,248,9,4.1,64,0.028
+2025-01,APAC,Analytics Suite,318000,127,6,3.9,41,0.035
+2025-01,North America,Data Platform,1240000,89,3,4.5,52,0.019
+2025-01,Europe,Data Platform,890000,64,2,4.4,38,0.021
+2025-01,APAC,Data Platform,445000,32,1,4.3,29,0.024
+2025-02,North America,Analytics Suite,891000,334,18,4.0,102,0.038
+2025-02,Europe,Analytics Suite,658000,261,11,4.0,71,0.031
+2025-02,APAC,Analytics Suite,342000,138,7,3.8,49,0.039
+2025-02,North America,Data Platform,1318000,95,4,4.6,48,0.017
+2025-02,Europe,Data Platform,941000,68,2,4.5,35,0.020
+2025-02,APAC,Data Platform,478000,35,1,4.4,26,0.022
+2025-03,North America,Analytics Suite,764000,287,22,3.8,134,0.047
+2025-03,Europe,Analytics Suite,589000,231,15,3.9,89,0.036
+2025-03,APAC,Analytics Suite,301000,119,9,3.7,62,0.044
+2025-03,North America,Data Platform,1401000,101,3,4.7,44,0.015
+2025-03,Europe,Data Platform,1012000,72,1,4.6,32,0.018
+2025-03,APAC,Data Platform,512000,38,2,4.5,23,0.020
