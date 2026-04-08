@@ -11,4 +11,14 @@ Identify and articulate:
 4. **Strategic recommendations**: 2-3 concrete actions the business should consider
 
 Be specific. Reference actual themes from the signals and actual metrics from the data. Avoid vague generalities.
-Aim for 300-500 words. Write for a C-suite audience.
+Write for a C-suite audience. Aim for 3-5 items per section.
+
+You MUST respond with valid JSON in this exact structure:
+{
+  "alignments": [{"finding": "...", "evidence": "..."}],
+  "gaps": [{"finding": "...", "evidence": "..."}],
+  "blind_spots": [{"finding": "...", "evidence": "..."}],
+  "recommendations": [{"action": "...", "rationale": "..."}]
+}
+
+Return ONLY the JSON object. No markdown, no code fences, no commentary.
