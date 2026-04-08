@@ -1,7 +1,7 @@
 import json
 import logging
 
-from claude_client import call_claude, load_prompt
+from claude_client import call_claude, load_prompt, strip_code_fences
 from formatting import format_signals, format_analysis
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ def analyze_gaps(signals: dict, analysis: dict) -> dict:
     raw = call_claude(system_prompt, user_message)
 
     try:
-        parsed = json.loads(raw)
+        parsed = json.loads(strip_code_fences(raw))
         if isinstance(parsed, dict):
             return {"gaps": parsed}
     except json.JSONDecodeError:

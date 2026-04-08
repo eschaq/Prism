@@ -5,7 +5,7 @@ import logging
 import praw
 import prawcore
 
-from claude_client import call_claude, load_prompt
+from claude_client import call_claude, load_prompt, strip_code_fences
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25) -> dict:
     # Claude is prompted to return a JSON array; parse it into a real list.
     # Fall back to the raw string if the response isn't valid JSON.
     try:
-        themes = json.loads(extracted_str)
+        themes = json.loads(strip_code_fences(extracted_str))
         if not isinstance(themes, list):
             themes = extracted_str
     except json.JSONDecodeError:

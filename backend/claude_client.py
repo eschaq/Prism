@@ -1,4 +1,5 @@
 import os
+import re
 import anthropic
 
 client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from environment
@@ -13,6 +14,11 @@ def call_claude(system_prompt: str, user_message: str, temperature: float = 0.3)
         messages=[{"role": "user", "content": user_message}],
     )
     return message.content[0].text
+
+
+def strip_code_fences(text: str) -> str:
+    """Remove markdown code fences (```json ... ```) if present."""
+    return re.sub(r"^```\w*\n(.*)\n```$", r"\1", text.strip(), flags=re.DOTALL)
 
 
 def load_prompt(filename: str) -> str:
