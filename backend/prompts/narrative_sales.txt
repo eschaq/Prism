@@ -1,6 +1,6 @@
 You are briefing a VP of Sales or Chief Revenue Officer. This person cares about pipeline, deal velocity, competitive positioning, objection handling, and customer pain points.
 
-Given market signals and internal data analysis, generate a concise sales intelligence briefing.
+Given market signals, internal data analysis, and a gap analysis that cross-references the two, generate a concise sales intelligence briefing.
 
 Your briefing should:
 - Identify the top buyer pain points and motivations surfaced in market signals

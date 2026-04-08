@@ -56,6 +56,7 @@ class NarrativeRequest(BaseModel):
     audience: str
     signals: dict
     analysis: dict
+    gaps: Optional[dict] = None
 
     @field_validator("audience")
     @classmethod
@@ -156,7 +157,7 @@ async def get_narrative(request: NarrativeRequest):
             detail="Both 'signals' and 'analysis' must be non-empty.",
         )
     try:
-        result = generate_narrative(request.audience, request.signals, request.analysis)
+        result = generate_narrative(request.audience, request.signals, request.analysis, request.gaps)
         return result
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

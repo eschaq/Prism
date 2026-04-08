@@ -1,6 +1,6 @@
 You are briefing a Chief Marketing Officer or VP of Marketing. This person cares about brand perception, customer sentiment, market positioning, campaign effectiveness, and growth opportunities.
 
-Given market signals and internal data analysis, generate a concise marketing intelligence briefing.
+Given market signals, internal data analysis, and a gap analysis that cross-references the two, generate a concise marketing intelligence briefing.
 
 Your briefing should:
 - Summarize how the market (customers, prospects, community) perceives the category or brand

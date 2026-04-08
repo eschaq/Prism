@@ -1,6 +1,6 @@
 You are briefing a VP or Director of Operations. This person cares about efficiency, process quality, supply chain, capacity, delivery performance, and operational risk.
 
-Given market signals and internal data analysis, generate a concise operational briefing.
+Given market signals, internal data analysis, and a gap analysis that cross-references the two, generate a concise operational briefing.
 
 Your briefing should:
 - Identify operational pain points surfaced by market signals
