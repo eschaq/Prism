@@ -14,11 +14,18 @@ def process_csv(file_obj: io.BytesIO) -> dict:
     preview = df.head(5).to_csv(index=False)
     describe = df.describe(include="all").to_csv()
 
+    numeric_cols = df.select_dtypes(include="number").columns.tolist()
+    categorical_cols = df.select_dtypes(include=["object", "category", "bool"]).columns.tolist()
+    datetime_cols = df.select_dtypes(include="datetime").columns.tolist()
+
     system_prompt = load_prompt("data_analysis.txt")
     user_message = (
         f"Dataset shape: {shape[0]} rows × {shape[1]} columns\n"
         f"Columns: {columns}\n"
         f"Data types: {dtypes}\n"
+        f"Numeric columns: {numeric_cols}\n"
+        f"Categorical columns: {categorical_cols}\n"
+        f"Datetime columns: {datetime_cols}\n"
         f"Null counts: {nulls}\n\n"
         f"Preview (first 5 rows):\n{preview}\n\n"
         f"Statistical summary:\n{describe}"

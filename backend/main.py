@@ -110,6 +110,12 @@ async def analyze_data(file: UploadFile = File(...)):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Uploaded file is empty.",
             )
+        max_size = 10 * 1024 * 1024  # 10 MB
+        if len(contents) > max_size:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File too large ({len(contents) / 1024 / 1024:.1f} MB). Maximum size is 10 MB.",
+            )
         result = process_csv(io.BytesIO(contents))
         return result
     except HTTPException:
