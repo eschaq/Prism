@@ -1,23 +1,109 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { X, Plus } from "lucide-react";
 import { LoadingOverlay, CardSkeleton } from "./LoadingStates";
 
+const STORAGE_KEY = "prism_subreddits";
+
+function loadSavedSubreddits() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return [{ name: "MachineLearning", checked: true }];
+}
+
 export default function SignalPanel({ apiBase, profile, onSignals }) {
-  const [subreddit, setSubreddit] = useState("MachineLearning");
-  const [query, setQuery] = useState("enterprise AI tools");
+  const [subreddits, setSubreddits] = useState(loadSavedSubreddits);
+  const [customInput, setCustomInput] = useState("");
+  const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  useEffect(() => {
+    if (!profile?.industry) return;
+    const suggestedQuery = profile.industry
+      .toLowerCase()
+      .replace(/&/g, "")
+      .replace(/[^\w\s]/g, "")
+      .replace(/\s+/g, " ")
+      .trim() + " tools";
+    setQuery((prev) => prev || suggestedQuery);
+    let cancelled = false;
+    async function fetchSuggestions() {
+      setLoadingSuggestions(true);
+      try {
+        const res = await fetch(`${apiBase}/api/subreddits`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ industry: profile.industry, query }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.suggested)) {
+          setSubreddits((prev) => {
+            const existing = new Set(prev.map((s) => s.name.toLowerCase()));
+            const newSubs = data.suggested
+              .filter((name) => !existing.has(name.toLowerCase()))
+              .map((name) => ({ name, checked: true }));
+            return [...prev, ...newSubs];
+          });
+        }
+      } catch {
+        // Silently fail — suggestions are optional
+      } finally {
+        if (!cancelled) setLoadingSuggestions(false);
+      }
+    }
+    fetchSuggestions();
+    return () => { cancelled = true; };
+  }, [profile?.industry, apiBase]);
+
+  function toggleSubreddit(name) {
+    setSubreddits((prev) =>
+      prev.map((s) => (s.name === name ? { ...s, checked: !s.checked } : s))
+    );
+  }
+
+  function removeSubreddit(name) {
+    setSubreddits((prev) => prev.filter((s) => s.name !== name));
+  }
+
+  function addCustom() {
+    const name = customInput.trim().replace(/^r\//, "");
+    if (!name) return;
+    const exists = subreddits.some((s) => s.name.toLowerCase() === name.toLowerCase());
+    if (!exists) {
+      setSubreddits((prev) => [...prev, { name, checked: true }]);
+    }
+    setCustomInput("");
+  }
+
+  function saveSubreddits() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(subreddits));
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
+    const checked = subreddits.filter((s) => s.checked).map((s) => s.name);
+    if (checked.length === 0) {
+      setError("Select at least one subreddit.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`${apiBase}/api/signals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subreddit, query, limit, profile }),
+        body: JSON.stringify({ subreddits: checked, query, limit, profile }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -30,6 +116,8 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
     }
   }
 
+  const checkedCount = subreddits.filter((s) => s.checked).length;
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
@@ -40,35 +128,95 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1">
-              Subreddit
-            </label>
-            <input
-              value={subreddit}
-              onChange={(e) => setSubreddit(e.target.value)}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g. MachineLearning"
-            />
+        <div>
+          <label className="block text-xs font-medium text-gray-400 mb-2">
+            Subreddits ({checkedCount} selected)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {subreddits.map((s) => (
+              <span
+                key={s.name}
+                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                  s.checked
+                    ? "border-indigo-500 bg-indigo-950 text-indigo-300"
+                    : "border-gray-700 bg-gray-900 text-gray-500"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={s.checked}
+                  onChange={() => toggleSubreddit(s.name)}
+                  className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                />
+                <span
+                  className="cursor-pointer"
+                  onClick={() => toggleSubreddit(s.name)}
+                >
+                  r/{s.name}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeSubreddit(s.name)}
+                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
           </div>
-          <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1">
-              Search Query
-            </label>
+
+          {loadingSuggestions && (
+            <p className="text-xs text-gray-500 mt-2">Loading subreddit suggestions...</p>
+          )}
+
+          <div className="flex items-center gap-2 mt-3">
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g. enterprise AI tools"
+              value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCustom();
+                }
+              }}
+              className="flex-1 rounded-md bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Add subreddit..."
             />
+            <button
+              type="button"
+              onClick={addCustom}
+              className="inline-flex items-center gap-1 rounded-md border border-gray-700 px-2.5 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+            >
+              <Plus size={12} />
+              Add
+            </button>
           </div>
+
+          <button
+            type="button"
+            onClick={saveSubreddits}
+            className="mt-2 rounded-md border border-gray-700 px-3 py-1 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+          >
+            Save subreddits
+          </button>
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-gray-400 mb-1">
+            Search Query
+          </label>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="e.g. enterprise AI tools"
+          />
         </div>
 
         <div className="flex items-center gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Post Limit
+              Post Limit (per subreddit)
             </label>
             <input
               type="number"
@@ -81,10 +229,10 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || checkedCount === 0}
             className="mt-5 rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors"
           >
-            {loading ? "Scraping..." : "Run Signal Collection"}
+            {loading ? "Scraping..." : `Scan ${checkedCount} subreddit${checkedCount !== 1 ? "s" : ""}`}
           </button>
         </div>
       </form>
@@ -100,7 +248,7 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
       {result && !loading && (
         <div className="space-y-4">
           <div className="text-xs text-gray-500">
-            r/{result.subreddit} · "{result.query}" · {result.raw_posts?.length ?? 0} posts
+            {(result.subreddits || []).map((s) => `r/${s}`).join(" + ")} · "{result.query}" · {result.raw_posts?.length ?? 0} posts
           </div>
           <div className="space-y-3">
             {Array.isArray(result.themes) ? (
@@ -119,6 +267,13 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
   );
 }
 
+const PPS_COLORS = {
+  PRODUCT: "text-purple-400 bg-purple-950 border-purple-800",
+  SERIES: "text-blue-400 bg-blue-950 border-blue-800",
+  POST: "text-gray-400 bg-gray-800 border-gray-700",
+  AWARENESS: "text-gray-500 bg-gray-900 border-gray-800",
+};
+
 function ThemeCard({ theme }) {
   const sentimentColors = {
     positive: "text-green-400 bg-green-950 border-green-800",
@@ -127,6 +282,7 @@ function ThemeCard({ theme }) {
     mixed: "text-yellow-400 bg-yellow-950 border-yellow-800",
   };
   const color = sentimentColors[theme.sentiment] || sentimentColors.neutral;
+  const ppsColor = PPS_COLORS[theme.pps_tier] || PPS_COLORS.AWARENESS;
 
   return (
     <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-2">
@@ -139,6 +295,16 @@ function ThemeCard({ theme }) {
           <span className="text-xs px-2 py-0.5 rounded-full border border-gray-700 text-gray-400">
             {theme.frequency}
           </span>
+          {theme.pps_tier && (
+            <span className={`text-xs px-2 py-0.5 rounded-full border ${ppsColor}`}>
+              {theme.pps_tier}
+            </span>
+          )}
+          {theme.wtp_signal && (
+            <span className="text-xs px-2 py-0.5 rounded-full border border-green-800 bg-green-950 text-green-400 font-bold">
+              $
+            </span>
+          )}
         </div>
       </div>
       <p className="text-sm text-gray-300">{theme.description}</p>

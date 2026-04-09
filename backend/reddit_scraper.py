@@ -54,27 +54,37 @@ def _enrich_with_comments(submission) -> tuple[str, bool, list[str]]:
     return (comment_text, wtp_detected, wtp_matches)
 
 
-def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | None = None) -> dict:
-    """Scrape Reddit posts with filtering, PPS scoring, and comment enrichment."""
-    reddit = _get_reddit_client()
-
+def _fetch_subreddit(reddit, subreddit_name: str, query: str, limit: int) -> list:
+    """Fetch submissions from a single subreddit. Returns list of PRAW submissions."""
     try:
-        sub = reddit.subreddit(subreddit)
-        submissions = list(sub.search(query, limit=limit, sort="relevance", time_filter="month"))
+        sub = reddit.subreddit(subreddit_name)
+        return list(sub.search(query, limit=limit, sort="relevance", time_filter="month"))
     except prawcore.exceptions.NotFound:
-        raise ValueError(f"Subreddit r/{subreddit} does not exist.")
+        logger.warning("Subreddit r/%s does not exist, skipping.", subreddit_name)
+        return []
     except prawcore.exceptions.Forbidden:
-        raise ValueError(f"r/{subreddit} is private or banned.")
+        logger.warning("r/%s is private or banned, skipping.", subreddit_name)
+        return []
     except prawcore.exceptions.TooManyRequests:
         raise RuntimeError("Reddit rate limit reached. Please try again in a moment.")
     except prawcore.exceptions.ResponseException as e:
         raise RuntimeError(f"Reddit API error: {e}")
 
+
+def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: dict | None = None) -> dict:
+    """Scrape multiple subreddits with filtering, PPS scoring, and comment enrichment."""
+    reddit = _get_reddit_client()
+
+    # --- Fetch posts from all subreddits ---
+    submissions = []
+    for sub_name in subreddits:
+        submissions.extend(_fetch_subreddit(reddit, sub_name, query, limit))
+
     if not submissions:
         return {
             "themes": [],
             "raw_posts": [],
-            "subreddit": subreddit,
+            "subreddits": subreddits,
             "query": query,
             "post_count": 0,
         }
@@ -89,7 +99,7 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | N
         return {
             "themes": [],
             "raw_posts": [],
-            "subreddit": subreddit,
+            "subreddits": subreddits,
             "query": query,
             "post_count": 0,
         }
@@ -112,6 +122,7 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | N
             "score": s.score,
             "num_comments": s.num_comments,
             "url": s.url,
+            "subreddit": s.subreddit.display_name,
             "relevance_tier": relevance_tier,
             "wtp_detected": wtp_detected,
             "wtp_matches": wtp_matches,
@@ -146,10 +157,12 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | N
     system_prompt = load_prompt("signal_extraction.txt")
     profile_section = f"COMPANY PROFILE:\n{format_profile(profile)}\n\n" if profile else ""
 
+    sub_label = ", ".join(f"r/{s}" for s in subreddits)
     post_sections = []
     for p in scored_posts:
         section = (
             f"Title: {p['title']}\n"
+            f"Subreddit: r/{p['subreddit']}\n"
             f"Score: {p['score']} | Comments: {p['num_comments']}\n"
             f"Relevance: {p['relevance_tier']} | PPS: {p['pps_total']} ({p['pps_label']}) "
             f"| WTP: {'yes' if p['wtp_detected'] else 'no'} | Pain signals: {p['pain_count']}\n"
@@ -161,7 +174,7 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | N
 
     user_message = (
         f"{profile_section}"
-        f"Subreddit: r/{subreddit}\n"
+        f"Subreddits: {sub_label}\n"
         f"Query: {query}\n\n"
         "Posts (sorted by Pain Point Score, highest first):\n"
         + "\n---\n".join(post_sections)
@@ -188,6 +201,7 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | N
             "score": p["score"],
             "num_comments": p["num_comments"],
             "url": p["url"],
+            "subreddit": p["subreddit"],
             "relevance_tier": p["relevance_tier"],
             "wtp_detected": p["wtp_detected"],
             "wtp_matches": p["wtp_matches"],
@@ -200,7 +214,7 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | N
     return {
         "themes": themes,
         "raw_posts": raw_posts,
-        "subreddit": subreddit,
+        "subreddits": subreddits,
         "query": query,
         "post_count": len(raw_posts),
     }

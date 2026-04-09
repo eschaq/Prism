@@ -19,8 +19,10 @@ def format_profile(profile: dict) -> str:
 
 def format_signals(signals: dict) -> str:
     """Format the signals dict into clean readable text for Claude."""
+    subs = signals.get("subreddits", [signals.get("subreddit", "unknown")])
+    sub_label = ", ".join(f"r/{s}" for s in subs) if isinstance(subs, list) else f"r/{subs}"
     lines = [
-        f"Subreddit: r/{signals.get('subreddit', 'unknown')}",
+        f"Subreddits: {sub_label}",
         f"Query: {signals.get('query', 'unknown')}",
         f"Posts analyzed: {signals.get('post_count', 0)}",
         "",

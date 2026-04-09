@@ -3,10 +3,37 @@ import { X } from "lucide-react";
 
 const COMPANY_SIZES = ["1-50", "51-200", "201-1000", "1001-5000", "5000+"];
 
+const INDUSTRIES = [
+  "Business Intelligence & Analytics",
+  "Data Engineering & Infrastructure",
+  "Marketing & Advertising",
+  "E-commerce & Retail",
+  "Finance & Accounting",
+  "SaaS & Technology",
+  "AI & Machine Learning",
+  "Sales & Revenue Operations",
+  "Supply Chain & Operations",
+  "HR & People Analytics",
+  "Agency & Consulting",
+  "Small Business & Entrepreneurship",
+  "Other",
+];
+
+function resolveInitialIndustry(saved) {
+  if (!saved) return { industry: "", industryOther: "" };
+  if (INDUSTRIES.includes(saved)) return { industry: saved, industryOther: "" };
+  // Saved value doesn't match any option — treat as "Other" with free text
+  return { industry: "Other", industryOther: saved };
+}
+
 export default function ProfileSettings({ profile, onSave, onClose }) {
+  const initial = resolveInitialIndustry(profile?.industry);
+
   const [form, setForm] = useState({
     companyName: profile?.companyName || "",
-    industry: profile?.industry || "",
+    industry: initial.industry,
+    industryOther: initial.industryOther,
+    subIndustry: profile?.subIndustry || "",
     companySize: profile?.companySize || "",
     context: profile?.context || "",
   });
@@ -16,13 +43,19 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
   }
 
   function handleSave() {
+    const resolvedIndustry =
+      form.industry === "Other" ? form.industryOther.trim() : form.industry;
+
     const trimmed = {
       companyName: form.companyName.trim(),
-      industry: form.industry.trim(),
+      industry: resolvedIndustry,
+      subIndustry: form.subIndustry.trim(),
       companySize: form.companySize,
       context: form.context.trim(),
     };
-    const hasContent = trimmed.companyName || trimmed.industry || trimmed.companySize || trimmed.context;
+    const hasContent =
+      trimmed.companyName || trimmed.industry || trimmed.subIndustry ||
+      trimmed.companySize || trimmed.context;
     onSave(hasContent ? trimmed : null);
     onClose();
   }
@@ -60,13 +93,45 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Industry / Niche
+              Industry
             </label>
-            <input
+            <select
               value={form.industry}
               onChange={(e) => handleChange("industry", e.target.value)}
               className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="e.g. Enterprise SaaS, Healthcare logistics"
+            >
+              <option value="">Select industry...</option>
+              {INDUSTRIES.map((ind) => (
+                <option key={ind} value={ind}>
+                  {ind}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {form.industry === "Other" && (
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">
+                Specify industry
+              </label>
+              <input
+                value={form.industryOther}
+                onChange={(e) => handleChange("industryOther", e.target.value)}
+                className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="e.g. Healthcare logistics, Legal tech"
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-medium text-gray-400 mb-1">
+              Sub-industry (optional)
+            </label>
+            <input
+              value={form.subIndustry}
+              onChange={(e) => handleChange("subIndustry", e.target.value)}
+              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g. Revenue analytics, B2B payments"
             />
           </div>
 

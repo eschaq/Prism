@@ -42,7 +42,7 @@ if os.path.isdir(ASSETS_DIR):
 # Request / response models
 # ---------------------------------------------------------------------------
 class SignalRequest(BaseModel):
-    subreddit: str = Field(..., min_length=1, max_length=100)
+    subreddits: list[str] = Field(..., min_length=1, max_length=10)
     query: str = Field(..., min_length=1, max_length=300)
     limit: Optional[int] = Field(default=25, ge=1, le=100)
     profile: Optional[dict] = None
@@ -93,7 +93,7 @@ async def health():
 @app.post("/api/signals", tags=["signals"])
 async def get_signals(request: SignalRequest):
     try:
-        result = scrape_reddit(request.subreddit, request.query, request.limit, request.profile)
+        result = scrape_reddit(request.subreddits, request.query, request.limit, request.profile)
         return result
     except ValueError as e:
         # Bad subreddit name, private sub, etc. — caller's fault
