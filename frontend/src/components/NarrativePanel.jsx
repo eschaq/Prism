@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { LoadingOverlay } from "./LoadingStates";
 import AUDIENCES from "../audiences";
 
-export default function NarrativePanel({ apiBase, audience, signals, analysis, gaps }) {
+export default function NarrativePanel({ apiBase, audience, signals, analysis, gaps, onNarrative }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -24,6 +24,7 @@ export default function NarrativePanel({ apiBase, audience, signals, analysis, g
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       setResult(data);
+      if (onNarrative) onNarrative(data);
     } catch (err) {
       setError(err.message);
     } finally {
