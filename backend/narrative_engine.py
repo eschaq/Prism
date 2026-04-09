@@ -6,6 +6,13 @@ AUDIENCE_PROMPTS = {
     "operations": "narrative_operations.txt",
     "marketing": "narrative_marketing.txt",
     "sales": "narrative_sales.txt",
+    "product": "narrative_product.txt",
+    "sales_engineer": "narrative_sales_engineer.txt",
+    "hr": "narrative_hr.txt",
+    "supply_chain": "narrative_supply_chain.txt",
+    "customer_success": "narrative_customer_success.txt",
+    "risk_compliance": "narrative_risk_compliance.txt",
+    "board": "narrative_board.txt",
 }
 
 

@@ -11,7 +11,7 @@ from typing import Optional
 
 from reddit_scraper import scrape_reddit
 from data_processor import process_csv
-from narrative_engine import generate_narrative
+from narrative_engine import generate_narrative, AUDIENCE_PROMPTS
 from gap_analysis import analyze_gaps
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class GapRequest(BaseModel):
     analysis: dict
 
 
-VALID_AUDIENCES = {"cfo", "operations", "marketing", "sales"}
+VALID_AUDIENCES = set(AUDIENCE_PROMPTS.keys())
 
 
 class NarrativeRequest(BaseModel):
