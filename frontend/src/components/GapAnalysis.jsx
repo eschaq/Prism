@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LoadingOverlay } from "./LoadingStates";
+import { StepProgress } from "./LoadingStates";
 
 const GAP_SECTIONS = [
   { key: "alignments", label: "Alignments", fieldMain: "finding", fieldDetail: "evidence", accent: "border-green-800 bg-green-950", labelColor: "text-green-400" },
@@ -65,7 +65,15 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
         </div>
       )}
 
-      {loading && <LoadingOverlay message="Identifying gaps across signal and data streams..." />}
+      {loading && (
+        <StepProgress
+          steps={[
+            "Cross-referencing signals with data...",
+            "Identifying gaps and opportunities with AI...",
+          ]}
+          active={loading}
+        />
+      )}
 
       {result && !loading && (
         typeof result.gaps === "string" ? (

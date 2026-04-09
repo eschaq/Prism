@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LoadingOverlay } from "./LoadingStates";
+import { StepProgress } from "./LoadingStates";
 import AUDIENCES from "../audiences";
 
 export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, onNarrative }) {
@@ -62,8 +62,12 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
       )}
 
       {loading && (
-        <LoadingOverlay
-          message={`Framing intelligence for the ${audienceLabel}...`}
+        <StepProgress
+          steps={[
+            "Assembling intelligence context...",
+            "Generating executive briefing with AI...",
+          ]}
+          active={loading}
         />
       )}
 

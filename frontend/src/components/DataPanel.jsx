@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { LoadingOverlay } from "./LoadingStates";
+import { StepProgress } from "./LoadingStates";
 
 export default function DataPanel({ apiBase, profile, onAnalysis }) {
   const [loading, setLoading] = useState(false);
@@ -77,7 +77,16 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
         </div>
       )}
 
-      {loading && <LoadingOverlay message="Analyzing your data..." />}
+      {loading && (
+        <StepProgress
+          steps={[
+            "Uploading and parsing CSV...",
+            "Analyzing column patterns...",
+            "Generating business summary with AI...",
+          ]}
+          active={loading}
+        />
+      )}
 
       {result && !loading && (
         <div className="space-y-4">

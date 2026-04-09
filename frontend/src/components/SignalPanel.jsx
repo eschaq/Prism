@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, Plus } from "lucide-react";
-import { LoadingOverlay, CardSkeleton } from "./LoadingStates";
+import { StepProgress, CardSkeleton } from "./LoadingStates";
 
 const STORAGE_KEY = "prism_subreddits";
 
@@ -26,6 +26,7 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const queryManuallyEdited = useRef(false);
 
   useEffect(() => {
     if (!profile?.industry) return;
@@ -35,7 +36,9 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
       .replace(/[^\w\s]/g, "")
       .replace(/\s+/g, " ")
       .trim() + " tools";
-    setQuery((prev) => prev || suggestedQuery);
+    if (!queryManuallyEdited.current) {
+      setQuery(suggestedQuery);
+    }
     let cancelled = false;
     async function fetchSuggestions() {
       setLoadingSuggestions(true);
@@ -203,7 +206,7 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
           </label>
           <input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { queryManuallyEdited.current = true; setQuery(e.target.value); }}
             className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             placeholder="e.g. enterprise AI tools"
           />
@@ -239,7 +242,16 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
         </div>
       )}
 
-      {loading && <LoadingOverlay message="Scraping Reddit and extracting signals..." />}
+      {loading && (
+        <StepProgress
+          steps={[
+            "Fetching posts from Reddit...",
+            "Scoring and filtering posts...",
+            "Extracting themes with AI...",
+          ]}
+          active={loading}
+        />
+      )}
 
       {result && !loading && (
         <div className="space-y-4">
