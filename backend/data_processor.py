@@ -1,9 +1,10 @@
 import io
 import pandas as pd
 from claude_client import call_claude, load_prompt
+from formatting import format_profile
 
 
-def process_csv(file_obj: io.BytesIO) -> dict:
+def process_csv(file_obj: io.BytesIO, profile: dict | None = None) -> dict:
     """Ingest a CSV file and produce a plain-English business summary via Claude."""
     df = pd.read_csv(file_obj)
 
@@ -19,7 +20,9 @@ def process_csv(file_obj: io.BytesIO) -> dict:
     datetime_cols = df.select_dtypes(include="datetime").columns.tolist()
 
     system_prompt = load_prompt("data_analysis.txt")
+    profile_section = f"COMPANY PROFILE:\n{format_profile(profile)}\n\n" if profile else ""
     user_message = (
+        f"{profile_section}"
         f"Dataset shape: {shape[0]} rows × {shape[1]} columns\n"
         f"Columns: {columns}\n"
         f"Data types: {dtypes}\n"

@@ -8,7 +8,7 @@ const GAP_SECTIONS = [
   { key: "recommendations", label: "Recommendations", fieldMain: "action", fieldDetail: "rationale", accent: "border-indigo-800 bg-indigo-950", labelColor: "text-indigo-400" },
 ];
 
-export default function GapAnalysis({ apiBase, signals, analysis, onGaps }) {
+export default function GapAnalysis({ apiBase, profile, signals, analysis, onGaps }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -23,7 +23,7 @@ export default function GapAnalysis({ apiBase, signals, analysis, onGaps }) {
       const res = await fetch(`${apiBase}/api/gaps`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signals, analysis }),
+        body: JSON.stringify({ signals, analysis, profile }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();

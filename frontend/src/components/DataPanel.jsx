@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { LoadingOverlay } from "./LoadingStates";
 
-export default function DataPanel({ apiBase, onAnalysis }) {
+export default function DataPanel({ apiBase, profile, onAnalysis }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -14,6 +14,7 @@ export default function DataPanel({ apiBase, onAnalysis }) {
     setError(null);
     const form = new FormData();
     form.append("file", file);
+    if (profile) form.append("profile", JSON.stringify(profile));
     try {
       const res = await fetch(`${apiBase}/api/analyze`, {
         method: "POST",

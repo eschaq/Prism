@@ -1,8 +1,9 @@
 import io
+import json
 import logging
 import os
 
-from fastapi import FastAPI, HTTPException, UploadFile, File, status
+from fastapi import FastAPI, Form, HTTPException, UploadFile, File, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -42,11 +43,13 @@ class SignalRequest(BaseModel):
     subreddit: str = Field(..., min_length=1, max_length=100)
     query: str = Field(..., min_length=1, max_length=300)
     limit: Optional[int] = Field(default=25, ge=1, le=100)
+    profile: Optional[dict] = None
 
 
 class GapRequest(BaseModel):
     signals: dict
     analysis: dict
+    profile: Optional[dict] = None
 
 
 VALID_AUDIENCES = set(AUDIENCE_PROMPTS.keys())
@@ -57,6 +60,7 @@ class NarrativeRequest(BaseModel):
     signals: dict
     analysis: dict
     gaps: Optional[dict] = None
+    profile: Optional[dict] = None
 
     @field_validator("audience")
     @classmethod
@@ -81,7 +85,7 @@ async def health():
 @app.post("/api/signals", tags=["signals"])
 async def get_signals(request: SignalRequest):
     try:
-        result = scrape_reddit(request.subreddit, request.query, request.limit)
+        result = scrape_reddit(request.subreddit, request.query, request.limit, request.profile)
         return result
     except ValueError as e:
         # Bad subreddit name, private sub, etc. — caller's fault
@@ -98,7 +102,7 @@ async def get_signals(request: SignalRequest):
 # POST /api/analyze — CSV upload + Claude data analysis
 # ---------------------------------------------------------------------------
 @app.post("/api/analyze", tags=["data"])
-async def analyze_data(file: UploadFile = File(...)):
+async def analyze_data(file: UploadFile = File(...), profile: Optional[str] = Form(None)):
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -117,7 +121,8 @@ async def analyze_data(file: UploadFile = File(...)):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"File too large ({len(contents) / 1024 / 1024:.1f} MB). Maximum size is 10 MB.",
             )
-        result = process_csv(io.BytesIO(contents))
+        profile_data = json.loads(profile) if profile else None
+        result = process_csv(io.BytesIO(contents), profile_data)
         return result
     except HTTPException:
         raise
@@ -139,7 +144,7 @@ async def get_gaps(request: GapRequest):
             detail="Both 'signals' and 'analysis' must be non-empty.",
         )
     try:
-        result = analyze_gaps(request.signals, request.analysis)
+        result = analyze_gaps(request.signals, request.analysis, request.profile)
         return result
     except Exception as e:
         logger.exception("Unexpected error in /api/gaps")
@@ -157,7 +162,7 @@ async def get_narrative(request: NarrativeRequest):
             detail="Both 'signals' and 'analysis' must be non-empty.",
         )
     try:
-        result = generate_narrative(request.audience, request.signals, request.analysis, request.gaps)
+        result = generate_narrative(request.audience, request.signals, request.analysis, request.gaps, request.profile)
         return result
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

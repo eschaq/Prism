@@ -1,11 +1,23 @@
 import React, { useState } from "react";
+import { Settings } from "lucide-react";
 import AUDIENCES from "./audiences";
 import { PATHS } from "./paths";
 import RoleSelector from "./components/RoleSelector";
 import PathSelector from "./components/PathSelector";
+import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const STORAGE_KEY = "prism_profile";
+
+function loadProfile() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function App() {
   const [audience, setAudience] = useState(null);
@@ -14,6 +26,17 @@ export default function App() {
   const [analysis, setAnalysis] = useState(null);
   const [gaps, setGaps] = useState(null);
   const [narrative, setNarrative] = useState(null);
+  const [profile, setProfile] = useState(loadProfile);
+  const [showSettings, setShowSettings] = useState(false);
+
+  function handleSaveProfile(data) {
+    setProfile(data);
+    if (data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
 
   // Screen 1: Role selection
   if (!audience) {
@@ -80,6 +103,16 @@ export default function App() {
                 Change path
               </button>
             </div>
+            <button
+              onClick={() => setShowSettings(true)}
+              className="relative rounded-md border border-gray-700 p-2 text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+              title="Company Profile Settings"
+            >
+              <Settings size={16} />
+              {profile && (
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-gray-950" />
+              )}
+            </button>
           </div>
         </div>
       </header>
@@ -89,6 +122,7 @@ export default function App() {
           steps={activePath.steps}
           apiBase={API_BASE}
           audience={audience}
+          profile={profile}
           signals={signals}
           analysis={analysis}
           gaps={gaps}
@@ -99,6 +133,14 @@ export default function App() {
           onNarrative={setNarrative}
         />
       </main>
+
+      {showSettings && (
+        <ProfileSettings
+          profile={profile}
+          onSave={handleSaveProfile}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
     </div>
   );
 }

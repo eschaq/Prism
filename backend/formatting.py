@@ -1,6 +1,22 @@
 """Shared formatting helpers for preparing Claude user messages."""
 
 
+def format_profile(profile: dict) -> str:
+    """Format the company profile dict into clean readable text for Claude."""
+    if not profile:
+        return ""
+    lines = []
+    if profile.get("companyName"):
+        lines.append(f"Company: {profile['companyName']}")
+    if profile.get("industry"):
+        lines.append(f"Industry: {profile['industry']}")
+    if profile.get("companySize"):
+        lines.append(f"Size: {profile['companySize']} employees")
+    if profile.get("context"):
+        lines.append(f"Context: {profile['context']}")
+    return "\n".join(lines)
+
+
 def format_signals(signals: dict) -> str:
     """Format the signals dict into clean readable text for Claude."""
     lines = [

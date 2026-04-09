@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { LoadingOverlay, CardSkeleton } from "./LoadingStates";
 
-export default function SignalPanel({ apiBase, onSignals }) {
+export default function SignalPanel({ apiBase, profile, onSignals }) {
   const [subreddit, setSubreddit] = useState("MachineLearning");
   const [query, setQuery] = useState("enterprise AI tools");
   const [limit, setLimit] = useState(25);
@@ -17,7 +17,7 @@ export default function SignalPanel({ apiBase, onSignals }) {
       const res = await fetch(`${apiBase}/api/signals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subreddit, query, limit }),
+        body: JSON.stringify({ subreddit, query, limit, profile }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();

@@ -6,6 +6,7 @@ import praw
 import prawcore
 
 from claude_client import call_claude, load_prompt, strip_code_fences
+from formatting import format_profile
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,7 @@ def _get_reddit_client() -> praw.Reddit:
     return _reddit
 
 
-def scrape_reddit(subreddit: str, query: str, limit: int = 25) -> dict:
+def scrape_reddit(subreddit: str, query: str, limit: int = 25, profile: dict | None = None) -> dict:
     """Scrape Reddit posts and extract structured themes via Claude."""
     reddit = _get_reddit_client()
 
@@ -58,7 +59,9 @@ def scrape_reddit(subreddit: str, query: str, limit: int = 25) -> dict:
         }
 
     system_prompt = load_prompt("signal_extraction.txt")
+    profile_section = f"COMPANY PROFILE:\n{format_profile(profile)}\n\n" if profile else ""
     user_message = (
+        f"{profile_section}"
         f"Subreddit: r/{subreddit}\n"
         f"Query: {query}\n\n"
         "Posts:\n"

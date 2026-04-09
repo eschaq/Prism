@@ -9,6 +9,7 @@ export default function Wizard({
   steps,
   apiBase,
   audience,
+  profile,
   signals,
   analysis,
   gaps,
@@ -108,14 +109,15 @@ export default function Wizard({
 
       {/* Active panel */}
       {activeStep === "signals" && (
-        <SignalPanel apiBase={apiBase} onSignals={onSignals} />
+        <SignalPanel apiBase={apiBase} profile={profile} onSignals={onSignals} />
       )}
       {activeStep === "data" && (
-        <DataPanel apiBase={apiBase} onAnalysis={onAnalysis} />
+        <DataPanel apiBase={apiBase} profile={profile} onAnalysis={onAnalysis} />
       )}
       {activeStep === "gaps" && (
         <GapAnalysis
           apiBase={apiBase}
+          profile={profile}
           signals={signals}
           analysis={analysis}
           onGaps={onGaps}
@@ -125,6 +127,7 @@ export default function Wizard({
         <NarrativePanel
           apiBase={apiBase}
           audience={audience}
+          profile={profile}
           signals={signals}
           analysis={analysis}
           gaps={gaps}
