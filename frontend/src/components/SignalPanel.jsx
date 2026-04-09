@@ -14,7 +14,7 @@ function loadSavedSubreddits() {
   } catch {
     // ignore
   }
-  return [{ name: "MachineLearning", checked: true }];
+  return [];
 }
 
 export default function SignalPanel({ apiBase, profile, onSignals }) {
@@ -43,18 +43,14 @@ export default function SignalPanel({ apiBase, profile, onSignals }) {
         const res = await fetch(`${apiBase}/api/subreddits`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ industry: profile.industry, query }),
+          body: JSON.stringify({ industry: profile.industry, query: suggestedQuery }),
         });
         if (!res.ok) return;
         const data = await res.json();
         if (!cancelled && Array.isArray(data.suggested)) {
-          setSubreddits((prev) => {
-            const existing = new Set(prev.map((s) => s.name.toLowerCase()));
-            const newSubs = data.suggested
-              .filter((name) => !existing.has(name.toLowerCase()))
-              .map((name) => ({ name, checked: true }));
-            return [...prev, ...newSubs];
-          });
+          setSubreddits(
+            data.suggested.map((name) => ({ name, checked: true }))
+          );
         }
       } catch {
         // Silently fail — suggestions are optional
