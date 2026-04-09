@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Audience-aware, insight-driven, forward-looking.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to marketing priorities — such as launching a campaign targeting an unmet need surfaced in signals, updating messaging to address a perception gap, or commissioning audience research on a newly identified segment.
+
+DECISION TRIGGER:
+End with one sentence naming the single marketing decision the CMO can make today — a campaign pivot, a messaging update, or a positioning shift based on the intelligence.

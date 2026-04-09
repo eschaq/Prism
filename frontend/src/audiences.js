@@ -10,6 +10,7 @@ const AUDIENCES = [
   { id: "customer_success", label: "Customer Success", description: "Churn, satisfaction, expansion" },
   { id: "risk_compliance", label: "Risk / Compliance", description: "Regulatory signals, audit readiness" },
   { id: "board", label: "Board / Executive Summary", description: "Strategic position, key decisions" },
+  { id: "small_business", label: "Small Business Owner", description: "Revenue, growth, and practical decisions" },
 ];
 
 export default AUDIENCES;

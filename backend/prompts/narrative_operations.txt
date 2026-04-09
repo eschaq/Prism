@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Practical and action-oriented. Focus on what needs to change and how.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to operational priorities — such as launching a process audit on a flagged inefficiency, adjusting capacity allocation based on demand signals, or escalating a customer-facing delivery issue to the relevant team lead.
+
+DECISION TRIGGER:
+End with one sentence naming the single process change or operational action the VP of Operations can initiate this week based on these findings.

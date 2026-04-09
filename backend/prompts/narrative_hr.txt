@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: People-focused but data-informed. Balance empathy with analytical rigor.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to people priorities — such as launching a targeted retention initiative for an at-risk team, updating job postings to address a competitive hiring gap, or commissioning a pulse survey on a sentiment theme surfaced in signals.
+
+DECISION TRIGGER:
+End with one sentence naming the single people decision the VP of HR can make today — a retention intervention, a hiring strategy shift, or an employer brand action based on the intelligence.

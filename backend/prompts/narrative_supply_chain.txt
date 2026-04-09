@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Risk-aware and operationally specific. Focus on actionable procurement decisions.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to supply chain priorities — such as initiating a backup supplier qualification for a flagged vendor risk, renegotiating terms based on cost trend data, or adjusting safety stock levels based on demand forecast signals.
+
+DECISION TRIGGER:
+End with one sentence naming the single procurement decision the VP of Supply Chain can make today — a supplier switch, a contract renegotiation, or an inventory adjustment based on the intelligence.

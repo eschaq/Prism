@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Technical but accessible. A sales engineer should be able to use this in a customer call tomorrow.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to SE priorities — such as building a demo scenario that addresses the top technical objection, creating a reference architecture for the most common integration concern, or escalating a product gap to engineering with supporting signal data.
+
+DECISION TRIGGER:
+End with one sentence naming the single technical sales action the SE can take today — a POC scope adjustment, a demo update, or a technical enablement request based on the intelligence.

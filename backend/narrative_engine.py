@@ -13,6 +13,7 @@ AUDIENCE_PROMPTS = {
     "customer_success": "narrative_customer_success.txt",
     "risk_compliance": "narrative_risk_compliance.txt",
     "board": "narrative_board.txt",
+    "small_business": "narrative_small_business.txt",
 }
 
 

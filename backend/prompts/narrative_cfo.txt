@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Direct, data-driven, no fluff. The CFO has 5 minutes. Make every sentence count.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to financial priorities — such as reallocating budget to a high-signal opportunity, commissioning a cost-impact analysis on an emerging risk, or accelerating/pausing a capital investment based on the data.
+
+DECISION TRIGGER:
+End with one sentence naming the single financial decision the CFO can make today based on these findings — a budget reallocation, an investment pause, or a strategic go/no-go.

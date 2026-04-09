@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Customer-centric and proactive. Focus on early warning signals and retention levers.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to CS priorities — such as triggering proactive outreach to accounts showing churn risk signals, updating the onboarding playbook to address a friction point surfaced in data, or flagging an expansion opportunity to the account team for a high-potential segment.
+
+DECISION TRIGGER:
+End with one sentence naming the single customer success action the VP of CS can take today — a save play for an at-risk cohort, an onboarding change, or an upsell motion based on the intelligence.

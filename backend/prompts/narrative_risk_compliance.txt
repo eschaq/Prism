@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Precise and risk-calibrated. Distinguish between immediate threats and emerging concerns.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to risk/compliance priorities — such as initiating a control review for a newly surfaced regulatory signal, updating the risk register with a quantified exposure from the data, or scheduling a compliance readiness assessment for an emerging requirement.
+
+DECISION TRIGGER:
+End with one sentence naming the single risk or compliance action the CRO can take today — an audit trigger, a control remediation, or a regulatory response based on the intelligence.

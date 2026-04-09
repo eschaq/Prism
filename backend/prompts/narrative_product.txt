@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Evidence-based and strategic. Every recommendation should trace back to a signal or data point.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps tied to product priorities — such as fast-tracking a feature that addresses a high-PPS pain point, scheduling user research on a newly surfaced need, or deprioritizing a roadmap item that lacks market validation.
+
+DECISION TRIGGER:
+End with one sentence naming the single product decision the PM can make today — a roadmap reprioritization, a feature scope change, or a build-vs-buy call based on the intelligence.

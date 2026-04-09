@@ -11,3 +11,9 @@ Your briefing should:
 
 Tone: Strategic, concise, and decisive. Every sentence should matter at the board level. No operational detail.
 Format: Use headers and bullet points. Aim for 300-400 words.
+
+RECOMMENDED ACTIONS:
+End with 2-3 specific, actionable next steps at the board level — such as authorizing a strategic investment to capture a validated market opportunity, directing management to present a mitigation plan for the top existential risk, or approving a pivot in market strategy based on the competitive intelligence.
+
+DECISION TRIGGER:
+End with one sentence naming the single strategic decision the board should make today — a go/no-go on a major initiative, a resource reallocation, or a strategic direction change based on the intelligence.
