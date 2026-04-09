@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import SignalPanel from "./components/SignalPanel";
 import DataPanel from "./components/DataPanel";
 import NarrativePanel from "./components/NarrativePanel";
@@ -9,6 +9,7 @@ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 export default function App() {
   const [signals, setSignals] = useState(null);
   const [analysis, setAnalysis] = useState(null);
+  const [gaps, setGaps] = useState(null);
   const [activeTab, setActiveTab] = useState("signals");
 
   const tabs = [
@@ -56,10 +57,10 @@ export default function App() {
           <DataPanel apiBase={API_BASE} onAnalysis={setAnalysis} />
         )}
         {activeTab === "gaps" && (
-          <GapAnalysis apiBase={API_BASE} signals={signals} analysis={analysis} />
+          <GapAnalysis apiBase={API_BASE} signals={signals} analysis={analysis} onGaps={setGaps} />
         )}
         {activeTab === "narrative" && (
-          <NarrativePanel apiBase={API_BASE} signals={signals} analysis={analysis} />
+          <NarrativePanel apiBase={API_BASE} signals={signals} analysis={analysis} gaps={gaps} />
         )}
       </main>
     </div>

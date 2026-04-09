@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { LoadingOverlay, CardSkeleton } from "./LoadingStates";
 
 export default function SignalPanel({ apiBase, onSignals }) {

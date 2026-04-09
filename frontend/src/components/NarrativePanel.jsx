@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { LoadingOverlay } from "./LoadingStates";
 
 const AUDIENCES = [
@@ -8,7 +8,7 @@ const AUDIENCES = [
   { id: "sales", label: "Sales", description: "Pipeline, objections, buyer pain points" },
 ];
 
-export default function NarrativePanel({ apiBase, signals, analysis }) {
+export default function NarrativePanel({ apiBase, signals, analysis, gaps }) {
   const [audience, setAudience] = useState("cfo");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,7 +25,7 @@ export default function NarrativePanel({ apiBase, signals, analysis }) {
       const res = await fetch(`${apiBase}/api/narrative`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audience, signals, analysis }),
+        body: JSON.stringify({ audience, signals, analysis, gaps }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();

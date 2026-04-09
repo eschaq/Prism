@@ -1,7 +1,14 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { LoadingOverlay } from "./LoadingStates";
 
-export default function GapAnalysis({ apiBase, signals, analysis }) {
+const GAP_SECTIONS = [
+  { key: "alignments", label: "Alignments", fieldMain: "finding", fieldDetail: "evidence", accent: "border-green-800 bg-green-950", labelColor: "text-green-400" },
+  { key: "gaps", label: "Critical Gaps", fieldMain: "finding", fieldDetail: "evidence", accent: "border-red-800 bg-red-950", labelColor: "text-red-400" },
+  { key: "blind_spots", label: "Blind Spots", fieldMain: "finding", fieldDetail: "evidence", accent: "border-yellow-800 bg-yellow-950", labelColor: "text-yellow-400" },
+  { key: "recommendations", label: "Recommendations", fieldMain: "action", fieldDetail: "rationale", accent: "border-indigo-800 bg-indigo-950", labelColor: "text-indigo-400" },
+];
+
+export default function GapAnalysis({ apiBase, signals, analysis, onGaps }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -21,6 +28,7 @@ export default function GapAnalysis({ apiBase, signals, analysis }) {
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       setResult(data);
+      onGaps(data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -60,12 +68,43 @@ export default function GapAnalysis({ apiBase, signals, analysis }) {
       {loading && <LoadingOverlay message="Identifying gaps across signal and data streams..." />}
 
       {result && !loading && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-          <h3 className="text-sm font-semibold text-indigo-400 mb-3">Gap Analysis Report</h3>
-          <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-            {result.gaps}
+        typeof result.gaps === "string" ? (
+          <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
+            <h3 className="text-sm font-semibold text-indigo-400 mb-3">Gap Analysis Report</h3>
+            <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+              {result.gaps}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-6">
+            {GAP_SECTIONS.map((section) => {
+              const items = result.gaps?.[section.key];
+              if (!items?.length) return null;
+              return (
+                <div key={section.key} className="space-y-3">
+                  <h3 className={`text-sm font-semibold ${section.labelColor}`}>
+                    {section.label}
+                  </h3>
+                  {items.map((item, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-lg border p-4 ${section.accent}`}
+                    >
+                      <p className="text-sm font-medium text-gray-100">
+                        {item[section.fieldMain]}
+                      </p>
+                      {item[section.fieldDetail] && (
+                        <p className="text-xs text-gray-400 mt-1">
+                          {item[section.fieldDetail]}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        )
       )}
     </div>
   );

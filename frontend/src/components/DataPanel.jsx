@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { LoadingOverlay } from "./LoadingStates";
 
 export default function DataPanel({ apiBase, onAnalysis }) {
