@@ -43,7 +43,7 @@ export default function DataPanel({ apiBase, onAnalysis }) {
       <div>
         <h2 className="text-lg font-semibold text-gray-100">Data Analysis</h2>
         <p className="text-sm text-gray-400 mt-1">
-          Upload a CSV and get a plain-English business summary from Claude.
+          Upload a CSV and get a plain-English business summary.
         </p>
       </div>
 
@@ -76,7 +76,7 @@ export default function DataPanel({ apiBase, onAnalysis }) {
         </div>
       )}
 
-      {loading && <LoadingOverlay message="Analyzing your data with Claude..." />}
+      {loading && <LoadingOverlay message="Analyzing your data..." />}
 
       {result && !loading && (
         <div className="space-y-4">

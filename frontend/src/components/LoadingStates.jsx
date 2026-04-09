@@ -15,7 +15,7 @@ export function SkeletonBlock({ className = "" }) {
   );
 }
 
-export function LoadingOverlay({ message = "Analyzing with Claude..." }) {
+export function LoadingOverlay({ message = "Analyzing..." }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-16">
       <Spinner size="lg" />

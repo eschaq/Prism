@@ -35,7 +35,7 @@ export default function SignalPanel({ apiBase, onSignals }) {
       <div>
         <h2 className="text-lg font-semibold text-gray-100">Signal Collection</h2>
         <p className="text-sm text-gray-400 mt-1">
-          Scrape Reddit and extract structured business themes using Claude.
+          Scrape Reddit and extract structured business themes.
         </p>
       </div>
 
