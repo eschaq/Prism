@@ -40,7 +40,18 @@ export default function App() {
 
   // Screen 1: Role selection
   if (!audience) {
-    return <RoleSelector onSelect={setAudience} />;
+    return (
+      <>
+        <RoleSelector onSelect={setAudience} profile={profile} onOpenSettings={() => setShowSettings(true)} />
+        {showSettings && (
+          <ProfileSettings
+            profile={profile}
+            onSave={handleSaveProfile}
+            onClose={() => setShowSettings(false)}
+          />
+        )}
+      </>
+    );
   }
 
   const audienceLabel = AUDIENCES.find((a) => a.id === audience)?.label ?? audience;

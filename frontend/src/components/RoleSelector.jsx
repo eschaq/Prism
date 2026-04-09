@@ -1,9 +1,22 @@
 import React from "react";
+import { Settings } from "lucide-react";
 import AUDIENCES from "../audiences";
 
-export default function RoleSelector({ onSelect }) {
+export default function RoleSelector({ onSelect, profile, onOpenSettings }) {
   return (
-    <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center px-6 py-16">
+    <div className="relative min-h-screen bg-gray-950 flex flex-col items-center justify-center px-6 py-16">
+      <div className="absolute top-6 right-6">
+        <button
+          onClick={onOpenSettings}
+          className="relative rounded-md border border-gray-700 p-2 text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+          title="Company Profile Settings"
+        >
+          <Settings size={16} />
+          {profile && (
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-gray-950" />
+          )}
+        </button>
+      </div>
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tight">
           <span className="text-indigo-400">Prism</span>

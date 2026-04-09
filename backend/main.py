@@ -14,6 +14,8 @@ from reddit_scraper import scrape_reddit
 from data_processor import process_csv
 from narrative_engine import generate_narrative, AUDIENCE_PROMPTS
 from gap_analysis import analyze_gaps
+from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
+from claude_client import call_claude, strip_code_fences
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +71,12 @@ class NarrativeRequest(BaseModel):
         if normalized not in VALID_AUDIENCES:
             raise ValueError(f"audience must be one of: {sorted(VALID_AUDIENCES)}")
         return normalized
+
+
+class SubredditRequest(BaseModel):
+    industry: str = Field(..., min_length=1)
+    sub_industry: Optional[str] = None
+    query: str = Field(..., min_length=1)
 
 
 # ---------------------------------------------------------------------------
@@ -169,6 +177,36 @@ async def get_narrative(request: NarrativeRequest):
     except Exception as e:
         logger.exception("Unexpected error in /api/narrative")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# POST /api/subreddits — Dynamic subreddit suggestions
+# ---------------------------------------------------------------------------
+@app.post("/api/subreddits", tags=["signals"])
+async def get_subreddits(request: SubredditRequest):
+    base_list = INDUSTRY_SUBREDDITS.get(request.industry, DEFAULT_SUBREDDITS)
+    try:
+        if request.sub_industry:
+            prompt = (
+                f"Given the industry '{request.industry}' and sub-industry '{request.sub_industry}', "
+                f"and the search query '{request.query}', select the 5 most relevant subreddits "
+                f"from this list: {base_list}\n\n"
+                "Return ONLY a JSON array of subreddit names (no r/ prefix). No commentary."
+            )
+            raw = call_claude("You select relevant subreddits. Return only a JSON array.", prompt)
+            try:
+                parsed = json.loads(strip_code_fences(raw))
+                if isinstance(parsed, list):
+                    suggested = [s for s in parsed if isinstance(s, str)][:7]
+                    if len(suggested) >= 3:
+                        return {"suggested": suggested}
+            except (json.JSONDecodeError, Exception):
+                logger.warning("Claude returned invalid subreddit suggestions; using defaults.")
+        suggested = base_list[:5]
+    except Exception as e:
+        logger.exception("Unexpected error in /api/subreddits")
+        suggested = DEFAULT_SUBREDDITS[:5]
+    return {"suggested": suggested}
 
 
 # ---------------------------------------------------------------------------
