@@ -1,7 +1,24 @@
 import io
+import math
 import pandas as pd
 from claude_client import call_claude, load_prompt
 from formatting import format_profile
+
+
+def _json_safe(obj):
+    """Recursively replace float NaN/Inf with None for JSON serialization."""
+    if isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    if isinstance(obj, dict):
+        return {k: _json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_json_safe(v) for v in obj]
+    # Convert numpy int/float to Python native
+    if hasattr(obj, "item"):
+        return _json_safe(obj.item())
+    return obj
 
 
 def process_csvs(file_objs: list[io.BytesIO], profile: dict | None = None) -> dict:
@@ -25,6 +42,9 @@ def process_csvs(file_objs: list[io.BytesIO], profile: dict | None = None) -> di
                 df = df.merge(next_df, on=merge_keys, how="outer")
         else:
             df = pd.concat(dfs, ignore_index=True)
+
+    # Aggressive NaN/Inf cleanup on the entire DataFrame
+    df = df.where(pd.notnull(df), None)
 
     shape = df.shape
     columns = df.columns.tolist()
@@ -56,10 +76,12 @@ def process_csvs(file_objs: list[io.BytesIO], profile: dict | None = None) -> di
 
     summary = call_claude(system_prompt, user_message)
 
-    return {
+    result = {
         "summary": summary,
-        "shape": {"rows": shape[0], "columns": shape[1]},
+        "shape": {"rows": int(shape[0]), "columns": int(shape[1])},
         "columns": columns,
         "preview": df.head(5).to_dict(orient="records"),
         "file_count": len(file_objs),
     }
+
+    return _json_safe(result)

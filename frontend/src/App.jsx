@@ -55,6 +55,7 @@ export default function App() {
         <RoleSelector onSelect={setAudience} profile={profile} onOpenSettings={() => setShowSettings(true)} onLoadDemo={handleLoadDemo} />
         {showSettings && (
           <ProfileSettings
+            apiBase={API_BASE}
             profile={profile}
             onSave={handleSaveProfile}
             onClose={() => setShowSettings(false)}

@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST http://localhost:8000/api/analyze -F \"files=@/home/eschachter/Prism/data/demo/marketing_campaigns.csv\")",
+      "Bash(curl -s -X POST http://localhost:8000/api/analyze -F \"files=@/home/eschachter/Prism/data/demo/marketing_campaigns.csv\" -F \"files=@/home/eschachter/Prism/data/demo/ga4_traffic.csv\" -F \"files=@/home/eschachter/Prism/data/demo/sales_pipeline.csv\")",
+      "Bash(curl -s -X POST http://localhost:8000/api/analyze -F \"files=@/home/eschachter/Prism/data/demo/marketing_campaigns.csv\" -F \"files=@/home/eschachter/Prism/data/demo/ga4_traffic.csv\")",
+      "Bash(python -c \":*)",
+      "Bash(curl -s -X POST http://localhost:8000/api/analyze -F \"file=@/home/eschachter/Prism/data/demo/marketing_campaigns.csv\" -F \"file=@/home/eschachter/Prism/data/demo/ga4_traffic.csv\")",
+      "Bash(curl -s --max-time 120 -X POST http://localhost:8000/api/analyze -F \"files=@/home/eschachter/Prism/data/demo/marketing_campaigns.csv\" -F \"files=@/home/eschachter/Prism/data/demo/ga4_traffic.csv\")",
+      "Read(//tmp/**)"
+    ],
+    "additionalDirectories": [
+      "/home/eschachter/Prism/http:/localhost:8000/api"
+    ]
+  }
+}

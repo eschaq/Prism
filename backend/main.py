@@ -102,6 +102,12 @@ class SubredditRequest(BaseModel):
     query: str = Field(..., min_length=1)
 
 
+class CompetitorSuggestionRequest(BaseModel):
+    company: str = Field(..., min_length=1)
+    industry: str = Field(..., min_length=1)
+    sub_industry: Optional[str] = None
+
+
 class VisibilityRequest(BaseModel):
     company: str = Field(..., min_length=1)
     industry: str = Field(..., min_length=1)
@@ -171,7 +177,7 @@ async def analyze_data(files: list[UploadFile] = File(...), profile: Optional[st
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
-        logger.exception("Unexpected error in /api/analyze")
+        logger.exception("Unexpected error in /api/analyze: %s", e)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
@@ -275,6 +281,30 @@ async def get_feeds(request: FeedRequest):
 
 
 # ---------------------------------------------------------------------------
+# POST /api/suggest-competitors — AI-powered competitor suggestions
+# ---------------------------------------------------------------------------
+@app.post("/api/suggest-competitors", tags=["analysis"])
+async def suggest_competitors(request: CompetitorSuggestionRequest):
+    sub_context = f" (sub-industry: {request.sub_industry})" if request.sub_industry else ""
+    prompt = (
+        f"Company: {request.company}\n"
+        f"Industry: {request.industry}{sub_context}\n\n"
+        "List 5-8 likely direct competitors for this company in this space. "
+        "Include both well-known market leaders and emerging challengers. "
+        "Return ONLY a JSON array of company name strings. No commentary."
+    )
+    try:
+        raw = call_claude("You identify business competitors. Return only a JSON array.", prompt)
+        parsed = json.loads(strip_code_fences(raw))
+        if isinstance(parsed, list):
+            suggested = [s for s in parsed if isinstance(s, str)][:8]
+            return {"suggested": suggested}
+    except (json.JSONDecodeError, Exception):
+        logger.warning("Claude returned invalid competitor suggestions.")
+    return {"suggested": []}
+
+
+# ---------------------------------------------------------------------------
 # POST /api/visibility — AI search visibility assessment
 # ---------------------------------------------------------------------------
 @app.post("/api/visibility", tags=["analysis"])
@@ -285,6 +315,22 @@ async def get_visibility(request: VisibilityRequest):
     except Exception as e:
         logger.exception("Unexpected error in /api/visibility")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# GET /api/demo-data/{filename} — Serve demo CSV files
+# ---------------------------------------------------------------------------
+DEMO_DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "demo")
+
+
+@app.get("/api/demo-data/{filename}", tags=["data"])
+async def get_demo_data(filename: str):
+    if not filename.endswith(".csv") or "/" in filename or "\\" in filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid filename.")
+    filepath = os.path.join(DEMO_DATA_DIR, filename)
+    if not os.path.isfile(filepath):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Demo file not found: {filename}")
+    return FileResponse(filepath, media_type="text/csv", filename=filename)
 
 
 # ---------------------------------------------------------------------------

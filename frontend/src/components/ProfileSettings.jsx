@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { Spinner } from "./LoadingStates";
 
 const COMPANY_SIZES = ["1-50", "51-200", "201-1000", "1001-5000", "5000+"];
 
@@ -26,7 +27,7 @@ function resolveInitialIndustry(saved) {
   return { industry: "Other", industryOther: saved };
 }
 
-export default function ProfileSettings({ profile, onSave, onClose }) {
+export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
   const initial = resolveInitialIndustry(profile?.industry);
 
   const [form, setForm] = useState({
@@ -38,6 +39,8 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
     companySize: profile?.companySize || "",
     context: profile?.context || "",
   });
+  const [suggestions, setSuggestions] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -60,6 +63,55 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
       trimmed.competitors || trimmed.companySize || trimmed.context;
     onSave(hasContent ? trimmed : null);
     onClose();
+  }
+
+  async function handleSuggestCompetitors() {
+    const resolvedIndustry =
+      form.industry === "Other" ? form.industryOther.trim() : form.industry;
+    if (!form.companyName.trim() || !resolvedIndustry) return;
+    setLoadingSuggestions(true);
+    setSuggestions([]);
+    try {
+      const res = await fetch(`${apiBase}/api/suggest-competitors`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          company: form.companyName.trim(),
+          industry: resolvedIndustry,
+          sub_industry: form.subIndustry.trim() || null,
+        }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data.suggested)) {
+        setSuggestions(data.suggested.map((name) => ({ name, checked: true })));
+      }
+    } catch {
+      // Silently fail
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }
+
+  function toggleSuggestion(name) {
+    setSuggestions((prev) =>
+      prev.map((s) => (s.name === name ? { ...s, checked: !s.checked } : s))
+    );
+  }
+
+  function handleAddSelected() {
+    const existing = new Set(
+      form.competitors.split(",").map((c) => c.trim().toLowerCase()).filter(Boolean)
+    );
+    const selected = suggestions
+      .filter((s) => s.checked && !existing.has(s.name.toLowerCase()))
+      .map((s) => s.name);
+    const current = form.competitors.trim();
+    const updated = current
+      ? `${current}, ${selected.join(", ")}`
+      : selected.join(", ");
+    handleChange("competitors", updated);
+    setSuggestions([]);
   }
 
   return (
@@ -147,6 +199,45 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
               className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="e.g. Tableau, Looker, Metabase"
             />
+            <button
+              type="button"
+              onClick={handleSuggestCompetitors}
+              disabled={!form.companyName.trim() || (!form.industry && !form.industryOther.trim()) || loadingSuggestions}
+              className="inline-flex items-center gap-1.5 mt-2 rounded-md border border-gray-700 px-3 py-1 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 disabled:opacity-40 transition-colors"
+            >
+              {loadingSuggestions && <Spinner size="sm" />}
+              {loadingSuggestions ? "Suggesting..." : "Suggest Competitors"}
+            </button>
+            {suggestions.length > 0 && (
+              <div className="mt-3 space-y-2">
+                {suggestions.map((s) => (
+                  <label
+                    key={s.name}
+                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer transition-colors ${
+                      s.checked
+                        ? "border-indigo-500 bg-indigo-950 text-indigo-300"
+                        : "border-gray-700 bg-gray-800 text-gray-400"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={s.checked}
+                      onChange={() => toggleSuggestion(s.name)}
+                      className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                    />
+                    <span className="text-xs">{s.name}</span>
+                  </label>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleAddSelected}
+                  disabled={!suggestions.some((s) => s.checked)}
+                  className="rounded-md bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+                >
+                  Add Selected
+                </button>
+              </div>
+            )}
           </div>
 
           <div>

@@ -1,0 +1,61 @@
+month,category,tickets_opened,tickets_resolved,avg_resolution_hours,csat_score,escalations
+2025-01,Billing,126,112,19.5,4.4,8
+2025-01,Technical,228,198,4.3,4.4,19
+2025-01,Integrations,70,62,23.3,4.4,4
+2025-01,Onboarding,57,51,4.0,4.0,4
+2025-01,Feature Request,45,43,4.5,4.5,3
+2025-02,Billing,137,125,11.4,4.0,4
+2025-02,Technical,185,164,13.0,4.4,11
+2025-02,Integrations,72,71,32.1,4.6,4
+2025-02,Onboarding,66,56,10.7,4.0,2
+2025-02,Feature Request,36,33,18.6,4.3,1
+2025-03,Billing,146,138,10.6,4.3,7
+2025-03,Technical,194,191,8.9,4.2,17
+2025-03,Integrations,91,78,18.1,4.3,5
+2025-03,Onboarding,51,50,13.2,4.0,3
+2025-03,Feature Request,44,37,8.6,4.4,2
+2025-04,Billing,143,130,4.2,3.9,8
+2025-04,Technical,188,161,17.9,4.6,16
+2025-04,Integrations,99,87,21.5,4.6,9
+2025-04,Onboarding,59,58,13.2,4.0,3
+2025-04,Feature Request,44,37,14.1,4.6,1
+2025-05,Billing,161,158,18.6,4.5,10
+2025-05,Technical,237,228,5.9,4.2,19
+2025-05,Integrations,85,80,20.9,4.3,7
+2025-05,Onboarding,55,46,3.4,4.1,5
+2025-05,Feature Request,41,38,6.9,4.1,3
+2025-06,Billing,166,143,9.7,3.7,10
+2025-06,Technical,220,190,7.6,4.1,20
+2025-06,Integrations,110,94,24.7,4.1,9
+2025-06,Onboarding,60,59,12.0,4.1,5
+2025-06,Feature Request,42,39,8.6,4.3,1
+2025-07,Billing,148,146,4.4,4.1,6
+2025-07,Technical,182,155,5.5,4.5,9
+2025-07,Integrations,112,104,28.4,4.2,9
+2025-07,Onboarding,49,44,16.1,4.6,4
+2025-07,Feature Request,46,44,9.9,4.2,2
+2025-08,Billing,175,153,7.4,4.3,7
+2025-08,Technical,186,160,15.9,4.2,10
+2025-08,Integrations,111,108,30.5,4.4,8
+2025-08,Onboarding,46,45,10.3,4.0,2
+2025-08,Feature Request,41,35,13.5,3.8,2
+2025-09,Billing,178,152,15.6,3.8,9
+2025-09,Technical,203,179,2.7,4.4,19
+2025-09,Integrations,96,91,33.3,4.1,4
+2025-09,Onboarding,47,44,13.5,3.9,2
+2025-09,Feature Request,55,53,15.7,4.4,3
+2025-10,Billing,189,179,3.5,4.1,15
+2025-10,Technical,196,189,9.9,4.6,6
+2025-10,Integrations,101,94,30.9,4.4,3
+2025-10,Onboarding,49,45,7.2,4.5,4
+2025-10,Feature Request,53,50,8.3,4.5,4
+2025-11,Billing,205,200,5.7,4.2,8
+2025-11,Technical,209,188,14.1,4.5,16
+2025-11,Integrations,119,111,26.9,4.1,4
+2025-11,Onboarding,52,49,7.0,3.8,4
+2025-11,Feature Request,44,42,14.0,4.2,2
+2025-12,Billing,211,205,8.5,4.4,7
+2025-12,Technical,222,212,12.1,3.9,19
+2025-12,Integrations,117,106,33.6,3.9,6
+2025-12,Onboarding,43,42,9.9,4.4,2
+2025-12,Feature Request,55,51,11.7,4.5,1
