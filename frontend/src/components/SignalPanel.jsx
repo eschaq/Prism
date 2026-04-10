@@ -2,11 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { X, Plus } from "lucide-react";
 import { StepProgress, CardSkeleton } from "./LoadingStates";
 
-const STORAGE_KEY = "prism_subreddits";
+const SUBREDDITS_KEY = "prism_subreddits";
+const FEEDS_KEY = "prism_feeds";
 
 function loadSavedSubreddits() {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(SUBREDDITS_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -17,19 +18,44 @@ function loadSavedSubreddits() {
   return [];
 }
 
+function loadSavedFeeds() {
+  try {
+    const stored = localStorage.getItem(FEEDS_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+function feedDisplayName(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
 export default function SignalPanel({ apiBase, profile, initialConfig, onSignals }) {
   const [subreddits, setSubreddits] = useState(
     () => initialConfig?.subreddits || loadSavedSubreddits()
   );
   const [customInput, setCustomInput] = useState("");
+  const [feeds, setFeeds] = useState(loadSavedFeeds);
+  const [feedInput, setFeedInput] = useState("");
   const [query, setQuery] = useState(() => initialConfig?.query || "");
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [loadingFeeds, setLoadingFeeds] = useState(false);
   const queryManuallyEdited = useRef(!!initialConfig?.query);
 
+  // Fetch subreddit suggestions on industry change
   useEffect(() => {
     if (!profile?.industry) return;
     const suggestedQuery = profile.industry
@@ -58,12 +84,41 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           );
         }
       } catch {
-        // Silently fail — suggestions are optional
+        // Silently fail
       } finally {
         if (!cancelled) setLoadingSuggestions(false);
       }
     }
     fetchSuggestions();
+    return () => { cancelled = true; };
+  }, [profile?.industry, apiBase]);
+
+  // Fetch RSS feed suggestions on industry change
+  useEffect(() => {
+    if (!profile?.industry) return;
+    let cancelled = false;
+    async function fetchFeeds() {
+      setLoadingFeeds(true);
+      try {
+        const res = await fetch(`${apiBase}/api/feeds`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ industry: profile.industry }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && Array.isArray(data.suggested)) {
+          setFeeds(
+            data.suggested.map((url) => ({ url, checked: true }))
+          );
+        }
+      } catch {
+        // Silently fail
+      } finally {
+        if (!cancelled) setLoadingFeeds(false);
+      }
+    }
+    fetchFeeds();
     return () => { cancelled = true; };
   }, [profile?.industry, apiBase]);
 
@@ -88,23 +143,54 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
   }
 
   function saveSubreddits() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(subreddits));
+    localStorage.setItem(SUBREDDITS_KEY, JSON.stringify(subreddits));
   }
+
+  function toggleFeed(url) {
+    setFeeds((prev) =>
+      prev.map((f) => (f.url === url ? { ...f, checked: !f.checked } : f))
+    );
+  }
+
+  function removeFeed(url) {
+    setFeeds((prev) => prev.filter((f) => f.url !== url));
+  }
+
+  function addCustomFeed() {
+    const url = feedInput.trim();
+    if (!url) return;
+    const exists = feeds.some((f) => f.url.toLowerCase() === url.toLowerCase());
+    if (!exists) {
+      setFeeds((prev) => [...prev, { url, checked: true }]);
+    }
+    setFeedInput("");
+  }
+
+  function saveFeeds() {
+    localStorage.setItem(FEEDS_KEY, JSON.stringify(feeds));
+  }
+
+  const checkedSubreddits = subreddits.filter((s) => s.checked).map((s) => s.name);
+  const checkedFeeds = feeds.filter((f) => f.checked).map((f) => f.url);
+  const totalSources = checkedSubreddits.length + checkedFeeds.length;
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const checked = subreddits.filter((s) => s.checked).map((s) => s.name);
-    if (checked.length === 0) {
-      setError("Select at least one subreddit.");
+    if (totalSources === 0) {
+      setError("Select at least one subreddit or RSS feed.");
       return;
     }
     setLoading(true);
     setError(null);
     try {
+      const body = { subreddits: checkedSubreddits, query, limit, profile };
+      if (checkedFeeds.length > 0) {
+        body.rss_feeds = checkedFeeds;
+      }
       const res = await fetch(`${apiBase}/api/signals`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subreddits: checked, query, limit, profile }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -117,21 +203,22 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
     }
   }
 
-  const checkedCount = subreddits.filter((s) => s.checked).length;
+  const hasFeeds = checkedFeeds.length > 0;
 
   return (
     <div className="space-y-6 max-w-3xl">
       <div>
         <h2 className="text-lg font-semibold text-gray-100">Signal Collection</h2>
         <p className="text-sm text-gray-400 mt-1">
-          Scrape Reddit and extract structured business themes.
+          Scrape Reddit{hasFeeds ? " and RSS feeds" : ""} and extract structured business themes.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Subreddits section */}
         <div>
           <label className="block text-xs font-medium text-gray-400 mb-2">
-            Subreddits ({checkedCount} selected)
+            Subreddits ({checkedSubreddits.length} selected)
           </label>
           <div className="flex flex-wrap gap-2">
             {subreddits.map((s) => (
@@ -202,6 +289,81 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           </button>
         </div>
 
+        {/* RSS Feeds section */}
+        <div>
+          <label className="block text-xs font-medium text-gray-400 mb-2">
+            RSS Feeds ({checkedFeeds.length} selected)
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {feeds.map((f) => (
+              <span
+                key={f.url}
+                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors ${
+                  f.checked
+                    ? "border-indigo-500 bg-indigo-950 text-indigo-300"
+                    : "border-gray-700 bg-gray-900 text-gray-500"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={f.checked}
+                  onChange={() => toggleFeed(f.url)}
+                  className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                />
+                <span
+                  className="cursor-pointer"
+                  onClick={() => toggleFeed(f.url)}
+                  title={f.url}
+                >
+                  {feedDisplayName(f.url)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeFeed(f.url)}
+                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  <X size={12} />
+                </button>
+              </span>
+            ))}
+          </div>
+
+          {loadingFeeds && (
+            <p className="text-xs text-gray-500 mt-2">Loading RSS feed suggestions...</p>
+          )}
+
+          <div className="flex items-center gap-2 mt-3">
+            <input
+              value={feedInput}
+              onChange={(e) => setFeedInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addCustomFeed();
+                }
+              }}
+              className="flex-1 rounded-md bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Add feed URL..."
+            />
+            <button
+              type="button"
+              onClick={addCustomFeed}
+              className="inline-flex items-center gap-1 rounded-md border border-gray-700 px-2.5 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+            >
+              <Plus size={12} />
+              Add
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={saveFeeds}
+            className="mt-2 rounded-md border border-gray-700 px-3 py-1 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+          >
+            Save feeds
+          </button>
+        </div>
+
         <div>
           <label className="block text-xs font-medium text-gray-400 mb-1">
             Search Query
@@ -217,7 +379,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
         <div className="flex items-center gap-4">
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Post Limit (per subreddit)
+              Post Limit (per source)
             </label>
             <input
               type="number"
@@ -230,10 +392,10 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           </div>
           <button
             type="submit"
-            disabled={loading || checkedCount === 0}
+            disabled={loading || totalSources === 0}
             className="mt-5 rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors"
           >
-            {loading ? "Scraping..." : `Scan ${checkedCount} subreddit${checkedCount !== 1 ? "s" : ""}`}
+            {loading ? "Scraping..." : `Scan ${totalSources} source${totalSources !== 1 ? "s" : ""}`}
           </button>
         </div>
       </form>
@@ -247,7 +409,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
       {loading && (
         <StepProgress
           steps={[
-            "Fetching posts from Reddit...",
+            hasFeeds ? "Fetching posts from Reddit and RSS..." : "Fetching posts from Reddit...",
             "Scoring and filtering posts...",
             "Extracting themes with AI...",
           ]}
@@ -273,11 +435,16 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           return `${Math.floor(days / 7)}w ago`;
         }
         const recency = formatRecency(newestTimestamp);
+        const rssCount = (result.rss_feeds || []).length;
+        const subLabels = (result.subreddits || []).map((s) => `r/${s}`).join(" + ");
+        const sourceLabel = rssCount > 0
+          ? `${subLabels}${subLabels ? " + " : ""}${rssCount} RSS feed${rssCount !== 1 ? "s" : ""}`
+          : subLabels;
 
         return (
         <div className="space-y-4">
           <div className="text-xs text-gray-500">
-            {(result.subreddits || []).map((s) => `r/${s}`).join(" + ")} · "{result.query}" · {posts.length} posts
+            {sourceLabel} · "{result.query}" · {posts.length} posts
           </div>
 
           {posts.length > 0 && (
