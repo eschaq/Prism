@@ -224,11 +224,26 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
         />
       )}
 
-      {result && !loading && (
+      {result && !loading && (() => {
+        const sourcesPresent = [signals, analysis, gaps, visibility].filter(Boolean).length;
+        const qualityCount = sourcesPresent + 1; // +1 for narrative itself
+        const missingNames = [];
+        if (!signals) missingNames.push("signals");
+        if (!analysis) missingNames.push("data");
+        if (!gaps) missingNames.push("gaps");
+        if (!visibility) missingNames.push("visibility");
+        const qualityTier = qualityCount >= 5 ? "Complete" : qualityCount >= 4 ? "Strong" : qualityCount >= 3 ? "Partial" : "Limited";
+        const qualityColor = qualityCount >= 4
+          ? "text-green-400 border-green-800"
+          : qualityCount >= 3
+          ? "text-yellow-400 border-yellow-800"
+          : "text-red-400 border-red-800";
+
+        return (
         <>
           {/* Heading row + compare dropdown */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <h3 className="text-sm font-semibold text-indigo-400">
                 {audienceLabel} Briefing
               </h3>
@@ -238,6 +253,14 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               <span className="text-xs text-gray-500">
                 ~{Math.ceil(result.briefing.split(/\s+/).length / 200)} min read
               </span>
+              <span className={`text-xs px-2 py-0.5 rounded-full border ${qualityColor}`}>
+                {qualityTier} — {qualityCount}/5
+              </span>
+              {missingNames.length > 0 && (
+                <span className="text-xs text-gray-600">
+                  add {missingNames.join(", ")} to strengthen
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <select
@@ -387,7 +410,8 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
             </button>
           </div>
         </>
-      )}
+        );
+      })()}
     </div>
   );
 }
