@@ -7,6 +7,12 @@ const VISIBILITY_COLORS = {
   "Not Visible": "text-red-400 border-red-800 bg-red-950",
 };
 
+const READINESS_COLORS = {
+  High: "text-green-400 border-green-800",
+  Medium: "text-yellow-400 border-yellow-800",
+  Low: "text-red-400 border-red-800",
+};
+
 export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -95,9 +101,16 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
                         <span className="ml-2 text-xs font-normal text-indigo-400">(You)</span>
                       )}
                     </h3>
-                    <span className={`text-xs px-2.5 py-0.5 rounded-full border ${tierColor}`}>
-                      {a.visibility}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {a.agentic_readiness && (
+                        <span className={`text-xs px-2.5 py-0.5 rounded-full border ${READINESS_COLORS[a.agentic_readiness] || READINESS_COLORS.Low}`}>
+                          Agentic: {a.agentic_readiness}
+                        </span>
+                      )}
+                      <span className={`text-xs px-2.5 py-0.5 rounded-full border ${tierColor}`}>
+                        {a.visibility}
+                      </span>
+                    </div>
                   </div>
 
                   <p className="text-sm text-gray-300">{a.rationale}</p>
@@ -127,6 +140,22 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+
+                  {a.content_recommendations?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-indigo-400 mb-1">Recommendations</p>
+                      <div className="space-y-1.5">
+                        {a.content_recommendations.map((rec, j) => (
+                          <div key={j} className="rounded-md border border-indigo-800 bg-indigo-950 px-3 py-2">
+                            <p className="text-xs text-gray-300">
+                              <span className="text-indigo-400 font-medium mr-1">{j + 1}.</span>
+                              {rec}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
