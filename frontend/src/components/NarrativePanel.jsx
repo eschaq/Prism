@@ -8,6 +8,8 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [copiedNotion, setCopiedNotion] = useState(false);
+  const [copiedSlack, setCopiedSlack] = useState(false);
   const [activeQuestion, setActiveQuestion] = useState(null);
   const [followUpLoading, setFollowUpLoading] = useState(false);
   const [followUpAnswer, setFollowUpAnswer] = useState(null);
@@ -103,6 +105,36 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
     navigator.clipboard.writeText(result.briefing).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function handleCopyNotion() {
+    const notionText = result.briefing
+      .replace(/^###\s+(.+)$/gm, "$1")
+      .replace(/^##\s+(.+)$/gm, "$1")
+      .replace(/^#\s+(.+)$/gm, "$1");
+    navigator.clipboard.writeText(notionText).then(() => {
+      setCopiedNotion(true);
+      setTimeout(() => setCopiedNotion(false), 2000);
+    });
+  }
+
+  function handleCopySlack() {
+    const lines = result.briefing
+      .replace(/^#{1,3}\s+/gm, "")
+      .replace(/\*\*/g, "*")
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l);
+    let slackText = lines.join("\n");
+    const maxLen = 500 - "\n\nFull brief in Prism".length;
+    if (slackText.length > maxLen) {
+      slackText = slackText.slice(0, maxLen).replace(/\n[^\n]*$/, "") + "...";
+    }
+    slackText += "\n\nFull brief in Prism";
+    navigator.clipboard.writeText(slackText).then(() => {
+      setCopiedSlack(true);
+      setTimeout(() => setCopiedSlack(false), 2000);
     });
   }
 
@@ -330,6 +362,28 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
             >
               <Mail size={14} />
               Email Draft
+            </button>
+            <button
+              onClick={handleCopyNotion}
+              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                copiedNotion
+                  ? "border-green-700 text-green-400"
+                  : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+              }`}
+            >
+              <Copy size={14} />
+              {copiedNotion ? "Copied" : "Notion"}
+            </button>
+            <button
+              onClick={handleCopySlack}
+              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                copiedSlack
+                  ? "border-green-700 text-green-400"
+                  : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+              }`}
+            >
+              <Copy size={14} />
+              {copiedSlack ? "Copied" : "Slack"}
             </button>
           </div>
         </>
