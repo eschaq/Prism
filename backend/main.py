@@ -54,6 +54,7 @@ class GapRequest(BaseModel):
     signals: dict
     analysis: dict
     profile: Optional[dict] = None
+    competitor_signals: Optional[dict] = None
 
 
 VALID_AUDIENCES = set(AUDIENCE_PROMPTS.keys())
@@ -113,7 +114,9 @@ async def health():
 @app.post("/api/signals", tags=["signals"])
 async def get_signals(request: SignalRequest):
     try:
-        result = scrape_signals(request.subreddits, request.query, request.limit, request.profile, request.rss_feeds)
+        competitors_raw = (request.profile or {}).get("competitors", "")
+        competitors = [c.strip() for c in competitors_raw.split(",") if c.strip()] if competitors_raw else None
+        result = scrape_signals(request.subreddits, request.query, request.limit, request.profile, request.rss_feeds, competitors)
         return result
     except ValueError as e:
         # Bad subreddit name, private sub, etc. — caller's fault
@@ -172,7 +175,7 @@ async def get_gaps(request: GapRequest):
             detail="Both 'signals' and 'analysis' must be non-empty.",
         )
     try:
-        result = analyze_gaps(request.signals, request.analysis, request.profile)
+        result = analyze_gaps(request.signals, request.analysis, request.profile, request.competitor_signals)
         return result
     except Exception as e:
         logger.exception("Unexpected error in /api/gaps")

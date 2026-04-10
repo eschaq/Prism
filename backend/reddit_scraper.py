@@ -72,12 +72,65 @@ def _fetch_subreddit(reddit, subreddit_name: str, query: str, limit: int) -> lis
         raise RuntimeError(f"Reddit API error: {e}")
 
 
+def scan_competitors(
+    competitors: list[str], subreddits: list[str], limit: int = 10
+) -> dict[str, list[dict]]:
+    """Run parallel Reddit scans for each competitor name.
+
+    Returns a dict mapping competitor name to a list of scored post dicts.
+    """
+    reddit = _get_reddit_client()
+    results = {}
+
+    for competitor in competitors:
+        submissions = []
+        for sub_name in subreddits:
+            submissions.extend(_fetch_subreddit(reddit, sub_name, competitor, limit))
+
+        # Career filter
+        submissions = [s for s in submissions if not is_career_post(s.title, s.selftext)]
+
+        # Score using competitor name as query terms
+        comp_terms = extract_query_terms(competitor)
+        scored = []
+        for s in submissions:
+            text = f"{s.title} {s.selftext}"
+            relevance_tier = score_relevance(s.title, s.selftext, comp_terms)
+            wtp_detected, wtp_matches = detect_wtp(text)
+            pain_patterns, pain_count = detect_pain_patterns(text)
+            pps_total, pps_label = calculate_pps(relevance_tier, pain_count, wtp_detected)
+
+            scored.append({
+                "title": s.title,
+                "selftext": s.selftext[:500],
+                "score": s.score,
+                "num_comments": s.num_comments,
+                "url": s.url,
+                "created": s.created_utc,
+                "source": f"r/{s.subreddit.display_name}",
+                "competitor": competitor,
+                "relevance_tier": relevance_tier,
+                "wtp_detected": wtp_detected,
+                "wtp_matches": wtp_matches,
+                "pain_patterns": pain_patterns,
+                "pain_count": pain_count,
+                "pps_total": pps_total,
+                "pps_label": pps_label,
+            })
+
+        scored.sort(key=lambda p: p["pps_total"], reverse=True)
+        results[competitor] = scored
+
+    return results
+
+
 def scrape_signals(
     subreddits: list[str],
     query: str,
     limit: int = 25,
     profile: dict | None = None,
     rss_feeds: list[str] | None = None,
+    competitors: list[str] | None = None,
 ) -> dict:
     """Scrape Reddit and optional RSS feeds with filtering, PPS scoring, and comment enrichment."""
     reddit = _get_reddit_client()
@@ -264,6 +317,11 @@ def scrape_signals(
             "pps_label": p["pps_label"],
         })
 
+    # --- Step 7: Competitive scanning (separate from main pipeline) ---
+    competitor_signals = {}
+    if competitors:
+        competitor_signals = scan_competitors(competitors, subreddits, limit=10)
+
     return {
         "themes": themes,
         "raw_posts": raw_posts,
@@ -271,4 +329,5 @@ def scrape_signals(
         "rss_feeds": rss_feeds or [],
         "query": query,
         "post_count": len(raw_posts),
+        "competitor_signals": competitor_signals,
     }

@@ -12,6 +12,7 @@ const GAP_SECTIONS = [
   { key: "gaps", label: "Critical Gaps", fieldMain: "finding", fieldDetail: "evidence", accent: "border-red-800 bg-red-950", labelColor: "text-red-400" },
   { key: "blind_spots", label: "Blind Spots", fieldMain: "finding", fieldDetail: "evidence", accent: "border-yellow-800 bg-yellow-950", labelColor: "text-yellow-400" },
   { key: "recommendations", label: "Recommendations", fieldMain: "action", fieldDetail: "rationale", accent: "border-indigo-800 bg-indigo-950", labelColor: "text-indigo-400" },
+  { key: "competitive_contrast", label: "Competitive Contrast", fieldMain: "finding", fieldDetail: "evidence", accent: "border-orange-800 bg-orange-950", labelColor: "text-orange-400" },
 ];
 
 export default function GapAnalysis({ apiBase, profile, signals, analysis, onGaps }) {
@@ -29,7 +30,12 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
       const res = await fetch(`${apiBase}/api/gaps`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signals, analysis, profile }),
+        body: JSON.stringify({
+          signals,
+          analysis,
+          profile,
+          competitor_signals: signals?.competitor_signals || null,
+        }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -108,11 +114,18 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                         <p className="text-sm font-medium text-gray-100">
                           {item[section.fieldMain]}
                         </p>
-                        {item.confidence && (
-                          <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full border ${CONFIDENCE_COLORS[item.confidence] || CONFIDENCE_COLORS.Low}`}>
-                            {item.confidence}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5 flex-shrink-0">
+                          {item.competitor && (
+                            <span className="text-xs px-2 py-0.5 rounded-full border border-orange-800 text-orange-400">
+                              {item.competitor}
+                            </span>
+                          )}
+                          {item.confidence && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full border ${CONFIDENCE_COLORS[item.confidence] || CONFIDENCE_COLORS.Low}`}>
+                              {item.confidence}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       {item[section.fieldDetail] && (
                         <p className="text-xs text-gray-400 mt-1">

@@ -12,6 +12,8 @@ def format_profile(profile: dict) -> str:
         lines.append(f"Industry: {profile['industry']}")
     if profile.get("companySize"):
         lines.append(f"Size: {profile['companySize']} employees")
+    if profile.get("competitors"):
+        lines.append(f"Competitors: {profile['competitors']}")
     if profile.get("context"):
         lines.append(f"Context: {profile['context']}")
     return "\n".join(lines)
@@ -101,3 +103,22 @@ def format_gaps(gaps: dict) -> str:
 
     # Raw text fallback
     return str(data)
+
+
+def format_competitor_signals(competitor_signals: dict) -> str:
+    """Format competitor signal data into clean readable text for Claude."""
+    if not competitor_signals:
+        return ""
+    sections = []
+    for competitor, posts in competitor_signals.items():
+        if not posts:
+            continue
+        sorted_posts = sorted(posts, key=lambda p: p.get("pps_total", 0), reverse=True)
+        top_pps = sorted_posts[0].get("pps_total", 0) if sorted_posts else 0
+        sections.append(f"{competitor} ({len(posts)} posts found, top PPS: {top_pps}):")
+        for i, p in enumerate(sorted_posts[:3], 1):
+            sections.append(
+                f"  {i}. {p.get('title', 'Untitled')} "
+                f"[PPS: {p.get('pps_total', 0)}, WTP: {'yes' if p.get('wtp_detected') else 'no'}]"
+            )
+    return "\n".join(sections)

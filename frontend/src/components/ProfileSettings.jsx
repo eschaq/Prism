@@ -34,6 +34,7 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
     industry: initial.industry,
     industryOther: initial.industryOther,
     subIndustry: profile?.subIndustry || "",
+    competitors: profile?.competitors || "",
     companySize: profile?.companySize || "",
     context: profile?.context || "",
   });
@@ -50,12 +51,13 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
       companyName: form.companyName.trim(),
       industry: resolvedIndustry,
       subIndustry: form.subIndustry.trim(),
+      competitors: form.competitors.trim(),
       companySize: form.companySize,
       context: form.context.trim(),
     };
     const hasContent =
       trimmed.companyName || trimmed.industry || trimmed.subIndustry ||
-      trimmed.companySize || trimmed.context;
+      trimmed.competitors || trimmed.companySize || trimmed.context;
     onSave(hasContent ? trimmed : null);
     onClose();
   }
@@ -132,6 +134,18 @@ export default function ProfileSettings({ profile, onSave, onClose }) {
               onChange={(e) => handleChange("subIndustry", e.target.value)}
               className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder="e.g. Revenue analytics, B2B payments"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-400 mb-1">
+              Primary Competitors (optional)
+            </label>
+            <input
+              value={form.competitors}
+              onChange={(e) => handleChange("competitors", e.target.value)}
+              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="e.g. Tableau, Looker, Metabase"
             />
           </div>
 
