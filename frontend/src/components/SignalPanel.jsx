@@ -17,16 +17,18 @@ function loadSavedSubreddits() {
   return [];
 }
 
-export default function SignalPanel({ apiBase, profile, onSignals }) {
-  const [subreddits, setSubreddits] = useState(loadSavedSubreddits);
+export default function SignalPanel({ apiBase, profile, initialConfig, onSignals }) {
+  const [subreddits, setSubreddits] = useState(
+    () => initialConfig?.subreddits || loadSavedSubreddits()
+  );
   const [customInput, setCustomInput] = useState("");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => initialConfig?.query || "");
   const [limit, setLimit] = useState(25);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
-  const queryManuallyEdited = useRef(false);
+  const queryManuallyEdited = useRef(!!initialConfig?.query);
 
   useEffect(() => {
     if (!profile?.industry) return;

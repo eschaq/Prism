@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Settings } from "lucide-react";
 import AUDIENCES from "./audiences";
 import { PATHS } from "./paths";
+import DEMO_CONFIG from "./demo";
 import RoleSelector from "./components/RoleSelector";
 import PathSelector from "./components/PathSelector";
 import ProfileSettings from "./components/ProfileSettings";
@@ -28,6 +29,7 @@ export default function App() {
   const [narrative, setNarrative] = useState(null);
   const [profile, setProfile] = useState(loadProfile);
   const [showSettings, setShowSettings] = useState(false);
+  const [demoConfig, setDemoConfig] = useState(null);
 
   function handleSaveProfile(data) {
     setProfile(data);
@@ -38,11 +40,18 @@ export default function App() {
     }
   }
 
+  function handleLoadDemo() {
+    handleSaveProfile(DEMO_CONFIG.profile);
+    setAudience(DEMO_CONFIG.audience);
+    setPath(DEMO_CONFIG.path);
+    setDemoConfig({ subreddits: DEMO_CONFIG.subreddits, query: DEMO_CONFIG.query });
+  }
+
   // Screen 1: Role selection
   if (!audience) {
     return (
       <>
-        <RoleSelector onSelect={setAudience} profile={profile} onOpenSettings={() => setShowSettings(true)} />
+        <RoleSelector onSelect={setAudience} profile={profile} onOpenSettings={() => setShowSettings(true)} onLoadDemo={handleLoadDemo} />
         {showSettings && (
           <ProfileSettings
             profile={profile}
@@ -134,6 +143,7 @@ export default function App() {
           apiBase={API_BASE}
           audience={audience}
           profile={profile}
+          initialConfig={demoConfig}
           signals={signals}
           analysis={analysis}
           gaps={gaps}

@@ -2,7 +2,7 @@ import React from "react";
 import { Settings } from "lucide-react";
 import AUDIENCES from "../audiences";
 
-export default function RoleSelector({ onSelect, profile, onOpenSettings }) {
+export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoadDemo }) {
   return (
     <div className="relative min-h-screen bg-gray-950 flex flex-col items-center justify-center px-6 py-16">
       <div className="absolute top-6 right-6">
@@ -47,6 +47,16 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings }) {
             </div>
           </button>
         ))}
+      </div>
+
+      <div className="mt-10 text-center">
+        <p className="text-xs text-gray-600 mb-3">or try a pre-configured scenario</p>
+        <button
+          onClick={onLoadDemo}
+          className="rounded-lg border border-gray-700 bg-gray-900 px-5 py-2.5 text-sm text-gray-300 hover:border-indigo-500 hover:text-indigo-300 hover:bg-indigo-950/40 transition-all duration-200"
+        >
+          Load Demo: Acme Analytics
+        </button>
       </div>
     </div>
   );

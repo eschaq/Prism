@@ -10,6 +10,7 @@ export default function Wizard({
   apiBase,
   audience,
   profile,
+  initialConfig,
   signals,
   analysis,
   gaps,
@@ -109,7 +110,7 @@ export default function Wizard({
 
       {/* Active panel */}
       {activeStep === "signals" && (
-        <SignalPanel apiBase={apiBase} profile={profile} onSignals={onSignals} />
+        <SignalPanel apiBase={apiBase} profile={profile} initialConfig={initialConfig} onSignals={onSignals} />
       )}
       {activeStep === "data" && (
         <DataPanel apiBase={apiBase} profile={profile} onAnalysis={onAnalysis} />
