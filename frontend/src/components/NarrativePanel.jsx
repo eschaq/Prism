@@ -203,6 +203,9 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               <span className="text-xs px-2 py-0.5 rounded-full border border-indigo-800 text-indigo-400">
                 Prism Intelligence
               </span>
+              <span className="text-xs text-gray-500">
+                ~{Math.ceil(result.briefing.split(/\s+/).length / 200)} min read
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <select
