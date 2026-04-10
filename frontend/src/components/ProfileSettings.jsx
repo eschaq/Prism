@@ -100,16 +100,17 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
   }
 
   function handleAddSelected() {
-    const existing = new Set(
-      form.competitors.split(",").map((c) => c.trim().toLowerCase()).filter(Boolean)
-    );
+    const existingList = form.competitors.split(",").map((c) => c.trim()).filter(Boolean);
+    const existingLower = new Set(existingList.map((c) => c.toLowerCase()));
     const selected = suggestions
-      .filter((s) => s.checked && !existing.has(s.name.toLowerCase()))
+      .filter((s) => s.checked && !existingLower.has(s.name.toLowerCase()))
       .map((s) => s.name);
+    const remaining = 8 - existingList.length;
+    const toAdd = selected.slice(0, Math.max(0, remaining));
     const current = form.competitors.trim();
     const updated = current
-      ? `${current}, ${selected.join(", ")}`
-      : selected.join(", ");
+      ? `${current}, ${toAdd.join(", ")}`
+      : toAdd.join(", ");
     handleChange("competitors", updated);
     setSuggestions([]);
   }
@@ -191,7 +192,7 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Primary Competitors (optional)
+              Primary Competitors (optional, max 8)
             </label>
             <input
               value={form.competitors}
@@ -208,36 +209,53 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
               {loadingSuggestions && <Spinner size="sm" />}
               {loadingSuggestions ? "Suggesting..." : "Suggest Competitors"}
             </button>
-            {suggestions.length > 0 && (
+            {suggestions.length > 0 && (() => {
+              const currentCount = form.competitors.split(",").map((c) => c.trim()).filter(Boolean).length;
+              const currentLower = new Set(form.competitors.split(",").map((c) => c.trim().toLowerCase()).filter(Boolean));
+              const checkedNew = suggestions.filter((s) => s.checked && !currentLower.has(s.name.toLowerCase())).length;
+              const wouldTotal = currentCount + checkedNew;
+
+              return (
               <div className="mt-3 space-y-2">
-                {suggestions.map((s) => (
+                <p className="text-xs text-gray-500">
+                  {currentCount}/8 competitors set — {Math.max(0, 8 - currentCount)} slots available
+                </p>
+                {suggestions.map((s) => {
+                  const isNew = !currentLower.has(s.name.toLowerCase());
+                  const atLimit = wouldTotal >= 8 && !s.checked && isNew;
+                  return (
                   <label
                     key={s.name}
-                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 cursor-pointer transition-colors ${
-                      s.checked
-                        ? "border-indigo-500 bg-indigo-950 text-indigo-300"
-                        : "border-gray-700 bg-gray-800 text-gray-400"
+                    className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-colors ${
+                      atLimit
+                        ? "border-gray-800 bg-gray-900 text-gray-600 cursor-not-allowed"
+                        : s.checked
+                        ? "border-indigo-500 bg-indigo-950 text-indigo-300 cursor-pointer"
+                        : "border-gray-700 bg-gray-800 text-gray-400 cursor-pointer"
                     }`}
                   >
                     <input
                       type="checkbox"
                       checked={s.checked}
+                      disabled={atLimit}
                       onChange={() => toggleSuggestion(s.name)}
-                      className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                      className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer disabled:cursor-not-allowed"
                     />
                     <span className="text-xs">{s.name}</span>
                   </label>
-                ))}
+                  );
+                })}
                 <button
                   type="button"
                   onClick={handleAddSelected}
-                  disabled={!suggestions.some((s) => s.checked)}
+                  disabled={!suggestions.some((s) => s.checked) || currentCount >= 8}
                   className="rounded-md bg-indigo-600 px-3 py-1 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
                 >
-                  Add Selected
+                  Add Selected{checkedNew > 0 ? ` (${Math.min(checkedNew, 8 - currentCount)})` : ""}
                 </button>
               </div>
-            )}
+              );
+            })()}
           </div>
 
           <div>

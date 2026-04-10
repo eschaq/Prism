@@ -117,7 +117,7 @@ class BattlecardRequest(BaseModel):
 class VisibilityRequest(BaseModel):
     company: str = Field(..., min_length=1)
     industry: str = Field(..., min_length=1)
-    competitors: list[str] = Field(..., min_length=1, max_length=5)
+    competitors: list[str] = Field(..., min_length=1, max_length=8)
 
 
 # ---------------------------------------------------------------------------

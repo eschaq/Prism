@@ -8,7 +8,7 @@ client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from environment
 def call_claude(system_prompt: str, user_message: str, temperature: float = 0.3) -> str:
     message = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=2048,
+        max_tokens=4096,
         temperature=temperature,
         system=system_prompt,
         messages=[{"role": "user", "content": user_message}],
@@ -18,7 +18,11 @@ def call_claude(system_prompt: str, user_message: str, temperature: float = 0.3)
 
 def strip_code_fences(text: str) -> str:
     """Remove markdown code fences (```json ... ```) if present."""
-    return re.sub(r"^```\w*\n(.*)\n```$", r"\1", text.strip(), flags=re.DOTALL)
+    stripped = text.strip()
+    match = re.match(r"^```\w*\s*\n(.*?)```\s*$", stripped, flags=re.DOTALL)
+    if match:
+        return match.group(1).strip()
+    return stripped
 
 
 def load_prompt(filename: str) -> str:
