@@ -12,9 +12,14 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const [followUpLoading, setFollowUpLoading] = useState(false);
   const [followUpAnswer, setFollowUpAnswer] = useState(null);
   const [followUpError, setFollowUpError] = useState(null);
+  const [compareAudience, setCompareAudience] = useState(null);
+  const [compareResult, setCompareResult] = useState(null);
+  const [compareLoading, setCompareLoading] = useState(false);
+  const [compareError, setCompareError] = useState(null);
 
   const canRun = signals && analysis;
   const audienceLabel = AUDIENCES.find((a) => a.id === audience)?.label ?? audience;
+  const compareLabel = AUDIENCES.find((a) => a.id === compareAudience)?.label ?? compareAudience;
 
   async function handleGenerate() {
     if (!canRun) return;
@@ -24,6 +29,9 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
     setActiveQuestion(null);
     setFollowUpAnswer(null);
     setFollowUpError(null);
+    setCompareAudience(null);
+    setCompareResult(null);
+    setCompareError(null);
     try {
       const res = await fetch(`${apiBase}/api/narrative`, {
         method: "POST",
@@ -38,6 +46,27 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleCompare() {
+    if (!compareAudience) return;
+    setCompareLoading(true);
+    setCompareResult(null);
+    setCompareError(null);
+    try {
+      const res = await fetch(`${apiBase}/api/narrative`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ audience: compareAudience, signals, analysis, gaps, profile }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setCompareResult(data);
+    } catch (err) {
+      setCompareError(err.message);
+    } finally {
+      setCompareLoading(false);
     }
   }
 
@@ -122,8 +151,10 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }
 
+  const isComparing = !!compareResult;
+
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className={`space-y-6 ${isComparing ? "max-w-5xl" : "max-w-3xl"}`}>
       <div>
         <h2 className="text-lg font-semibold text-gray-100">Narrative Engine</h2>
         <p className="text-sm text-gray-400 mt-1">
@@ -163,8 +194,9 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
 
       {result && !loading && (
         <>
-          <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-            <div className="flex items-center gap-2 mb-3">
+          {/* Heading row + compare dropdown */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-indigo-400">
                 {audienceLabel} Briefing
               </h3>
@@ -172,39 +204,41 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
                 Prism Intelligence
               </span>
             </div>
-            <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-              {result.briefing}
+            <div className="flex items-center gap-2">
+              <select
+                value={compareAudience || ""}
+                onChange={(e) => {
+                  setCompareAudience(e.target.value || null);
+                  setCompareResult(null);
+                  setCompareError(null);
+                }}
+                className="rounded-md bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="">Compare with...</option>
+                {AUDIENCES.filter((a) => a.id !== audience).map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleCompare}
+                disabled={!compareAudience || compareLoading}
+                className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+              >
+                {compareLoading && <Spinner size="sm" />}
+                {compareLoading ? "Comparing..." : "Compare"}
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleCopy}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
-                copied
-                  ? "border-green-700 text-green-400"
-                  : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
-              }`}
-            >
-              <Copy size={14} />
-              {copied ? "Copied" : "Copy"}
-            </button>
-            <button
-              onClick={handleDownloadPDF}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
-            >
-              <Download size={14} />
-              Download PDF
-            </button>
-            <button
-              onClick={handleEmail}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
-            >
-              <Mail size={14} />
-              Email Draft
-            </button>
-          </div>
+          {compareError && (
+            <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+              {compareError}
+            </div>
+          )}
 
+          {/* Follow-up question chips */}
           {result.follow_up_questions?.length > 0 && (
             <div className="space-y-3">
               <p className="text-xs font-medium text-gray-400">What would you ask next?</p>
@@ -242,6 +276,59 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               )}
             </div>
           )}
+
+          {/* Briefing text — side by side when comparing */}
+          {isComparing ? (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
+                <p className="text-xs font-medium text-indigo-400 mb-3">{audienceLabel}</p>
+                <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                  {result.briefing}
+                </div>
+              </div>
+              <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
+                <p className="text-xs font-medium text-indigo-400 mb-3">{compareLabel}</p>
+                <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                  {compareResult.briefing}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
+              <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {result.briefing}
+              </div>
+            </div>
+          )}
+
+          {/* Export buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                copied
+                  ? "border-green-700 text-green-400"
+                  : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+              }`}
+            >
+              <Copy size={14} />
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              onClick={handleDownloadPDF}
+              className="inline-flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+            >
+              <Download size={14} />
+              Download PDF
+            </button>
+            <button
+              onClick={handleEmail}
+              className="inline-flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+            >
+              <Mail size={14} />
+              Email Draft
+            </button>
+          </div>
         </>
       )}
     </div>
