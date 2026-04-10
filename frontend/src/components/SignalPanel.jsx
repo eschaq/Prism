@@ -255,11 +255,43 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
         />
       )}
 
-      {result && !loading && (
+      {result && !loading && (() => {
+        const posts = result.raw_posts || [];
+        const wtpCount = posts.filter((p) => p.wtp_detected).length;
+        const wtpPercent = posts.length ? Math.round((wtpCount / posts.length) * 100) : 0;
+        const ppsDist = { PRODUCT: 0, SERIES: 0, POST: 0, AWARENESS: 0 };
+        posts.forEach((p) => { if (ppsDist[p.pps_label] !== undefined) ppsDist[p.pps_label]++; });
+
+        return (
         <div className="space-y-4">
           <div className="text-xs text-gray-500">
-            {(result.subreddits || []).map((s) => `r/${s}`).join(" + ")} · "{result.query}" · {result.raw_posts?.length ?? 0} posts
+            {(result.subreddits || []).map((s) => `r/${s}`).join(" + ")} · "{result.query}" · {posts.length} posts
           </div>
+
+          {posts.length > 0 && (
+            <div className="flex items-center gap-4 text-xs">
+              <span className="text-green-400 font-medium">
+                {wtpPercent}% WTP
+                <span className="text-gray-500 font-normal ml-1">
+                  ({wtpCount} of {posts.length} posts)
+                </span>
+              </span>
+              <span className="text-gray-700">|</span>
+              <span className={`font-medium ${PPS_COLORS.PRODUCT.split(" ").find((c) => c.startsWith("text-"))}`}>
+                {ppsDist.PRODUCT} PRODUCT
+              </span>
+              <span className={`font-medium ${PPS_COLORS.SERIES.split(" ").find((c) => c.startsWith("text-"))}`}>
+                {ppsDist.SERIES} SERIES
+              </span>
+              <span className={`font-medium ${PPS_COLORS.POST.split(" ").find((c) => c.startsWith("text-"))}`}>
+                {ppsDist.POST} POST
+              </span>
+              <span className={`font-medium ${PPS_COLORS.AWARENESS.split(" ").find((c) => c.startsWith("text-"))}`}>
+                {ppsDist.AWARENESS} AWARENESS
+              </span>
+            </div>
+          )}
+
           <div className="space-y-3">
             {Array.isArray(result.themes) ? (
               result.themes.map((theme, i) => (
@@ -272,7 +304,8 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
             )}
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
