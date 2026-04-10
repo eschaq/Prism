@@ -435,6 +435,20 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           return `${Math.floor(days / 7)}w ago`;
         }
         const recency = formatRecency(newestTimestamp);
+        const datedPosts = posts.filter((p) => p.created > 0);
+        let urgency = null;
+        let olderCount = 0;
+        let recentCount = 0;
+        if (datedPosts.length >= 4) {
+          const oldest = Math.min(...datedPosts.map((p) => p.created));
+          const newest = Math.max(...datedPosts.map((p) => p.created));
+          const midpoint = (oldest + newest) / 2;
+          olderCount = datedPosts.filter((p) => p.created < midpoint).length;
+          recentCount = datedPosts.filter((p) => p.created >= midpoint).length;
+          if (recentCount > olderCount * 1.3) urgency = "Accelerating";
+          else if (recentCount < olderCount * 0.7) urgency = "Declining";
+          else urgency = "Stable";
+        }
         const rssCount = (result.rss_feeds || []).length;
         const subLabels = (result.subreddits || []).map((s) => `r/${s}`).join(" + ");
         const sourceLabel = rssCount > 0
@@ -474,6 +488,36 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                   <span className="text-gray-400">
                     Most recent: {recency}
                   </span>
+                </>
+              )}
+              {urgency && (
+                <>
+                  <span className="text-gray-700">|</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-end gap-px" style={{ width: 40, height: 10 }}>
+                      <div
+                        className="bg-gray-600 rounded-sm"
+                        style={{
+                          width: `${(olderCount / (olderCount + recentCount)) * 100}%`,
+                          height: "100%",
+                        }}
+                      />
+                      <div
+                        className={`rounded-sm ${
+                          urgency === "Accelerating" ? "bg-red-500" : urgency === "Declining" ? "bg-blue-500" : "bg-gray-500"
+                        }`}
+                        style={{
+                          width: `${(recentCount / (olderCount + recentCount)) * 100}%`,
+                          height: "100%",
+                        }}
+                      />
+                    </div>
+                    <span className={`font-medium ${
+                      urgency === "Accelerating" ? "text-red-400" : urgency === "Declining" ? "text-blue-400" : "text-gray-400"
+                    }`}>
+                      {urgency === "Accelerating" ? "↑" : urgency === "Declining" ? "↓" : "→"} {urgency}
+                    </span>
+                  </div>
                 </>
               )}
             </div>
