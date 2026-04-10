@@ -261,6 +261,18 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
         const wtpPercent = posts.length ? Math.round((wtpCount / posts.length) * 100) : 0;
         const ppsDist = { PRODUCT: 0, SERIES: 0, POST: 0, AWARENESS: 0 };
         posts.forEach((p) => { if (ppsDist[p.pps_label] !== undefined) ppsDist[p.pps_label]++; });
+        const newestTimestamp = Math.max(...posts.map((p) => p.created || 0));
+        function formatRecency(ts) {
+          if (!ts) return null;
+          const seconds = Math.floor(Date.now() / 1000 - ts);
+          if (seconds < 3600) return "minutes ago";
+          const hours = Math.floor(seconds / 3600);
+          if (hours < 24) return `${hours}h ago`;
+          const days = Math.floor(hours / 24);
+          if (days < 7) return `${days}d ago`;
+          return `${Math.floor(days / 7)}w ago`;
+        }
+        const recency = formatRecency(newestTimestamp);
 
         return (
         <div className="space-y-4">
@@ -289,6 +301,14 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
               <span className={`font-medium ${PPS_COLORS.AWARENESS.split(" ").find((c) => c.startsWith("text-"))}`}>
                 {ppsDist.AWARENESS} AWARENESS
               </span>
+              {recency && (
+                <>
+                  <span className="text-gray-700">|</span>
+                  <span className="text-gray-400">
+                    Most recent: {recency}
+                  </span>
+                </>
+              )}
             </div>
           )}
 
