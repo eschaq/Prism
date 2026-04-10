@@ -13,7 +13,7 @@ from typing import Optional
 from reddit_scraper import scrape_signals
 from data_processor import process_csvs
 from narrative_engine import generate_narrative, answer_follow_up, AUDIENCE_PROMPTS
-from gap_analysis import analyze_gaps
+from gap_analysis import analyze_gaps, generate_battlecard
 from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
 from rss_feed_map import INDUSTRY_FEEDS, DEFAULT_FEEDS
 from claude_client import call_claude, strip_code_fences
@@ -106,6 +106,12 @@ class CompetitorSuggestionRequest(BaseModel):
     company: str = Field(..., min_length=1)
     industry: str = Field(..., min_length=1)
     sub_industry: Optional[str] = None
+
+
+class BattlecardRequest(BaseModel):
+    competitive_contrast: list
+    signals: dict
+    profile: Optional[dict] = None
 
 
 class VisibilityRequest(BaseModel):
@@ -278,6 +284,24 @@ class FeedRequest(BaseModel):
 async def get_feeds(request: FeedRequest):
     feeds = INDUSTRY_FEEDS.get(request.industry, DEFAULT_FEEDS)
     return {"suggested": feeds[:5]}
+
+
+# ---------------------------------------------------------------------------
+# POST /api/battlecard — Generate competitive sales battlecard
+# ---------------------------------------------------------------------------
+@app.post("/api/battlecard", tags=["analysis"])
+async def get_battlecard(request: BattlecardRequest):
+    if not request.competitive_contrast:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="competitive_contrast must be non-empty.",
+        )
+    try:
+        result = generate_battlecard(request.competitive_contrast, request.signals, request.profile)
+        return result
+    except Exception as e:
+        logger.exception("Unexpected error in /api/battlecard")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 # ---------------------------------------------------------------------------

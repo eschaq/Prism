@@ -32,3 +32,27 @@ def analyze_gaps(signals: dict, analysis: dict, profile: dict | None = None, com
         logger.warning("Claude returned non-JSON gap analysis response; storing raw text.")
 
     return {"gaps": raw}
+
+
+def generate_battlecard(competitive_contrast: list, signals: dict, profile: dict | None = None) -> dict:
+    """Generate a sales battlecard from competitive contrast findings."""
+    system_prompt = load_prompt("battlecard.txt")
+    profile_section = f"COMPANY PROFILE:\n{format_profile(profile)}\n\n" if profile else ""
+
+    findings = []
+    for i, item in enumerate(competitive_contrast, 1):
+        competitor = item.get("competitor", "Unknown")
+        finding = item.get("finding", "")
+        evidence = item.get("evidence", "")
+        findings.append(f"{i}. [{competitor}] {finding}")
+        if evidence:
+            findings.append(f"   Evidence: {evidence}")
+
+    user_message = (
+        f"{profile_section}"
+        f"COMPETITIVE CONTRAST FINDINGS:\n{chr(10).join(findings)}\n\n"
+        f"MARKET SIGNALS:\n{format_signals(signals)}"
+    )
+
+    battlecard = call_claude(system_prompt, user_message)
+    return {"battlecard": battlecard}
