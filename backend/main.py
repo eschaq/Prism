@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 from reddit_scraper import scrape_signals
-from data_processor import process_csv
+from data_processor import process_csvs
 from narrative_engine import generate_narrative, answer_follow_up, AUDIENCE_PROMPTS
 from gap_analysis import analyze_gaps
 from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
@@ -141,27 +141,30 @@ async def get_signals(request: SignalRequest):
 # POST /api/analyze — CSV upload + Claude data analysis
 # ---------------------------------------------------------------------------
 @app.post("/api/analyze", tags=["data"])
-async def analyze_data(file: UploadFile = File(...), profile: Optional[str] = Form(None)):
-    if not file.filename or not file.filename.lower().endswith(".csv"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Only .csv files are accepted.",
-        )
+async def analyze_data(files: list[UploadFile] = File(...), profile: Optional[str] = Form(None)):
+    max_size = 10 * 1024 * 1024  # 10 MB per file
+    file_objs = []
     try:
-        contents = await file.read()
-        if not contents:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Uploaded file is empty.",
-            )
-        max_size = 10 * 1024 * 1024  # 10 MB
-        if len(contents) > max_size:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"File too large ({len(contents) / 1024 / 1024:.1f} MB). Maximum size is 10 MB.",
-            )
+        for f in files:
+            if not f.filename or not f.filename.lower().endswith(".csv"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Only .csv files are accepted. Got: {f.filename}",
+                )
+            contents = await f.read()
+            if not contents:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Uploaded file is empty: {f.filename}",
+                )
+            if len(contents) > max_size:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File too large ({len(contents) / 1024 / 1024:.1f} MB): {f.filename}. Maximum is 10 MB per file.",
+                )
+            file_objs.append(io.BytesIO(contents))
         profile_data = json.loads(profile) if profile else None
-        result = process_csv(io.BytesIO(contents), profile_data)
+        result = process_csvs(file_objs, profile_data)
         return result
     except HTTPException:
         raise
