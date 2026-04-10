@@ -21,8 +21,12 @@ def format_signals(signals: dict) -> str:
     """Format the signals dict into clean readable text for Claude."""
     subs = signals.get("subreddits", [signals.get("subreddit", "unknown")])
     sub_label = ", ".join(f"r/{s}" for s in subs) if isinstance(subs, list) else f"r/{subs}"
+    rss = signals.get("rss_feeds", [])
+    source_parts = [f"Subreddits: {sub_label}"]
+    if rss:
+        source_parts.append(f"RSS feeds: {', '.join(rss)}")
     lines = [
-        f"Subreddits: {sub_label}",
+        "\n".join(source_parts),
         f"Query: {signals.get('query', 'unknown')}",
         f"Posts analyzed: {signals.get('post_count', 0)}",
         "",

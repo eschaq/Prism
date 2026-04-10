@@ -5,3 +5,4 @@ praw==7.7.1
 pandas==2.2.2
 python-multipart==0.0.9
 pydantic==2.8.2
+feedparser==6.0.11

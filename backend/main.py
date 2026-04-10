@@ -10,11 +10,12 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
-from reddit_scraper import scrape_reddit
+from reddit_scraper import scrape_signals
 from data_processor import process_csv
 from narrative_engine import generate_narrative, answer_follow_up, AUDIENCE_PROMPTS
 from gap_analysis import analyze_gaps
 from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
+from rss_feed_map import INDUSTRY_FEEDS, DEFAULT_FEEDS
 from claude_client import call_claude, strip_code_fences
 
 logger = logging.getLogger(__name__)
@@ -46,6 +47,7 @@ class SignalRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=300)
     limit: Optional[int] = Field(default=25, ge=1, le=100)
     profile: Optional[dict] = None
+    rss_feeds: Optional[list[str]] = Field(default=None, max_length=10)
 
 
 class GapRequest(BaseModel):
@@ -111,7 +113,7 @@ async def health():
 @app.post("/api/signals", tags=["signals"])
 async def get_signals(request: SignalRequest):
     try:
-        result = scrape_reddit(request.subreddits, request.query, request.limit, request.profile)
+        result = scrape_signals(request.subreddits, request.query, request.limit, request.profile, request.rss_feeds)
         return result
     except ValueError as e:
         # Bad subreddit name, private sub, etc. — caller's fault
@@ -243,6 +245,19 @@ async def get_subreddits(request: SubredditRequest):
         logger.exception("Unexpected error in /api/subreddits")
         suggested = DEFAULT_SUBREDDITS[:5]
     return {"suggested": suggested}
+
+
+# ---------------------------------------------------------------------------
+# POST /api/feeds — Suggested RSS feeds for an industry
+# ---------------------------------------------------------------------------
+class FeedRequest(BaseModel):
+    industry: str = Field(..., min_length=1)
+
+
+@app.post("/api/feeds", tags=["signals"])
+async def get_feeds(request: FeedRequest):
+    feeds = INDUSTRY_FEEDS.get(request.industry, DEFAULT_FEEDS)
+    return {"suggested": feeds[:5]}
 
 
 # ---------------------------------------------------------------------------

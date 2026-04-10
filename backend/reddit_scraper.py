@@ -7,6 +7,7 @@ import prawcore
 
 from claude_client import call_claude, load_prompt, strip_code_fences
 from formatting import format_profile
+from rss_scraper import fetch_rss_feeds
 from scoring import (
     is_career_post,
     extract_query_terms,
@@ -71,8 +72,14 @@ def _fetch_subreddit(reddit, subreddit_name: str, query: str, limit: int) -> lis
         raise RuntimeError(f"Reddit API error: {e}")
 
 
-def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: dict | None = None) -> dict:
-    """Scrape multiple subreddits with filtering, PPS scoring, and comment enrichment."""
+def scrape_signals(
+    subreddits: list[str],
+    query: str,
+    limit: int = 25,
+    profile: dict | None = None,
+    rss_feeds: list[str] | None = None,
+) -> dict:
+    """Scrape Reddit and optional RSS feeds with filtering, PPS scoring, and comment enrichment."""
     reddit = _get_reddit_client()
 
     # --- Fetch posts from all subreddits ---
@@ -80,11 +87,17 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
     for sub_name in subreddits:
         submissions.extend(_fetch_subreddit(reddit, sub_name, query, limit))
 
-    if not submissions:
+    # --- Fetch RSS feed items ---
+    rss_items = []
+    if rss_feeds:
+        rss_items = fetch_rss_feeds(rss_feeds, query, limit)
+
+    if not submissions and not rss_items:
         return {
             "themes": [],
             "raw_posts": [],
             "subreddits": subreddits,
+            "rss_feeds": rss_feeds or [],
             "query": query,
             "post_count": 0,
         }
@@ -94,20 +107,26 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
         s for s in submissions
         if not is_career_post(s.title, s.selftext)
     ]
+    rss_items = [
+        item for item in rss_items
+        if not is_career_post(item["title"], item["selftext"])
+    ]
 
-    if not submissions:
+    if not submissions and not rss_items:
         return {
             "themes": [],
             "raw_posts": [],
             "subreddits": subreddits,
+            "rss_feeds": rss_feeds or [],
             "query": query,
             "post_count": 0,
         }
 
-    # --- Step 2: Score each post ---
+    # --- Step 2: Score all posts ---
     query_terms = extract_query_terms(query)
     scored_posts = []
 
+    # Score Reddit submissions
     for s in submissions:
         text = f"{s.title} {s.selftext}"
         relevance_tier = score_relevance(s.title, s.selftext, query_terms)
@@ -123,7 +142,34 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
             "num_comments": s.num_comments,
             "url": s.url,
             "created": s.created_utc,
-            "subreddit": s.subreddit.display_name,
+            "source": f"r/{s.subreddit.display_name}",
+            "relevance_tier": relevance_tier,
+            "wtp_detected": wtp_detected,
+            "wtp_matches": wtp_matches,
+            "pain_patterns": pain_patterns,
+            "pain_count": pain_count,
+            "pps_total": pps_total,
+            "pps_label": pps_label,
+            "comments_text": "",
+        })
+
+    # Score RSS items
+    for item in rss_items:
+        text = f"{item['title']} {item['selftext']}"
+        relevance_tier = score_relevance(item["title"], item["selftext"], query_terms)
+        wtp_detected, wtp_matches = detect_wtp(text)
+        pain_patterns, pain_count = detect_pain_patterns(text)
+        pps_total, pps_label = calculate_pps(relevance_tier, pain_count, wtp_detected)
+
+        scored_posts.append({
+            "submission": None,
+            "title": item["title"],
+            "selftext": item["selftext"],
+            "score": item["score"],
+            "num_comments": item["num_comments"],
+            "url": item["url"],
+            "created": item["created"],
+            "source": item["source"],
             "relevance_tier": relevance_tier,
             "wtp_detected": wtp_detected,
             "wtp_matches": wtp_matches,
@@ -137,8 +183,10 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
     # --- Step 3: Sort by PPS descending ---
     scored_posts.sort(key=lambda p: p["pps_total"], reverse=True)
 
-    # --- Step 4: Comment enrichment for top 10 ---
+    # --- Step 4: Comment enrichment for top 10 (Reddit posts only) ---
     for post in scored_posts[:10]:
+        if post["submission"] is None:
+            continue
         comment_text, comment_wtp, comment_wtp_matches = _enrich_with_comments(
             post["submission"]
         )
@@ -146,7 +194,6 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
         if comment_wtp and not post["wtp_detected"]:
             post["wtp_detected"] = True
             post["wtp_matches"].extend(comment_wtp_matches)
-            # Recalculate PPS with updated WTP
             post["pps_total"], post["pps_label"] = calculate_pps(
                 post["relevance_tier"], post["pain_count"], True
             )
@@ -158,12 +205,16 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
     system_prompt = load_prompt("signal_extraction.txt")
     profile_section = f"COMPANY PROFILE:\n{format_profile(profile)}\n\n" if profile else ""
 
-    sub_label = ", ".join(f"r/{s}" for s in subreddits)
+    source_parts = [f"r/{s}" for s in subreddits]
+    if rss_feeds:
+        source_parts.extend(f"RSS:{url}" for url in rss_feeds)
+    source_label = ", ".join(source_parts)
+
     post_sections = []
     for p in scored_posts:
         section = (
             f"Title: {p['title']}\n"
-            f"Subreddit: r/{p['subreddit']}\n"
+            f"Source: {p['source']}\n"
             f"Score: {p['score']} | Comments: {p['num_comments']}\n"
             f"Relevance: {p['relevance_tier']} | PPS: {p['pps_total']} ({p['pps_label']}) "
             f"| WTP: {'yes' if p['wtp_detected'] else 'no'} | Pain signals: {p['pain_count']}\n"
@@ -175,7 +226,7 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
 
     user_message = (
         f"{profile_section}"
-        f"Subreddits: {sub_label}\n"
+        f"Sources: {source_label}\n"
         f"Query: {query}\n\n"
         "Posts (sorted by Pain Point Score, highest first):\n"
         + "\n---\n".join(post_sections)
@@ -203,7 +254,7 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
             "num_comments": p["num_comments"],
             "url": p["url"],
             "created": p["created"],
-            "subreddit": p["subreddit"],
+            "source": p["source"],
             "relevance_tier": p["relevance_tier"],
             "wtp_detected": p["wtp_detected"],
             "wtp_matches": p["wtp_matches"],
@@ -217,6 +268,7 @@ def scrape_reddit(subreddits: list[str], query: str, limit: int = 25, profile: d
         "themes": themes,
         "raw_posts": raw_posts,
         "subreddits": subreddits,
+        "rss_feeds": rss_feeds or [],
         "query": query,
         "post_count": len(raw_posts),
     }
