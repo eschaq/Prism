@@ -12,7 +12,7 @@ from typing import Optional
 
 from reddit_scraper import scrape_reddit
 from data_processor import process_csv
-from narrative_engine import generate_narrative, AUDIENCE_PROMPTS
+from narrative_engine import generate_narrative, answer_follow_up, AUDIENCE_PROMPTS
 from gap_analysis import analyze_gaps
 from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
 from claude_client import call_claude, strip_code_fences
@@ -59,6 +59,24 @@ VALID_AUDIENCES = set(AUDIENCE_PROMPTS.keys())
 
 class NarrativeRequest(BaseModel):
     audience: str
+    signals: dict
+    analysis: dict
+    gaps: Optional[dict] = None
+    profile: Optional[dict] = None
+
+    @field_validator("audience")
+    @classmethod
+    def audience_must_be_valid(cls, v: str) -> str:
+        normalized = v.lower()
+        if normalized not in VALID_AUDIENCES:
+            raise ValueError(f"audience must be one of: {sorted(VALID_AUDIENCES)}")
+        return normalized
+
+
+class FollowUpRequest(BaseModel):
+    audience: str
+    question: str = Field(..., min_length=1)
+    briefing: str = Field(..., min_length=1)
     signals: dict
     analysis: dict
     gaps: Optional[dict] = None
@@ -176,6 +194,24 @@ async def get_narrative(request: NarrativeRequest):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         logger.exception("Unexpected error in /api/narrative")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# POST /api/narrative/follow-up — Answer a follow-up question
+# ---------------------------------------------------------------------------
+@app.post("/api/narrative/follow-up", tags=["narrative"])
+async def get_follow_up(request: FollowUpRequest):
+    try:
+        result = answer_follow_up(
+            request.audience, request.question, request.briefing,
+            request.signals, request.analysis, request.gaps, request.profile,
+        )
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        logger.exception("Unexpected error in /api/narrative/follow-up")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 

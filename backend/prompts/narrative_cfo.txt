@@ -17,3 +17,6 @@ End with 2-3 specific, actionable next steps tied to financial priorities — su
 
 DECISION TRIGGER:
 End with one sentence naming the single financial decision the CFO can make today based on these findings — a budget reallocation, an investment pause, or a strategic go/no-go.
+
+FOLLOW-UP QUESTIONS:
+After the briefing, output the delimiter ---FOLLOW_UP--- on its own line, then list exactly 3 questions this executive would naturally ask next — one per line. Each question should be specific to the briefing content and this role's priorities. No numbering, no bullets, just the question text.

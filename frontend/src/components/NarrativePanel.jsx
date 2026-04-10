@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Copy, Download, Mail } from "lucide-react";
-import { StepProgress } from "./LoadingStates";
+import { StepProgress, Spinner } from "./LoadingStates";
 import AUDIENCES from "../audiences";
 
 export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, onNarrative }) {
@@ -8,6 +8,10 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [activeQuestion, setActiveQuestion] = useState(null);
+  const [followUpLoading, setFollowUpLoading] = useState(false);
+  const [followUpAnswer, setFollowUpAnswer] = useState(null);
+  const [followUpError, setFollowUpError] = useState(null);
 
   const canRun = signals && analysis;
   const audienceLabel = AUDIENCES.find((a) => a.id === audience)?.label ?? audience;
@@ -17,6 +21,9 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
     setLoading(true);
     setError(null);
     setResult(null);
+    setActiveQuestion(null);
+    setFollowUpAnswer(null);
+    setFollowUpError(null);
     try {
       const res = await fetch(`${apiBase}/api/narrative`, {
         method: "POST",
@@ -31,6 +38,35 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleFollowUp(question) {
+    setActiveQuestion(question);
+    setFollowUpLoading(true);
+    setFollowUpAnswer(null);
+    setFollowUpError(null);
+    try {
+      const res = await fetch(`${apiBase}/api/narrative/follow-up`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          audience,
+          question,
+          briefing: result.briefing,
+          signals,
+          analysis,
+          gaps,
+          profile,
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setFollowUpAnswer(data.answer);
+    } catch (err) {
+      setFollowUpError(err.message);
+    } finally {
+      setFollowUpLoading(false);
     }
   }
 
@@ -168,6 +204,44 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               Email Draft
             </button>
           </div>
+
+          {result.follow_up_questions?.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-xs font-medium text-gray-400">What would you ask next?</p>
+              <div className="flex flex-wrap gap-2">
+                {result.follow_up_questions.map((q, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleFollowUp(q)}
+                    disabled={followUpLoading}
+                    className={`inline-flex items-center gap-1.5 text-left text-xs px-3 py-2 rounded-lg border transition-colors ${
+                      activeQuestion === q
+                        ? "border-indigo-500 bg-indigo-950 text-indigo-300"
+                        : "border-gray-700 bg-gray-900 text-gray-300 hover:border-gray-500 hover:text-gray-200"
+                    } disabled:opacity-50`}
+                  >
+                    {followUpLoading && activeQuestion === q && <Spinner size="sm" />}
+                    {q}
+                  </button>
+                ))}
+              </div>
+
+              {followUpError && (
+                <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+                  {followUpError}
+                </div>
+              )}
+
+              {followUpAnswer && (
+                <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+                  <p className="text-xs font-medium text-indigo-400 mb-2">{activeQuestion}</p>
+                  <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                    {followUpAnswer}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </>
       )}
     </div>
