@@ -13,12 +13,19 @@ Identify and articulate:
 Be specific. Reference actual themes from the signals and actual metrics from the data. Avoid vague generalities.
 Write for a C-suite audience. Aim for 3-5 items per section.
 
+For each finding and recommendation, rate your confidence as:
+- **High**: supported by both market signals and internal data metrics
+- **Medium**: supported by one data source, plausible but not confirmed by the other
+- **Low**: inferred or speculative, limited direct evidence
+
+Include a one-sentence rationale explaining why you assigned that confidence level.
+
 You MUST respond with valid JSON in this exact structure:
 {
-  "alignments": [{"finding": "...", "evidence": "..."}],
-  "gaps": [{"finding": "...", "evidence": "..."}],
-  "blind_spots": [{"finding": "...", "evidence": "..."}],
-  "recommendations": [{"action": "...", "rationale": "..."}]
+  "alignments": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
+  "gaps": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
+  "blind_spots": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
+  "recommendations": [{"action": "...", "rationale": "...", "confidence": "High", "confidence_rationale": "..."}]
 }
 
 Return ONLY the JSON object. No markdown, no code fences, no commentary.

@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { StepProgress } from "./LoadingStates";
 
+const CONFIDENCE_COLORS = {
+  High: "text-green-400 border-green-800",
+  Medium: "text-yellow-400 border-yellow-800",
+  Low: "text-gray-400 border-gray-700",
+};
+
 const GAP_SECTIONS = [
   { key: "alignments", label: "Alignments", fieldMain: "finding", fieldDetail: "evidence", accent: "border-green-800 bg-green-950", labelColor: "text-green-400" },
   { key: "gaps", label: "Critical Gaps", fieldMain: "finding", fieldDetail: "evidence", accent: "border-red-800 bg-red-950", labelColor: "text-red-400" },
@@ -98,12 +104,24 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                       key={i}
                       className={`rounded-lg border p-4 ${section.accent}`}
                     >
-                      <p className="text-sm font-medium text-gray-100">
-                        {item[section.fieldMain]}
-                      </p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm font-medium text-gray-100">
+                          {item[section.fieldMain]}
+                        </p>
+                        {item.confidence && (
+                          <span className={`flex-shrink-0 text-xs px-2 py-0.5 rounded-full border ${CONFIDENCE_COLORS[item.confidence] || CONFIDENCE_COLORS.Low}`}>
+                            {item.confidence}
+                          </span>
+                        )}
+                      </div>
                       {item[section.fieldDetail] && (
                         <p className="text-xs text-gray-400 mt-1">
                           {item[section.fieldDetail]}
+                        </p>
+                      )}
+                      {item.confidence_rationale && (
+                        <p className="text-xs text-gray-500 mt-1 italic">
+                          {item.confidence_rationale}
                         </p>
                       )}
                     </div>
