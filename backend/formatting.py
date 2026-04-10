@@ -122,3 +122,23 @@ def format_competitor_signals(competitor_signals: dict) -> str:
                 f"[PPS: {p.get('pps_total', 0)}, WTP: {'yes' if p.get('wtp_detected') else 'no'}]"
             )
     return "\n".join(sections)
+
+
+def format_visibility(visibility: dict) -> str:
+    """Format AI search visibility assessment into clean readable text for Claude."""
+    if not visibility:
+        return ""
+    assessments = visibility.get("assessments", [])
+    if not isinstance(assessments, list):
+        return str(assessments)
+    lines = []
+    for a in assessments:
+        entity = a.get("entity", "Unknown")
+        tier = a.get("visibility", "Unknown")
+        rationale = a.get("rationale", "")
+        is_primary = a.get("is_primary_company", False)
+        label = f"{entity} (your company)" if is_primary else entity
+        lines.append(f"{label}: {tier}")
+        if rationale:
+            lines.append(f"  {rationale}")
+    return "\n".join(lines)

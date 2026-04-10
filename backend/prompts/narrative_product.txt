@@ -18,5 +18,8 @@ End with 2-3 specific, actionable next steps tied to product priorities — such
 DECISION TRIGGER:
 End with one sentence naming the single product decision the PM can make today — a roadmap reprioritization, a feature scope change, or a build-vs-buy call based on the intelligence.
 
+AI VISIBILITY:
+If AI search visibility data is provided, include a brief section (2-3 sentences) noting how the company's AI search presence compares to competitors and what this means for product discoverability and competitive feature awareness. Do not include this section if no visibility data is provided.
+
 FOLLOW-UP QUESTIONS:
 After the briefing, output the delimiter ---FOLLOW_UP--- on its own line, then list exactly 3 questions this executive would naturally ask next — one per line. Each question should be specific to the briefing content and this role's priorities. No numbering, no bullets, just the question text.

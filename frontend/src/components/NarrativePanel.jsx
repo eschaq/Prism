@@ -3,7 +3,7 @@ import { Copy, Download, Mail } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import AUDIENCES from "../audiences";
 
-export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, onNarrative }) {
+export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, visibility, onNarrative }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -38,7 +38,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
       const res = await fetch(`${apiBase}/api/narrative`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audience, signals, analysis, gaps, profile }),
+        body: JSON.stringify({ audience, signals, analysis, gaps, profile, visibility }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
@@ -60,7 +60,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
       const res = await fetch(`${apiBase}/api/narrative`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ audience: compareAudience, signals, analysis, gaps, profile }),
+        body: JSON.stringify({ audience: compareAudience, signals, analysis, gaps, profile, visibility }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();

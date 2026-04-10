@@ -27,6 +27,7 @@ export default function App() {
   const [analysis, setAnalysis] = useState(null);
   const [gaps, setGaps] = useState(null);
   const [narrative, setNarrative] = useState(null);
+  const [visibility, setVisibility] = useState(null);
   const [profile, setProfile] = useState(loadProfile);
   const [showSettings, setShowSettings] = useState(false);
   const [demoConfig, setDemoConfig] = useState(null);
@@ -148,10 +149,12 @@ export default function App() {
           analysis={analysis}
           gaps={gaps}
           narrative={narrative}
+          visibility={visibility}
           onSignals={setSignals}
           onAnalysis={setAnalysis}
           onGaps={setGaps}
           onNarrative={setNarrative}
+          onVisibility={setVisibility}
         />
       </main>
 

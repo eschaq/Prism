@@ -4,6 +4,7 @@ import SignalPanel from "./SignalPanel";
 import DataPanel from "./DataPanel";
 import GapAnalysis from "./GapAnalysis";
 import NarrativePanel from "./NarrativePanel";
+import VisibilityPanel from "./VisibilityPanel";
 
 export default function Wizard({
   steps,
@@ -15,10 +16,12 @@ export default function Wizard({
   analysis,
   gaps,
   narrative,
+  visibility,
   onSignals,
   onAnalysis,
   onGaps,
   onNarrative,
+  onVisibility,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -27,6 +30,7 @@ export default function Wizard({
     data: analysis !== null,
     gaps: gaps !== null,
     narrative: narrative !== null,
+    visibility: visibility !== null,
   };
 
   // Auto-advance when the current step completes
@@ -35,7 +39,7 @@ export default function Wizard({
     if (completionMap[currentStep] && activeIndex < steps.length - 1) {
       setActiveIndex(activeIndex + 1);
     }
-  }, [signals, analysis, gaps, narrative]);
+  }, [signals, analysis, gaps, narrative, visibility]);
 
   const activeStep = steps[activeIndex];
 
@@ -132,7 +136,15 @@ export default function Wizard({
           signals={signals}
           analysis={analysis}
           gaps={gaps}
+          visibility={visibility}
           onNarrative={onNarrative}
+        />
+      )}
+      {activeStep === "visibility" && (
+        <VisibilityPanel
+          apiBase={apiBase}
+          profile={profile}
+          onVisibility={onVisibility}
         />
       )}
     </div>

@@ -21,7 +21,7 @@ const PATHS = [
     id: "full_report",
     label: "Full Intelligence Report",
     description: "Complete briefing for your role",
-    steps: ["signals", "data", "gaps", "narrative"],
+    steps: ["signals", "data", "gaps", "visibility", "narrative"],
   },
 ];
 
@@ -30,6 +30,7 @@ const STEP_META = {
   data: { label: "Data Analysis", description: "Upload and analyze CSV data" },
   gaps: { label: "Gap Analysis", description: "Cross-reference signals with data" },
   narrative: { label: "Narrative Engine", description: "Generate audience-specific briefing" },
+  visibility: { label: "AI Visibility", description: "Assess AI search visibility vs competitors" },
 };
 
 export { PATHS, STEP_META };

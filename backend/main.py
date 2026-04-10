@@ -17,6 +17,7 @@ from gap_analysis import analyze_gaps
 from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
 from rss_feed_map import INDUSTRY_FEEDS, DEFAULT_FEEDS
 from claude_client import call_claude, strip_code_fences
+from visibility import assess_visibility
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ class NarrativeRequest(BaseModel):
     analysis: dict
     gaps: Optional[dict] = None
     profile: Optional[dict] = None
+    visibility: Optional[dict] = None
 
     @field_validator("audience")
     @classmethod
@@ -98,6 +100,12 @@ class SubredditRequest(BaseModel):
     industry: str = Field(..., min_length=1)
     sub_industry: Optional[str] = None
     query: str = Field(..., min_length=1)
+
+
+class VisibilityRequest(BaseModel):
+    company: str = Field(..., min_length=1)
+    industry: str = Field(..., min_length=1)
+    competitors: list[str] = Field(..., min_length=1, max_length=5)
 
 
 # ---------------------------------------------------------------------------
@@ -193,7 +201,7 @@ async def get_narrative(request: NarrativeRequest):
             detail="Both 'signals' and 'analysis' must be non-empty.",
         )
     try:
-        result = generate_narrative(request.audience, request.signals, request.analysis, request.gaps, request.profile)
+        result = generate_narrative(request.audience, request.signals, request.analysis, request.gaps, request.profile, request.visibility)
         return result
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -261,6 +269,19 @@ class FeedRequest(BaseModel):
 async def get_feeds(request: FeedRequest):
     feeds = INDUSTRY_FEEDS.get(request.industry, DEFAULT_FEEDS)
     return {"suggested": feeds[:5]}
+
+
+# ---------------------------------------------------------------------------
+# POST /api/visibility — AI search visibility assessment
+# ---------------------------------------------------------------------------
+@app.post("/api/visibility", tags=["analysis"])
+async def get_visibility(request: VisibilityRequest):
+    try:
+        result = assess_visibility(request.company, request.industry, request.competitors)
+        return result
+    except Exception as e:
+        logger.exception("Unexpected error in /api/visibility")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 # ---------------------------------------------------------------------------

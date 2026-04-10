@@ -1,5 +1,5 @@
 from claude_client import call_claude, load_prompt
-from formatting import format_signals, format_analysis, format_gaps, format_profile
+from formatting import format_signals, format_analysis, format_gaps, format_profile, format_visibility
 
 AUDIENCE_PROMPTS = {
     "cfo": "narrative_cfo.txt",
@@ -29,7 +29,7 @@ def _parse_follow_up(raw: str) -> tuple[str, list[str]]:
     return raw.strip(), []
 
 
-def generate_narrative(audience: str, signals: dict, analysis: dict, gaps: dict | None = None, profile: dict | None = None) -> dict:
+def generate_narrative(audience: str, signals: dict, analysis: dict, gaps: dict | None = None, profile: dict | None = None, visibility: dict | None = None) -> dict:
     """Generate an audience-specific briefing from signal, analysis, and gap data."""
     audience_key = audience.lower()
     if audience_key not in AUDIENCE_PROMPTS:
@@ -45,6 +45,10 @@ def generate_narrative(audience: str, signals: dict, analysis: dict, gaps: dict 
     ])
     if gaps:
         sections.append(f"GAP ANALYSIS:\n{format_gaps(gaps)}")
+    if visibility:
+        vis_text = format_visibility(visibility)
+        if vis_text:
+            sections.append(f"AI SEARCH VISIBILITY:\n{vis_text}")
 
     user_message = "\n\n".join(sections)
     raw = call_claude(system_prompt, user_message)
