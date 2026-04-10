@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { Copy, Download, Mail } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import AUDIENCES from "../audiences";
+
+const PROSE_CLASSES = "prose prose-sm prose-invert prose-headings:text-gray-100 prose-headings:text-sm prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4 prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-gray-200 prose-ul:text-gray-300 prose-ol:text-gray-300 prose-li:text-gray-300 max-w-none";
 
 export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, visibility, onNarrative }) {
   const [loading, setLoading] = useState(false);
@@ -327,8 +330,8 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               {followUpAnswer && (
                 <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
                   <p className="text-xs font-medium text-indigo-400 mb-2">{activeQuestion}</p>
-                  <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-                    {followUpAnswer}
+                  <div className={PROSE_CLASSES}>
+                    <ReactMarkdown>{followUpAnswer}</ReactMarkdown>
                   </div>
                 </div>
               )}
@@ -340,21 +343,21 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
                 <p className="text-xs font-medium text-indigo-400 mb-3">{audienceLabel}</p>
-                <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-                  {result.briefing}
+                <div className={PROSE_CLASSES}>
+                  <ReactMarkdown>{result.briefing}</ReactMarkdown>
                 </div>
               </div>
               <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
                 <p className="text-xs font-medium text-indigo-400 mb-3">{compareLabel}</p>
-                <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-                  {compareResult.briefing}
+                <div className={PROSE_CLASSES}>
+                  <ReactMarkdown>{compareResult.briefing}</ReactMarkdown>
                 </div>
               </div>
             </div>
           ) : (
             <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-              <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-                {result.briefing}
+              <div className={PROSE_CLASSES}>
+                <ReactMarkdown>{result.briefing}</ReactMarkdown>
               </div>
             </div>
           )}

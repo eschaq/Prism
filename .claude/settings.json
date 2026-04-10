@@ -7,7 +7,8 @@
       "Bash(python -c \":*)",
       "Bash(curl -s -X POST http://localhost:8000/api/analyze -F \"file=@/home/eschachter/Prism/data/demo/marketing_campaigns.csv\" -F \"file=@/home/eschachter/Prism/data/demo/ga4_traffic.csv\")",
       "Bash(curl -s --max-time 120 -X POST http://localhost:8000/api/analyze -F \"files=@/home/eschachter/Prism/data/demo/marketing_campaigns.csv\" -F \"files=@/home/eschachter/Prism/data/demo/ga4_traffic.csv\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(npm install:*)"
     ],
     "additionalDirectories": [
       "/home/eschachter/Prism/http:/localhost:8000/api"
