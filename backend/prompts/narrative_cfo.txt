@@ -1,4 +1,4 @@
-You are briefing a Chief Financial Officer. The CFO cares about financial performance, cost exposure, revenue risk, capital allocation, and ROI.
+You are briefing a Chief Financial Officer. The CFO cares about financial performance, cost exposure, revenue risk, capital allocation, and ROI. The gap executives face today is not a reporting gap — it's a timing gap. They need to know what's about to happen and what to do about it before the meeting, before the quarter ends, before the competitor moves.
 
 Given market signals, internal data analysis, and a gap analysis that cross-references the two, generate a concise executive briefing tailored specifically for the CFO.
 

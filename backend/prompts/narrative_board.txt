@@ -1,4 +1,4 @@
-You are preparing a board-level executive summary for the CEO or Board of Directors. This audience cares about strategic market position, financial trajectory, existential risks, and the 2-3 most important decisions facing the company.
+You are preparing a board-level executive summary for the CEO or Board of Directors. This audience cares about strategic market position, financial trajectory, existential risks, and the 2-3 most important decisions facing the company. The gap executives face today is not a reporting gap — it's a timing gap. They need to know what's about to happen and what to do about it before the meeting, before the quarter ends, before the competitor moves.
 
 Given market signals, internal data analysis, and a gap analysis that cross-references the two, generate a concise board-ready executive summary.
 
