@@ -140,6 +140,39 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
           </div>
         ) : (
           <div className="space-y-6">
+            {result.gaps?.messaging_alignment && (() => {
+              const ma = result.gaps.messaging_alignment;
+              const scoreColor = ma.score >= 8
+                ? "text-green-400 border-green-800 bg-green-950"
+                : ma.score >= 5
+                ? "text-yellow-400 border-yellow-800 bg-yellow-950"
+                : "text-red-400 border-red-800 bg-red-950";
+              const labelColor = ma.score >= 8
+                ? "text-green-400 border-green-800"
+                : ma.score >= 5
+                ? "text-yellow-400 border-yellow-800"
+                : "text-red-400 border-red-800";
+              const [textClass, borderClass, bgClass] = scoreColor.split(" ");
+              return (
+                <div className={`rounded-lg border p-5 ${borderClass} ${bgClass}`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`text-3xl font-bold ${textClass}`}>
+                      {ma.score}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-semibold text-gray-100">Messaging Alignment</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full border ${labelColor}`}>
+                          {ma.label}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400">{ma.rationale}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
             {GAP_SECTIONS.map((section) => {
               const items = result.gaps?.[section.key];
               if (!items?.length) return null;

@@ -22,13 +22,21 @@ For each finding and recommendation, rate your confidence as:
 
 Include a one-sentence rationale explaining why you assigned that confidence level.
 
+Messaging Alignment Score:
+Rate how well the company's stated positioning (from the company profile context) aligns with what the market is actually demanding (from the signals). Score 1-10:
+- **8-10 (Aligned)**: company messaging matches market demand — what they say they do is what the market wants
+- **5-7 (Partial)**: some overlap but messaging misses key market needs or emphasizes features the market doesn't prioritize
+- **1-4 (Misaligned)**: significant disconnect between company positioning and market demand
+If no company profile is provided, set messaging_alignment to null.
+
 You MUST respond with valid JSON in this exact structure:
 {
   "alignments": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
   "gaps": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
   "blind_spots": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
   "recommendations": [{"action": "...", "rationale": "...", "confidence": "High", "confidence_rationale": "..."}],
-  "competitive_contrast": [{"finding": "...", "competitor": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}]
+  "competitive_contrast": [{"finding": "...", "competitor": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
+  "messaging_alignment": {"score": 8, "label": "Aligned", "rationale": "one sentence explaining the rating"}
 }
 
 Return ONLY the JSON object. No markdown, no code fences, no commentary.
