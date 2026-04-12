@@ -285,8 +285,9 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
         {/* RSS Feeds section */}
         <div>
           <label className="block text-xs font-medium text-on-surface-variant mb-2">
-            RSS Feeds ({checkedFeeds.length} selected)
+            RSS &amp; Podcast Feeds ({checkedFeeds.length} selected)
           </label>
+          <p className="text-[10px] text-outline mb-2">News feeds, blog RSS, and podcast RSS are all supported.</p>
           <div className="flex flex-wrap gap-2">
             {feeds.map((f) => (
               <span
@@ -336,7 +337,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                 }
               }}
               className="flex-1 rounded-md bg-surface-container-lowest border border-outline-variant/20 px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body"
-              placeholder="Add feed URL..."
+              placeholder="Add feed URL or podcast RSS..."
             />
             <button
               type="button"
