@@ -1,0 +1,50 @@
+QUARTERLY CUSTOMER FEEDBACK COMPILATION
+Period: Q1 2025
+Source: QBR interviews, NPS surveys, support interactions, G2 reviews
+Compiled by: Customer Success Team
+
+NPS OVERVIEW
+Overall NPS: 38 (down from 42 in Q4 2024)
+Promoters (9-10): 52% — unchanged
+Passives (7-8): 24% — down from 28%
+Detractors (0-6): 24% — up from 20%
+
+PROMOTER DRIVERS (WHY THEY LOVE US)
+The consistent themes among promoters are time savings and ease of use. Customers who have fully adopted the platform report saving 10-15 hours per week on reporting and data consolidation.
+
+"We went from spending 3 days building our monthly board report to having it auto-generated in 20 minutes. My CFO thought I was exaggerating until he watched me do it." — Rachel Torres, Head of FP&A, Summit Retail Group
+
+"The automated weekly reports are genuinely the best feature. My team gets a Slack ping every Monday morning with exactly the metrics they need. No one has to ask 'where's the report?' anymore." — James Liu, Director of Operations, Velocity Logistics
+
+"Onboarding took longer than I wanted, but once we got past the learning curve, this tool basically eliminated our entire manual reporting workflow. Worth the pain." — Michael Okafor, Analytics Lead, Pinnacle Healthcare
+
+DETRACTOR DRIVERS (WHY THEY'RE FRUSTRATED)
+Detractors cluster around two themes: onboarding complexity and missing mobile features.
+
+"We signed up 4 months ago and I still can't get our Salesforce data to sync reliably. Support has been responsive but the underlying issue keeps coming back. I'm losing patience." — Karen Wu, Revenue Operations Manager, Atlas Cloud
+
+"I was promised a mobile experience that would let me check dashboards between meetings. The app crashes half the time and I can't even log in on my iPad. This was a key part of why we bought." — Derek Hanson, VP Sales, Bridgewater Consulting
+
+KEY THEMES FROM FEEDBACK
+
+1. API Documentation Needs Work (mentioned by 23 customers)
+Developers and technical users consistently ask for better API docs. The current documentation is described as "sparse," "missing examples," and "outdated since the v3 migration." Several customers have built internal integrations and hit undocumented edge cases. One customer (NovaTech) said their developer spent 2 weeks on an integration that "should have taken 2 days with proper docs."
+
+2. Slack Integration Is the #1 Feature Request (mentioned by 31 customers)
+Customers want to receive alerts, share dashboards, and query data directly from Slack. This was the single most requested feature across all feedback channels. Several customers are using Zapier workarounds that break frequently. "Just give us a native Slack bot. We'll pay extra for it." — multiple customers
+
+3. Automated Reports Are the Killer Feature (mentioned by 44 customers)
+The scheduled report feature has the highest satisfaction of any individual feature (4.7/5.0). Customers who use it are 3x less likely to churn. However, only 38% of customers have set up their first automated report. The feature is buried in Settings > Integrations > Scheduled Exports, and most customers don't discover it until a CSM shows them.
+
+4. Support Response Times Are Slipping (mentioned by 18 customers)
+While first response times are within SLA (2.4 hours), resolution times have increased. Customers specifically called out that complex issues get "bounced between agents" and they have to re-explain the problem multiple times. Three customers mentioned considering alternatives specifically because of support frustration.
+
+5. Pricing Feels Fair but Contracts Are Inflexible (mentioned by 12 customers)
+Most customers feel the pricing is reasonable for the value delivered. However, annual contracts with no mid-term adjustment option frustrate growing companies. "We started with 10 seats and now need 25, but we can't add them without renegotiating the entire contract. It feels punitive." — Amanda Chen, COO, GreenLeaf Analytics
+
+RECOMMENDED ACTIONS
+1. Prioritize Slack integration — it's a retention lever and upsell opportunity
+2. Invest in API documentation — create a developer portal with interactive examples
+3. Surface automated reports during onboarding — don't hide the best feature
+4. Audit support escalation process — reduce handoffs and improve continuity
+5. Introduce mid-contract seat expansion with simple self-serve pricing

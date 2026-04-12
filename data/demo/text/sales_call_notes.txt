@@ -1,0 +1,33 @@
+SALES CALL NOTES — Meridian Financial
+Date: March 12, 2025
+Prospect: Sarah Chen, VP of Operations, Meridian Financial
+AE: David Park
+Stage: Discovery / Qualification
+
+BACKGROUND
+Meridian Financial is a mid-market wealth management firm (~$2.4B AUM, 340 employees across 6 offices). Sarah reports to the COO and manages an operations analytics team of 8 analysts. They currently use a patchwork of Salesforce, Excel, an internal Oracle DB, Tableau Server, and a legacy reporting tool called FinView.
+
+PAIN POINTS DISCUSSED
+1. Manual reporting is killing productivity. Sarah's team spends approximately 3 full days per month pulling data from 5 different systems and reconciling it into executive reports. "We're spending the first week of every month just getting last month's numbers right."
+
+2. Data is scattered everywhere. Client portfolio data lives in Oracle, sales pipeline in Salesforce, marketing attribution in HubSpot, financial actuals in NetSuite, and operational metrics in spreadsheets. No single source of truth exists. Different teams present different numbers in the same meetings.
+
+3. Analyst time is wasted on data prep. Sarah estimated that her team of 8 analysts spends roughly 60% of their time on data gathering, cleaning, and formatting — leaving only 40% for actual analysis. "I hired analysts to find insights, not to copy-paste between spreadsheets."
+
+4. Executive dashboards are always stale. By the time reports reach the C-suite, data is 2-3 weeks old. The CEO has started asking for "real numbers" because he doesn't trust the dashboards.
+
+OBJECTIONS RAISED
+- Budget: Sarah flagged that any new tool over $80K/year needs CFO sign-off. Their current analytics budget is ~$200K including Tableau licenses.
+- IT approval: Meridian has a formal IT security review process that takes 4-6 weeks minimum. They require SOC 2 Type II and will need a security questionnaire completed.
+- Timeline: Sarah wants something deployed before Q3 earnings prep (July 15). She's worried about implementation taking too long.
+
+NEXT STEPS AGREED
+1. Technical demo scheduled for March 26 — Sarah bringing two senior analysts and their IT lead (James Morrison)
+2. David to send customized ROI calculator showing projected time savings based on their 8-analyst team
+3. Intro call with IT scheduled for March 19 to begin security review in parallel
+4. Sarah to share sample report templates so we can build a demo with their actual metrics
+
+NOTES
+Sarah mentioned they evaluated Looker last year but abandoned the POC due to complexity. She specifically said "we need something that doesn't require a data engineering team to set up." Strong champion potential — she has budget authority up to $80K and direct line to COO.
+
+Competitive intel: They also have an active conversation with ThoughtSpot. Sarah said their demo was "impressive but expensive." No timeline pressure from them yet.

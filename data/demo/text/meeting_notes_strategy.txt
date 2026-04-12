@@ -1,0 +1,54 @@
+Q2 STRATEGY PLANNING — MEETING NOTES
+Date: April 2, 2025
+Location: HQ Conference Room A (recorded)
+Attendees: Marcus Webb (CEO), Lisa Huang (CMO), Raj Patel (VP Product), Danielle Foster (VP Sales)
+Facilitator: Marcus Webb
+
+AGENDA
+1. Competitive landscape update
+2. Product roadmap priorities for Q2-Q3
+3. Market segment focus decision
+4. Pricing strategy for H2 2025
+5. Churn analysis and retention
+
+1. COMPETITIVE LANDSCAPE
+Lisa presented the competitive intelligence brief. Three new AI-native BI tools have entered the market in the last 6 months: Vanna.ai (raised $28M Series A), QueryMind (launched out of stealth with Google Ventures backing), and DataWhisper (already has 400+ paying customers). All three lead with natural language query as the primary interface.
+
+Marcus: "This is the fastest the competitive landscape has shifted in the four years I've been here. We need to decide whether we're responding or leading."
+
+Raj noted that our current NLQ feature is in beta with 12% adoption among existing users. Competitors are shipping NLQ as the default experience, not a secondary feature. The gap is widening monthly.
+
+DECISION: Accelerate natural language query from Q3 launch to end of Q2. Raj to reallocate 4 engineers from the mobile team. Lisa to begin "Ask your data anything" messaging campaign in parallel.
+
+2. MARKET SEGMENT FOCUS
+Danielle presented pipeline data. Enterprise deals ($100K+ ACV) have a 22% win rate and 94-day average cycle. Mid-market ($25K-$100K) has a 34% win rate and 52-day cycle. SMB (<$25K) has a 41% win rate but only 8-day cycle and high churn.
+
+The debate was heated. Lisa argued for doubling down on SMB with a self-serve motion and product-led growth. Danielle pushed for enterprise because "that's where the real revenue compounds." Raj sided with mid-market as the sweet spot — enough deal size to matter, short enough cycle to learn fast.
+
+Marcus made the call: "We're a mid-market company that serves some enterprise accounts. We are not an SMB company. The unit economics don't work at SMB with our current cost structure."
+
+DECISION: Primary focus mid-market ($25K-$100K ACV). Maintain enterprise accounts but don't expand the enterprise sales team. Evaluate SMB self-serve as a separate product line in Q4.
+
+3. PRICING STRATEGY
+Current pricing hasn't changed in 18 months. Competitors are underpricing by 20-30% on comparable features. Danielle flagged that 3 of her last 5 lost deals cited pricing as the primary reason.
+
+Lisa proposed a "Starter" tier at $499/month to compete at the low end without cannibalizing the core product. Raj expressed concern about feature gating complexity. Marcus asked for a pricing committee to present options by April 30.
+
+DECISION: No immediate price changes. Pricing committee (Danielle, Raj, Lisa) to present 3 options by end of April. Include analysis of impact on existing customer base.
+
+4. CHURN ANALYSIS
+Marcus raised the red flag: SMB churn hit 18% in Q1, up from 12% in Q4. Mid-market churn is stable at 5%. Enterprise churn is 2%.
+
+Root causes identified by Raj: SMB customers don't complete onboarding (only 34% reach "first insight" within 30 days), they underutilize integrations, and they have no dedicated CSM.
+
+Danielle: "We're acquiring SMB customers we can't retain. Every churned SMB customer costs us $1,200 in CAC we'll never recover."
+
+DECISION: Immediate freeze on SMB marketing spend until the retention problem is diagnosed. Raj to implement an automated onboarding flow targeting the "first insight in 7 days" metric. Customer Success to flag any account that hasn't logged in for 14+ days.
+
+ACTION ITEMS
+- Raj: Reallocate 4 engineers to NLQ, new target date June 30 (owner: Raj, due: April 7)
+- Lisa: Launch "Ask your data" campaign prep (owner: Lisa, due: April 15)
+- Pricing committee: Present 3 pricing options (owner: Danielle, due: April 30)
+- Raj: Automated onboarding flow spec (owner: Raj, due: April 14)
+- CS team: Build 14-day inactivity alert system (owner: CS lead, due: April 10)
+- Marcus: Board update on segment strategy shift (owner: Marcus, due: April board meeting)

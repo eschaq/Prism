@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 
 from reddit_scraper import scrape_signals
-from data_processor import process_csvs
+from data_processor import process_csvs, process_text
 from narrative_engine import generate_narrative, answer_follow_up, AUDIENCE_PROMPTS
 from gap_analysis import analyze_gaps, generate_battlecard
 from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
@@ -150,33 +150,89 @@ async def get_signals(request: SignalRequest):
 
 
 # ---------------------------------------------------------------------------
-# POST /api/analyze — CSV upload + Claude data analysis
+# POST /api/analyze — CSV/text upload + Claude data analysis
 # ---------------------------------------------------------------------------
+ALLOWED_EXTENSIONS = {".csv", ".txt", ".md"}
+
+
 @app.post("/api/analyze", tags=["data"])
-async def analyze_data(files: list[UploadFile] = File(...), profile: Optional[str] = Form(None)):
+async def analyze_data(
+    files: list[UploadFile] = File(None),
+    text: Optional[str] = Form(None),
+    profile: Optional[str] = Form(None),
+):
     max_size = 10 * 1024 * 1024  # 10 MB per file
-    file_objs = []
+    csv_objs = []
+    text_parts = []
+    text_filenames = []
+
     try:
-        for f in files:
-            if not f.filename or not f.filename.lower().endswith(".csv"):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Only .csv files are accepted. Got: {f.filename}",
-                )
-            contents = await f.read()
-            if not contents:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Uploaded file is empty: {f.filename}",
-                )
-            if len(contents) > max_size:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"File too large ({len(contents) / 1024 / 1024:.1f} MB): {f.filename}. Maximum is 10 MB per file.",
-                )
-            file_objs.append(io.BytesIO(contents))
+        # Process uploaded files
+        if files:
+            for f in files:
+                if not f.filename:
+                    continue
+                ext = f.filename.lower()[f.filename.rfind("."):]
+                if ext not in ALLOWED_EXTENSIONS:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Unsupported file type: {f.filename}. Accepted: .csv, .txt, .md",
+                    )
+                contents = await f.read()
+                if not contents:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Uploaded file is empty: {f.filename}",
+                    )
+                if len(contents) > max_size:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"File too large ({len(contents) / 1024 / 1024:.1f} MB): {f.filename}. Maximum is 10 MB per file.",
+                    )
+                if ext == ".csv":
+                    csv_objs.append(io.BytesIO(contents))
+                else:
+                    text_parts.append(contents.decode("utf-8", errors="replace"))
+                    text_filenames.append(f.filename)
+
+        # Process pasted text
+        if text and text.strip():
+            text_parts.append(text.strip())
+            if not text_filenames:
+                text_filenames.append("pasted_text")
+
+        if not csv_objs and not text_parts:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No files or text provided.",
+            )
+
         profile_data = json.loads(profile) if profile else None
-        result = process_csvs(file_objs, profile_data)
+
+        # Route to appropriate processor
+        if csv_objs and not text_parts:
+            # CSV only
+            result = process_csvs(csv_objs, profile_data)
+        elif text_parts and not csv_objs:
+            # Text only
+            combined_text = "\n\n---\n\n".join(text_parts)
+            result = process_text(combined_text, text_filenames, profile_data)
+        else:
+            # Mixed: process both and combine
+            csv_result = process_csvs(csv_objs, profile_data)
+            combined_text = "\n\n---\n\n".join(text_parts)
+            text_result = process_text(combined_text, text_filenames, profile_data)
+            result = {
+                "summary": csv_result["summary"] + "\n\n---\n\n**Qualitative Analysis:**\n\n" + text_result["summary"],
+                "shape": csv_result["shape"],
+                "columns": csv_result["columns"],
+                "preview": csv_result["preview"],
+                "file_count": csv_result["file_count"] + text_result["file_count"],
+                "input_type": "mixed",
+                "text_length": text_result["text_length"],
+                "source_files": text_result["source_files"],
+            }
+
         return result
     except HTTPException:
         raise
@@ -342,19 +398,31 @@ async def get_visibility(request: VisibilityRequest):
 
 
 # ---------------------------------------------------------------------------
-# GET /api/demo-data/{filename} — Serve demo CSV files
+# GET /api/demo-data/{filepath:path} — Serve demo data files
 # ---------------------------------------------------------------------------
-DEMO_DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "demo")
+DEMO_DATA_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), "..", "data", "demo"))
+
+DEMO_MEDIA_TYPES = {
+    ".csv": "text/csv",
+    ".txt": "text/plain",
+    ".md": "text/markdown",
+}
 
 
-@app.get("/api/demo-data/{filename}", tags=["data"])
-async def get_demo_data(filename: str):
-    if not filename.endswith(".csv") or "/" in filename or "\\" in filename:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid filename.")
-    filepath = os.path.join(DEMO_DATA_DIR, filename)
-    if not os.path.isfile(filepath):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Demo file not found: {filename}")
-    return FileResponse(filepath, media_type="text/csv", filename=filename)
+@app.get("/api/demo-data/{filepath:path}", tags=["data"])
+async def get_demo_data(filepath: str):
+    # Validate extension
+    ext = filepath[filepath.rfind("."):].lower() if "." in filepath else ""
+    if ext not in DEMO_MEDIA_TYPES:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported file type.")
+    # Resolve and validate path stays within demo directory
+    resolved = os.path.realpath(os.path.join(DEMO_DATA_DIR, filepath))
+    if not resolved.startswith(DEMO_DATA_DIR + os.sep):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file path.")
+    if not os.path.isfile(resolved):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Demo file not found: {filepath}")
+    filename = os.path.basename(resolved)
+    return FileResponse(resolved, media_type=DEMO_MEDIA_TYPES[ext], filename=filename)
 
 
 # ---------------------------------------------------------------------------

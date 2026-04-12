@@ -85,3 +85,29 @@ def process_csvs(file_objs: list[io.BytesIO], profile: dict | None = None) -> di
     }
 
     return _json_safe(result)
+
+
+def process_text(text_content: str, filenames: list[str], profile: dict | None = None) -> dict:
+    """Analyze unstructured text content (meeting notes, support tickets, etc.) via Claude."""
+    system_prompt = load_prompt("text_analysis.txt")
+    profile_section = f"COMPANY PROFILE:\n{format_profile(profile)}\n\n" if profile else ""
+    sources_line = f"Source files: {', '.join(filenames)}\n" if filenames else ""
+    user_message = (
+        f"{profile_section}"
+        f"{sources_line}"
+        f"Text length: {len(text_content)} characters\n\n"
+        f"CONTENT:\n{text_content[:50000]}"
+    )
+
+    summary = call_claude(system_prompt, user_message)
+
+    return {
+        "summary": summary,
+        "shape": {"rows": 0, "columns": 0},
+        "columns": [],
+        "preview": [],
+        "file_count": len(filenames) if filenames else 1,
+        "input_type": "text",
+        "text_length": len(text_content),
+        "source_files": filenames,
+    }

@@ -14,6 +14,10 @@ const DEMO_DATASETS = [
   { id: "support_tickets", filename: "support_tickets.csv", label: "Support Tickets", description: "Volume, resolution time, CSAT by category" },
   { id: "headcount_attrition", filename: "headcount_attrition.csv", label: "Headcount & Attrition", description: "Hires, departures, time-to-fill by department" },
   { id: "employee_nps", filename: "employee_nps.csv", label: "Employee NPS", description: "eNPS scores, promoters, detractors by department" },
+  { id: "sales_call_notes", filename: "text/sales_call_notes.txt", label: "Sales Call Notes", description: "B2B discovery call with Meridian Financial — pain points, objections, next steps" },
+  { id: "support_tickets_summary", filename: "text/support_tickets_summary.txt", label: "Support Ticket Summary", description: "Q1 2025 ticket analysis — categories, CSAT trends, escalations" },
+  { id: "meeting_notes_strategy", filename: "text/meeting_notes_strategy.txt", label: "Strategy Meeting Notes", description: "Q2 planning — competitive threats, segment focus, pricing debate" },
+  { id: "customer_feedback", filename: "text/customer_feedback.txt", label: "Customer Feedback", description: "Quarterly NPS review — promoter/detractor drivers, verbatim quotes" },
 ];
 
 export default DEMO_DATASETS;

@@ -1,0 +1,44 @@
+Q1 2025 SUPPORT TICKET ANALYSIS
+Prepared by: Support Operations Team
+Period: January 1 – March 31, 2025
+
+VOLUME OVERVIEW
+Total tickets opened: 847
+Total tickets resolved: 791 (93.4% resolution rate)
+Average first response time: 2.4 hours
+Average resolution time: 18.7 hours
+Tickets still open at quarter end: 56
+
+CATEGORY BREAKDOWN
+1. Integration Failures — 288 tickets (34%)
+The single largest category and growing month over month. January: 78, February: 92, March: 118. The Salesforce connector is the primary offender — it breaks reliably after every Salesforce platform update (three times this quarter). Customers are reporting that synced data goes stale for 24-48 hours after each Salesforce release. The HubSpot integration also generated 41 tickets, mostly around custom field mapping failures.
+
+2. Slow Dashboard Loading — 237 tickets (28%)
+Performance complaints concentrated among enterprise accounts with large datasets (>500K rows). Average reported load time: 12-15 seconds for complex dashboards. Customers with more than 20 widgets per dashboard are most affected. Three enterprise accounts (Meridian Financial, Coastal Health Systems, TerraVerde Energy) each filed 10+ tickets about this. Excel export timeout is a related sub-issue — exports on datasets over 100K rows fail approximately 40% of the time with a generic "Request timed out" error.
+
+3. Data Sync Errors — 186 tickets (22%)
+Duplicate records appearing after sync operations, particularly with bi-directional syncs. Timestamp mismatches causing data to appear out of order. Several customers reported "phantom deletions" where records disappeared temporarily during sync windows. This category has the lowest CSAT score (3.1) because affected customers often don't discover the issue until they present wrong numbers in meetings.
+
+4. User Access Issues — 136 tickets (16%)
+SSO configuration problems (especially with Okta and Azure AD), role-based access not applying correctly to embedded dashboards, and mobile app login failures on iOS 17+. The mobile login issue has been open since January and affects approximately 15% of mobile users. Engineering has deprioritized it twice.
+
+CSAT TREND
+January: 4.2 → February: 3.9 → March: 3.7
+The decline correlates directly with the increase in integration failures. Customers who experienced a Salesforce sync break rated their experience 2.8 on average, dragging the overall score down. Customers without integration issues maintained a 4.4 CSAT.
+
+RECURRING THEMES FROM TICKET COMMENTS
+- "This is the third time this month my Salesforce data has gone stale"
+- "I can't present these dashboards to my CEO when they take 15 seconds to load"
+- "We switched to you FROM manual Excel processes — the export timeout makes us feel like we're going backwards"
+- "My team can't log in on their phones. We were told this would be fixed in February."
+- "The duplicate records issue made us report wrong revenue numbers to the board. This is a trust problem."
+
+ESCALATIONS
+14 tickets escalated to engineering (up from 8 in Q4)
+3 accounts flagged as churn risk due to unresolved issues: Coastal Health Systems, BrightPath Education, NovaTech Manufacturing
+
+RECOMMENDATIONS
+1. Salesforce connector needs architectural rework — patching after each update is unsustainable
+2. Dashboard performance requires dedicated engineering sprint before Q2 business reviews
+3. Mobile login fix should be elevated to P1 — it's been open 90 days and affects paying customers
+4. Consider proactive outreach to the 3 at-risk accounts before renewal conversations begin

@@ -1,7 +1,14 @@
 import React, { useState, useRef } from "react";
-import { X } from "lucide-react";
+import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import DEMO_DATASETS from "../demo_datasets";
+
+const ACCEPTED_EXTENSIONS = [".csv", ".txt", ".md"];
+
+function isAcceptedFile(name) {
+  const lower = name.toLowerCase();
+  return ACCEPTED_EXTENSIONS.some((ext) => lower.endsWith(ext));
+}
 
 export default function DataPanel({ apiBase, profile, onAnalysis }) {
   const [files, setFiles] = useState([]);
@@ -13,10 +20,12 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
   const [showDemoPicker, setShowDemoPicker] = useState(false);
   const [selectedDemos, setSelectedDemos] = useState(new Set());
   const [loadingDemos, setLoadingDemos] = useState(false);
+  const [pastedText, setPastedText] = useState("");
+  const [showPasteArea, setShowPasteArea] = useState(false);
 
   function addFiles(fileList) {
     const newFiles = Array.from(fileList).filter((f) => {
-      if (!f.name.toLowerCase().endsWith(".csv")) return false;
+      if (!isAcceptedFile(f.name)) return false;
       return !files.some((existing) => existing.name === f.name && existing.size === f.size);
     });
     if (newFiles.length > 0) {
@@ -31,13 +40,11 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
   function handleDrop(e) {
     e.preventDefault();
     setDragOver(false);
-    const csvFiles = Array.from(e.dataTransfer.files).filter((f) =>
-      f.name.toLowerCase().endsWith(".csv")
-    );
-    if (csvFiles.length > 0) {
-      addFiles(csvFiles);
+    const accepted = Array.from(e.dataTransfer.files).filter((f) => isAcceptedFile(f.name));
+    if (accepted.length > 0) {
+      addFiles(accepted);
     } else {
-      setError("Please upload .csv files.");
+      setError("Please upload .csv, .txt, or .md files.");
     }
   }
 
@@ -61,7 +68,9 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
           const res = await fetch(`${apiBase}/api/demo-data/${d.filename}`);
           if (!res.ok) throw new Error(`Failed to load ${d.filename}`);
           const blob = await res.blob();
-          return new File([blob], d.filename, { type: "text/csv" });
+          const basename = d.filename.split("/").pop();
+          const mimeType = basename.endsWith(".csv") ? "text/csv" : "text/plain";
+          return new File([blob], basename, { type: mimeType });
         })
       );
       setFiles((prev) => {
@@ -78,12 +87,25 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
     }
   }
 
+  const hasFiles = files.length > 0;
+  const hasText = pastedText.trim().length > 0;
+  const canAnalyze = hasFiles || hasText;
+
+  function getButtonLabel() {
+    if (loading) return "Analyzing...";
+    const parts = [];
+    if (hasFiles) parts.push(`${files.length} file${files.length !== 1 ? "s" : ""}`);
+    if (hasText) parts.push("text");
+    return `Analyze ${parts.join(" + ")}`;
+  }
+
   async function handleAnalyze() {
-    if (files.length === 0) return;
+    if (!canAnalyze) return;
     setLoading(true);
     setError(null);
     const form = new FormData();
     files.forEach((f) => form.append("files", f));
+    if (hasText) form.append("text", pastedText.trim());
     if (profile) form.append("profile", JSON.stringify(profile));
     try {
       const res = await fetch(`${apiBase}/api/analyze`, {
@@ -101,8 +123,12 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
     }
   }
 
+  const isTextResult = result?.input_type === "text";
+  const isMixedResult = result?.input_type === "mixed";
+
   return (
     <div className="space-y-6 max-w-4xl">
+      {/* File drop zone */}
       <div
         onDrop={handleDrop}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -115,18 +141,20 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
         }`}
       >
         <p className="text-sm text-on-surface-variant">
-          Drop <span className="text-primary font-medium">.csv</span> files here, or click to browse
+          Drop <span className="text-primary font-medium">.csv</span>, <span className="text-primary font-medium">.txt</span>, or <span className="text-primary font-medium">.md</span> files here, or click to browse
         </p>
+        <p className="text-[10px] text-outline mt-1">CSVs are analyzed with Pandas. Text and markdown files are analyzed qualitatively.</p>
         <input
           ref={inputRef}
           type="file"
-          accept=".csv"
+          accept=".csv,.txt,.md"
           multiple
           className="hidden"
           onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
         />
       </div>
 
+      {/* Action row */}
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -135,8 +163,17 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
         >
           {showDemoPicker ? "Hide Demo Data" : "Load Demo Data"}
         </button>
+        <button
+          type="button"
+          onClick={() => setShowPasteArea(!showPasteArea)}
+          className="inline-flex items-center gap-1 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 hover:border-primary/30 hover:text-primary"
+        >
+          {showPasteArea ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          Paste text
+        </button>
       </div>
 
+      {/* Demo picker */}
       {showDemoPicker && (
         <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-4" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
           <p className="text-xs font-medium text-on-surface-variant">Select demo datasets to load</p>
@@ -180,31 +217,56 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
         </div>
       )}
 
-      {files.length > 0 && (
+      {/* Paste textarea */}
+      {showPasteArea && (
+        <div className="space-y-2">
+          <textarea
+            value={pastedText}
+            onChange={(e) => setPastedText(e.target.value)}
+            rows={6}
+            className="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/20 px-4 py-3 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body resize-y"
+            placeholder="Paste meeting notes, support tickets, sales call summaries, or any text to analyze..."
+          />
+          <p className="text-[10px] text-outline text-right">
+            {pastedText.length.toLocaleString()} characters
+          </p>
+        </div>
+      )}
+
+      {/* File chips + analyze button */}
+      {(hasFiles || hasText) && (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-2">
-            {files.map((f, i) => (
-              <span
-                key={`${f.name}-${i}`}
-                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary"
-              >
-                {f.name}
-                <button
-                  type="button"
-                  onClick={() => removeFile(i)}
-                  className="text-outline hover:text-on-surface-variant transition-colors"
+          {hasFiles && (
+            <div className="flex flex-wrap gap-2">
+              {files.map((f, i) => (
+                <span
+                  key={`${f.name}-${i}`}
+                  className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary"
                 >
-                  <X size={12} />
-                </button>
-              </span>
-            ))}
-          </div>
+                  {f.name}
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    className="text-outline hover:text-on-surface-variant transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          {hasText && !hasFiles && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-tertiary/40 bg-tertiary/10 text-tertiary">
+              <span className="material-symbols-outlined text-xs">notes</span>
+              Pasted text ({pastedText.length.toLocaleString()} chars)
+            </span>
+          )}
           <button
             onClick={handleAnalyze}
-            disabled={loading}
+            disabled={loading || !canAnalyze}
             className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? "Analyzing..." : `Analyze ${files.length} file${files.length !== 1 ? "s" : ""}`}
+            {getButtonLabel()}
           </button>
         </div>
       )}
@@ -218,10 +280,12 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
       {loading && (
         <StepProgress
           steps={[
-            files.length > 1
-              ? `Uploading and parsing ${files.length} CSVs...`
-              : "Uploading and parsing CSV...",
-            "Analyzing column patterns...",
+            hasText && !hasFiles
+              ? "Uploading and parsing text..."
+              : hasFiles && files.length > 1
+              ? `Uploading and parsing ${files.length} files...`
+              : "Uploading and parsing file...",
+            "Analyzing patterns...",
             "Generating business summary with AI...",
           ]}
           active={loading}
@@ -231,8 +295,21 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
       {result && !loading && (
         <div className="space-y-4">
           <div className="text-xs text-outline">
-            {(result.file_count || 1) > 1 && `${result.file_count} files merged · `}
-            {result.shape?.rows} rows · {result.shape?.columns} columns
+            {isTextResult ? (
+              <>
+                {result.source_files?.length > 0 && `${result.source_files.join(", ")} · `}
+                {result.text_length?.toLocaleString()} characters analyzed
+              </>
+            ) : isMixedResult ? (
+              <>
+                {result.file_count} files · {result.shape?.rows} rows · {result.shape?.columns} columns + {result.text_length?.toLocaleString()} chars text
+              </>
+            ) : (
+              <>
+                {(result.file_count || 1) > 1 && `${result.file_count} files merged · `}
+                {result.shape?.rows} rows · {result.shape?.columns} columns
+              </>
+            )}
           </div>
 
           <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
@@ -242,7 +319,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
             </div>
           </div>
 
-          {result.preview?.length > 0 && (
+          {!isTextResult && result.preview?.length > 0 && (
             <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] overflow-x-auto" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
               <h3 className="text-xs font-semibold text-on-surface-variant mb-3">Data Preview</h3>
               <table className="text-xs text-on-surface-variant w-full">
