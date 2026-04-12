@@ -3,17 +3,17 @@ import { Copy, ChevronDown, ChevronUp } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 
 const CONFIDENCE_COLORS = {
-  High: "text-green-400 border-green-800",
-  Medium: "text-yellow-400 border-yellow-800",
-  Low: "text-gray-400 border-gray-700",
+  High: "text-secondary border-secondary/20",
+  Medium: "text-tertiary border-tertiary/20",
+  Low: "text-on-surface-variant border-outline-variant",
 };
 
 const GAP_SECTIONS = [
-  { key: "alignments", label: "Alignments", fieldMain: "finding", fieldDetail: "evidence", accent: "border-green-800 bg-green-950", labelColor: "text-green-400" },
-  { key: "gaps", label: "Critical Gaps", fieldMain: "finding", fieldDetail: "evidence", accent: "border-red-800 bg-red-950", labelColor: "text-red-400" },
-  { key: "blind_spots", label: "Blind Spots", fieldMain: "finding", fieldDetail: "evidence", accent: "border-yellow-800 bg-yellow-950", labelColor: "text-yellow-400" },
-  { key: "recommendations", label: "Recommendations", fieldMain: "action", fieldDetail: "rationale", accent: "border-indigo-800 bg-indigo-950", labelColor: "text-indigo-400" },
-  { key: "competitive_contrast", label: "Competitive Contrast", fieldMain: "finding", fieldDetail: "evidence", accent: "border-orange-800 bg-orange-950", labelColor: "text-orange-400" },
+  { key: "alignments", label: "Alignments", fieldMain: "finding", fieldDetail: "evidence", accent: "border-secondary/20 bg-secondary/10", labelColor: "text-secondary" },
+  { key: "gaps", label: "Critical Gaps", fieldMain: "finding", fieldDetail: "evidence", accent: "border-error-container bg-error-container/20", labelColor: "text-error" },
+  { key: "blind_spots", label: "Blind Spots", fieldMain: "finding", fieldDetail: "evidence", accent: "border-tertiary/20 bg-tertiary/10", labelColor: "text-tertiary" },
+  { key: "recommendations", label: "Recommendations", fieldMain: "action", fieldDetail: "rationale", accent: "border-primary/20 bg-primary/10", labelColor: "text-primary" },
+  { key: "competitive_contrast", label: "Competitive Contrast", fieldMain: "finding", fieldDetail: "evidence", accent: "border-tertiary/20 bg-tertiary/10", labelColor: "text-tertiary" },
 ];
 
 export default function GapAnalysis({ apiBase, profile, signals, analysis, onGaps }) {
@@ -92,16 +92,9 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
     result && typeof result.gaps !== "string" && result.gaps?.competitive_contrast?.length > 0;
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-100">Gap Analysis</h2>
-        <p className="text-sm text-gray-400 mt-1">
-          Cross-reference market signals with internal data to surface misalignments and opportunities.
-        </p>
-      </div>
-
+    <div className="space-y-6 max-w-4xl">
       {!canRun && (
-        <div className="rounded-md border border-yellow-800 bg-yellow-950 px-4 py-3 text-sm text-yellow-300">
+        <div className="rounded-md bg-tertiary/10 border border-tertiary/20 px-4 py-3 text-sm text-tertiary">
           Complete both Signal Collection and Data Analysis before running gap analysis.
         </div>
       )}
@@ -109,13 +102,13 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
       <button
         onClick={handleRun}
         disabled={!canRun || loading}
-        className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+        className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
       >
         {loading ? "Analyzing..." : "Run Gap Analysis"}
       </button>
 
       {error && (
-        <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
           {error}
         </div>
       )}
@@ -132,9 +125,9 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
 
       {result && !loading && (
         typeof result.gaps === "string" ? (
-          <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-            <h3 className="text-sm font-semibold text-indigo-400 mb-3">Gap Analysis Report</h3>
-            <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+          <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+            <h3 className="text-sm font-semibold text-primary mb-3">Gap Analysis Report</h3>
+            <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
               {result.gaps}
             </div>
           </div>
@@ -143,15 +136,15 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
             {result.gaps?.messaging_alignment && (() => {
               const ma = result.gaps.messaging_alignment;
               const scoreColor = ma.score >= 8
-                ? "text-green-400 border-green-800 bg-green-950"
+                ? "text-secondary border-secondary/20 bg-secondary/10"
                 : ma.score >= 5
-                ? "text-yellow-400 border-yellow-800 bg-yellow-950"
-                : "text-red-400 border-red-800 bg-red-950";
+                ? "text-tertiary border-tertiary/20 bg-tertiary/10"
+                : "text-error border-error-container bg-error-container/20";
               const labelColor = ma.score >= 8
-                ? "text-green-400 border-green-800"
+                ? "text-secondary border-secondary/20"
                 : ma.score >= 5
-                ? "text-yellow-400 border-yellow-800"
-                : "text-red-400 border-red-800";
+                ? "text-tertiary border-tertiary/20"
+                : "text-error border-error-container";
               const [textClass, borderClass, bgClass] = scoreColor.split(" ");
               return (
                 <div className={`rounded-lg border p-5 ${borderClass} ${bgClass}`}>
@@ -161,12 +154,12 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-semibold text-gray-100">Messaging Alignment</span>
+                        <span className="text-sm font-semibold text-on-surface">Messaging Alignment</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full border ${labelColor}`}>
                           {ma.label}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400">{ma.rationale}</p>
+                      <p className="text-xs text-on-surface-variant">{ma.rationale}</p>
                     </div>
                   </div>
                 </div>
@@ -174,17 +167,17 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
             })()}
 
             {result.gaps?.mindshare_risk && (
-              <div className="rounded-lg border border-orange-800 bg-orange-950 p-5">
+              <div className="rounded-lg border border-tertiary/20 bg-tertiary/10 p-5">
                 <div className="flex items-start gap-3">
-                  <span className="text-orange-400 text-lg mt-0.5">⚠</span>
+                  <span className="text-tertiary text-lg mt-0.5">⚠</span>
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-sm font-semibold text-gray-100">Mindshare Risk</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full border border-orange-800 text-orange-400">
+                      <span className="text-sm font-semibold text-on-surface">Mindshare Risk</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full border border-tertiary/20 text-tertiary">
                         {result.gaps.mindshare_risk.top_threat}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-300">{result.gaps.mindshare_risk.summary}</p>
+                    <p className="text-sm text-on-surface-variant">{result.gaps.mindshare_risk.summary}</p>
                   </div>
                 </div>
               </div>
@@ -204,12 +197,12 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                       className={`rounded-lg border p-4 ${section.accent}`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm font-medium text-gray-100">
+                        <p className="text-sm font-medium text-on-surface">
                           {item[section.fieldMain]}
                         </p>
                         <div className="flex items-center gap-1.5 flex-shrink-0">
                           {item.competitor && (
-                            <span className="text-xs px-2 py-0.5 rounded-full border border-orange-800 text-orange-400">
+                            <span className="text-xs px-2 py-0.5 rounded-full border border-tertiary/20 text-tertiary">
                               {item.competitor}
                             </span>
                           )}
@@ -221,12 +214,12 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                         </div>
                       </div>
                       {item[section.fieldDetail] && (
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-on-surface-variant mt-1">
                           {item[section.fieldDetail]}
                         </p>
                       )}
                       {item.confidence_rationale && (
-                        <p className="text-xs text-gray-500 mt-1 italic">
+                        <p className="text-xs text-outline mt-1 italic">
                           {item.confidence_rationale}
                         </p>
                       )}
@@ -241,29 +234,29 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                 <button
                   onClick={handleGenerateBattlecard}
                   disabled={battlecardLoading}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-orange-800 px-4 py-2 text-xs font-medium text-orange-400 hover:bg-orange-950 disabled:opacity-40 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 disabled:opacity-40"
                 >
                   {battlecardLoading && <Spinner size="sm" />}
                   {battlecardLoading ? "Generating..." : "Generate Battlecard"}
                 </button>
 
                 {battlecardError && (
-                  <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+                  <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
                     {battlecardError}
                   </div>
                 )}
 
                 {battlecard && (
-                  <div className="rounded-lg border border-gray-800 bg-gray-900">
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-gray-800">
-                      <h3 className="text-sm font-semibold text-orange-400">Competitor Battlecard</h3>
+                  <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low">
+                    <div className="flex items-center justify-between px-5 py-3 border-b border-outline-variant/10">
+                      <h3 className="text-sm font-semibold text-tertiary">Competitor Battlecard</h3>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={handleCopyBattlecard}
                           className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs transition-colors ${
                             battlecardCopied
-                              ? "border-green-700 text-green-400"
-                              : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+                              ? "border-secondary/30 text-secondary"
+                              : "border-outline-variant text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
                           }`}
                         >
                           <Copy size={12} />
@@ -271,7 +264,7 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                         </button>
                         <button
                           onClick={() => setShowBattlecard(!showBattlecard)}
-                          className="rounded-md border border-gray-700 p-1 text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+                          className="rounded-md border border-outline-variant p-1 text-on-surface-variant hover:border-outline-variant hover:text-on-surface transition-colors"
                         >
                           {showBattlecard ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                         </button>
@@ -279,7 +272,7 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                     </div>
                     {showBattlecard && (
                       <div className="px-5 py-4">
-                        <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                        <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
                           {battlecard}
                         </div>
                       </div>

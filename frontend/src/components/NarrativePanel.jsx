@@ -4,7 +4,7 @@ import { Copy, Download, Mail } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import AUDIENCES from "../audiences";
 
-const PROSE_CLASSES = "prose prose-sm prose-invert prose-headings:text-gray-100 prose-headings:text-sm prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4 prose-p:text-gray-300 prose-p:leading-relaxed prose-strong:text-gray-200 prose-ul:text-gray-300 prose-ol:text-gray-300 prose-li:text-gray-300 max-w-none";
+const PROSE_CLASSES = "prose prose-sm prose-invert prose-headings:text-on-surface prose-headings:text-sm prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4 prose-p:text-on-surface-variant prose-p:leading-relaxed prose-strong:text-on-surface prose-ul:text-on-surface-variant prose-ol:text-on-surface-variant prose-li:text-on-surface-variant max-w-none";
 
 export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, visibility, onNarrative }) {
   const [loading, setLoading] = useState(false);
@@ -141,20 +141,74 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
     });
   }
 
+  function markdownToHtml(md) {
+    return md
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      // Headers
+      .replace(/^### (.+)$/gm, "<h3>$1</h3>")
+      .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+      .replace(/^# (.+)$/gm, "<h1>$1</h1>")
+      // Bold
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      // Italic
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      // Bullet lists
+      .replace(/^- (.+)$/gm, "<li>$1</li>")
+      .replace(/((?:<li>.*<\/li>\n?)+)/g, "<ul>$1</ul>")
+      // Numbered lists
+      .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
+      // Paragraphs (lines not already wrapped)
+      .replace(/^(?!<[hul]|<li)(.+)$/gm, "<p>$1</p>")
+      // Clean up empty paragraphs
+      .replace(/<p>\s*<\/p>/g, "");
+  }
+
   function handleDownloadPDF() {
-    const title = `${audienceLabel} Briefing — Prism Intelligence`;
+    const title = `${audienceLabel} Briefing`;
+    const briefingHtml = markdownToHtml(result.briefing);
     const html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>${title}</title>
+<html><head><meta charset="UTF-8"><title>${title} — Prism Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Manrope:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-         color: #111; margin: 40px; line-height: 1.6; font-size: 14px; }
-  h1 { font-size: 20px; margin-bottom: 4px; }
-  .meta { font-size: 12px; color: #666; margin-bottom: 24px; }
-  .content { white-space: pre-wrap; }
+  @page { margin: 48px 56px; }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: #1a1a2e; margin: 0; padding: 0; line-height: 1.7; font-size: 13px; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid #aebaff; }
+  .header-left h1 { font-family: 'Manrope', sans-serif; font-size: 22px; font-weight: 800; color: #0c0e14; margin: 0 0 4px 0; letter-spacing: -0.02em; }
+  .header-left .subtitle { font-size: 11px; color: #717583; font-family: 'Manrope', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; }
+  .header-right { text-align: right; }
+  .header-right .brand { font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700; color: #4d5b9c; }
+  .header-right .date { font-size: 10px; color: #a7aab9; margin-top: 2px; }
+  .badge { display: inline-block; font-family: 'Manrope', sans-serif; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 4px; background: #f0f1ff; color: #4d5b9c; margin-bottom: 16px; }
+  h1 { font-family: 'Manrope', sans-serif; font-size: 18px; font-weight: 700; color: #0c0e14; margin: 28px 0 8px 0; letter-spacing: -0.01em; }
+  h2 { font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 700; color: #283575; margin: 24px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #e8e9f0; }
+  h3 { font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 700; color: #334080; margin: 20px 0 6px 0; }
+  p { margin: 0 0 10px 0; color: #2a2a3e; }
+  ul { margin: 0 0 12px 0; padding-left: 20px; }
+  li { margin-bottom: 6px; color: #2a2a3e; }
+  strong { color: #0c0e14; font-weight: 700; }
+  em { color: #4d5b9c; font-style: italic; }
+  .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #e8e9f0; display: flex; justify-content: space-between; align-items: center; }
+  .footer-text { font-size: 9px; color: #a7aab9; font-family: 'Manrope', sans-serif; text-transform: uppercase; letter-spacing: 0.08em; }
+  .footer-badge { font-size: 9px; color: #4d5b9c; font-family: 'Manrope', sans-serif; font-weight: 700; }
 </style></head><body>
-<h1>${title}</h1>
-<div class="meta">Generated by Prism Enterprise Intelligence Platform</div>
-<div class="content">${result.briefing.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>
+<div class="header">
+  <div class="header-left">
+    <h1 style="font-size:22px;border:none;margin:0 0 4px 0;padding:0;">${title}</h1>
+    <div class="subtitle">Prism Enterprise Intelligence Platform</div>
+  </div>
+  <div class="header-right">
+    <div class="brand">◆ Prism</div>
+    <div class="date">${new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</div>
+  </div>
+</div>
+<div class="badge">AI-Generated Intelligence Brief</div>
+${briefingHtml}
+<div class="footer">
+  <span class="footer-text">Confidential · Generated by Prism Intelligence</span>
+  <span class="footer-badge">prism.ai</span>
+</div>
 </body></html>`;
 
     const iframe = document.createElement("iframe");
@@ -189,16 +243,9 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const isComparing = !!compareResult;
 
   return (
-    <div className={`space-y-6 ${isComparing ? "max-w-5xl" : "max-w-3xl"}`}>
-      <div>
-        <h2 className="text-lg font-semibold text-gray-100">Narrative Engine</h2>
-        <p className="text-sm text-gray-400 mt-1">
-          Generate an executive briefing tailored for the <span className="text-indigo-400 font-medium">{audienceLabel}</span> role.
-        </p>
-      </div>
-
+    <div className={`space-y-6 ${isComparing ? "max-w-5xl" : "max-w-4xl"}`}>
       {!canRun && (
-        <div className="rounded-md border border-yellow-800 bg-yellow-950 px-4 py-3 text-sm text-yellow-300">
+        <div className="rounded-md bg-tertiary/10 border border-tertiary/20 px-4 py-3 text-sm text-tertiary">
           Complete both Signal Collection and Data Analysis before generating narratives.
         </div>
       )}
@@ -206,13 +253,13 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
       <button
         onClick={handleGenerate}
         disabled={!canRun || loading}
-        className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+        className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
       >
         {loading ? "Generating..." : `Generate ${audienceLabel} Briefing`}
       </button>
 
       {error && (
-        <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
           {error}
         </div>
       )}
@@ -237,30 +284,30 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
         if (!visibility) missingNames.push("visibility");
         const qualityTier = qualityCount >= 5 ? "Complete" : qualityCount >= 4 ? "Strong" : qualityCount >= 3 ? "Partial" : "Limited";
         const qualityColor = qualityCount >= 4
-          ? "text-green-400 border-green-800"
+          ? "text-secondary border-secondary/20"
           : qualityCount >= 3
-          ? "text-yellow-400 border-yellow-800"
-          : "text-red-400 border-red-800";
+          ? "text-tertiary border-tertiary/20"
+          : "text-error border-error-container";
 
         return (
         <>
           {/* Heading row + compare dropdown */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-sm font-semibold text-indigo-400">
+              <h3 className="text-sm font-semibold text-primary">
                 {audienceLabel} Briefing
               </h3>
-              <span className="text-xs px-2 py-0.5 rounded-full border border-indigo-800 text-indigo-400">
+              <span className="text-xs px-2 py-0.5 rounded-full border border-primary/20 text-primary">
                 Prism Intelligence
               </span>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-outline">
                 ~{Math.ceil(result.briefing.split(/\s+/).length / 200)} min read
               </span>
               <span className={`text-xs px-2 py-0.5 rounded-full border ${qualityColor}`}>
                 {qualityTier} — {qualityCount}/5
               </span>
               {missingNames.length > 0 && (
-                <span className="text-xs text-gray-600">
+                <span className="text-xs text-outline">
                   add {missingNames.join(", ")} to strengthen
                 </span>
               )}
@@ -273,7 +320,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
                   setCompareResult(null);
                   setCompareError(null);
                 }}
-                className="rounded-md bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="rounded-md bg-surface-container-lowest border border-outline-variant/20 px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body"
               >
                 <option value="">Compare with...</option>
                 {AUDIENCES.filter((a) => a.id !== audience).map((a) => (
@@ -285,7 +332,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               <button
                 onClick={handleCompare}
                 disabled={!compareAudience || compareLoading}
-                className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+                className="inline-flex items-center gap-1.5 bg-[#5C6BC0] text-white px-3 py-1.5 rounded-xl font-label font-bold text-xs shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40"
               >
                 {compareLoading && <Spinner size="sm" />}
                 {compareLoading ? "Comparing..." : "Compare"}
@@ -294,7 +341,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
           </div>
 
           {compareError && (
-            <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+            <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
               {compareError}
             </div>
           )}
@@ -302,7 +349,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
           {/* Follow-up question chips */}
           {result.follow_up_questions?.length > 0 && (
             <div className="space-y-3">
-              <p className="text-xs font-medium text-gray-400">What would you ask next?</p>
+              <p className="text-xs font-medium text-on-surface-variant">What would you ask next?</p>
               <div className="flex flex-wrap gap-2">
                 {result.follow_up_questions.map((q, i) => (
                   <button
@@ -311,8 +358,8 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
                     disabled={followUpLoading}
                     className={`inline-flex items-center gap-1.5 text-left text-xs px-3 py-2 rounded-lg border transition-colors ${
                       activeQuestion === q
-                        ? "border-indigo-500 bg-indigo-950 text-indigo-300"
-                        : "border-gray-700 bg-gray-900 text-gray-300 hover:border-gray-500 hover:text-gray-200"
+                        ? "border-primary/40 bg-primary/10 text-primary"
+                        : "border-outline-variant bg-surface-container-low text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
                     } disabled:opacity-50`}
                   >
                     {followUpLoading && activeQuestion === q && <Spinner size="sm" />}
@@ -322,14 +369,14 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               </div>
 
               {followUpError && (
-                <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+                <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
                   {followUpError}
                 </div>
               )}
 
               {followUpAnswer && (
-                <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
-                  <p className="text-xs font-medium text-indigo-400 mb-2">{activeQuestion}</p>
+                <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+                  <p className="text-xs font-medium text-primary font-label mb-2">{activeQuestion}</p>
                   <div className={PROSE_CLASSES}>
                     <ReactMarkdown>{followUpAnswer}</ReactMarkdown>
                   </div>
@@ -341,21 +388,21 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
           {/* Briefing text — side by side when comparing */}
           {isComparing ? (
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-                <p className="text-xs font-medium text-indigo-400 mb-3">{audienceLabel}</p>
+              <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+                <p className="text-xs font-medium text-primary font-label mb-3">{audienceLabel}</p>
                 <div className={PROSE_CLASSES}>
                   <ReactMarkdown>{result.briefing}</ReactMarkdown>
                 </div>
               </div>
-              <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-                <p className="text-xs font-medium text-indigo-400 mb-3">{compareLabel}</p>
+              <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+                <p className="text-xs font-medium text-primary font-label mb-3">{compareLabel}</p>
                 <div className={PROSE_CLASSES}>
                   <ReactMarkdown>{compareResult.briefing}</ReactMarkdown>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
+            <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
               <div className={PROSE_CLASSES}>
                 <ReactMarkdown>{result.briefing}</ReactMarkdown>
               </div>
@@ -368,8 +415,8 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               onClick={handleCopy}
               className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
                 copied
-                  ? "border-green-700 text-green-400"
-                  : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+                  ? "border-secondary/30 text-secondary"
+                  : "border-outline-variant text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
               }`}
             >
               <Copy size={14} />
@@ -377,14 +424,14 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
             </button>
             <button
               onClick={handleDownloadPDF}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-3 py-1.5"
             >
               <Download size={14} />
               Download PDF
             </button>
             <button
               onClick={handleEmail}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-3 py-1.5"
             >
               <Mail size={14} />
               Email Draft
@@ -393,8 +440,8 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               onClick={handleCopyNotion}
               className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
                 copiedNotion
-                  ? "border-green-700 text-green-400"
-                  : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+                  ? "border-secondary/30 text-secondary"
+                  : "border-outline-variant text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
               }`}
             >
               <Copy size={14} />
@@ -404,8 +451,8 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
               onClick={handleCopySlack}
               className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
                 copiedSlack
-                  ? "border-green-700 text-green-400"
-                  : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+                  ? "border-secondary/30 text-secondary"
+                  : "border-outline-variant text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
               }`}
             >
               <Copy size={14} />

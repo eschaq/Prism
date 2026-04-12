@@ -3,21 +3,21 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { StepProgress } from "./LoadingStates";
 
 const VISIBILITY_COLORS = {
-  Visible: "text-green-400 border-green-800 bg-green-950",
-  "Partially Visible": "text-yellow-400 border-yellow-800 bg-yellow-950",
-  "Not Visible": "text-red-400 border-red-800 bg-red-950",
+  Visible: "text-secondary border-secondary/20 bg-secondary/10",
+  "Partially Visible": "text-tertiary border-tertiary/20 bg-tertiary/10",
+  "Not Visible": "text-error border-error-container bg-error-container/20",
 };
 
 const SOM_COLORS = {
-  Visible: "text-green-400",
-  "Partially Visible": "text-yellow-400",
-  "Not Visible": "text-red-400",
+  Visible: "text-secondary",
+  "Partially Visible": "text-tertiary",
+  "Not Visible": "text-error",
 };
 
 const READINESS_COLORS = {
-  High: "text-green-400 border-green-800",
-  Medium: "text-yellow-400 border-yellow-800",
-  Low: "text-red-400 border-red-800",
+  High: "text-secondary border-secondary/20",
+  Medium: "text-tertiary border-tertiary/20",
+  Low: "text-error border-error-container",
 };
 
 export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
@@ -69,16 +69,9 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-100">AI Visibility</h2>
-        <p className="text-sm text-gray-400 mt-1">
-          Assess your Share of Model — how visible your company and competitors are in AI-generated search responses.
-        </p>
-      </div>
-
+    <div className="space-y-6 max-w-4xl">
       {!canRun && (
-        <div className="rounded-md border border-yellow-800 bg-yellow-950 px-4 py-3 text-sm text-yellow-300">
+        <div className="rounded-md bg-tertiary/10 border border-tertiary/20 px-4 py-3 text-sm text-tertiary">
           Configure your company name and competitors in Profile Settings to run AI visibility assessment.
         </div>
       )}
@@ -86,13 +79,13 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
       <button
         onClick={handleRun}
         disabled={!canRun || loading}
-        className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+        className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
       >
         {loading ? "Assessing..." : "Run Visibility Assessment"}
       </button>
 
       {error && (
-        <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
           {error}
         </div>
       )}
@@ -115,7 +108,7 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
               const somColor = SOM_COLORS[a.visibility] || SOM_COLORS["Not Visible"];
               const queriesExpanded = expandedQueries.has(i);
               return (
-                <div key={i} className="rounded-lg border border-gray-800 bg-gray-900 p-5 space-y-3">
+                <div key={i} className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-3">
                   <div className="flex items-center gap-4">
                     {a.estimated_som_percentage && (
                       <div className={`text-2xl font-bold ${somColor} flex-shrink-0`}>
@@ -124,10 +117,10 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-gray-100">
+                        <h3 className="text-sm font-semibold text-on-surface">
                           {a.entity}
                           {a.is_primary_company && (
-                            <span className="ml-2 text-xs font-normal text-indigo-400">(You)</span>
+                            <span className="ml-2 text-xs font-normal text-primary">(You)</span>
                           )}
                         </h3>
                         <div className="flex items-center gap-1.5">
@@ -142,24 +135,24 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
                         </div>
                       </div>
                       {a.estimated_som_percentage && (
-                        <p className="text-xs text-gray-500 mt-0.5">Share of Model</p>
+                        <p className="text-xs text-outline mt-0.5">Share of Model</p>
                       )}
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-300">{a.rationale}</p>
+                  <p className="text-sm text-on-surface-variant">{a.rationale}</p>
 
                   {a.query_patterns_tested?.length > 0 && (
                     <div>
                       <button
                         onClick={() => toggleQueries(i)}
-                        className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                        className="inline-flex items-center gap-1 text-xs text-outline hover:text-on-surface-variant transition-colors"
                       >
                         {queriesExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         {queriesExpanded ? "Hide" : "Show"} query patterns
                       </button>
                       {queriesExpanded && (
-                        <ol className="mt-2 space-y-1 text-xs text-gray-500 list-decimal list-inside">
+                        <ol className="mt-2 space-y-1 text-xs text-outline list-decimal list-inside">
                           {a.query_patterns_tested.map((q, j) => (
                             <li key={j}>{q}</li>
                           ))}
@@ -170,11 +163,11 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
 
                   {a.strengths?.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-green-400 mb-1">Strengths</p>
-                      <ul className="text-xs text-gray-400 space-y-0.5">
+                      <p className="text-xs font-medium text-secondary mb-1">Strengths</p>
+                      <ul className="text-xs text-on-surface-variant space-y-0.5">
                         {a.strengths.map((s, j) => (
                           <li key={j} className="flex items-start gap-1.5">
-                            <span className="text-green-600 mt-0.5">+</span>
+                            <span className="text-secondary-dim mt-0.5">+</span>
                             <span>{s}</span>
                           </li>
                         ))}
@@ -184,11 +177,11 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
 
                   {a.gaps?.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-red-400 mb-1">Gaps</p>
-                      <ul className="text-xs text-gray-400 space-y-0.5">
+                      <p className="text-xs font-medium text-error mb-1">Gaps</p>
+                      <ul className="text-xs text-on-surface-variant space-y-0.5">
                         {a.gaps.map((g, j) => (
                           <li key={j} className="flex items-start gap-1.5">
-                            <span className="text-red-600 mt-0.5">-</span>
+                            <span className="text-error-dim mt-0.5">-</span>
                             <span>{g}</span>
                           </li>
                         ))}
@@ -198,12 +191,12 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
 
                   {a.content_recommendations?.length > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-indigo-400 mb-1">Recommendations</p>
+                      <p className="text-xs font-medium text-primary mb-1">Recommendations</p>
                       <div className="space-y-1.5">
                         {a.content_recommendations.map((rec, j) => (
-                          <div key={j} className="rounded-md border border-indigo-800 bg-indigo-950 px-3 py-2">
-                            <p className="text-xs text-gray-300">
-                              <span className="text-indigo-400 font-medium mr-1">{j + 1}.</span>
+                          <div key={j} className="rounded-md border border-primary/20 bg-primary/10 px-3 py-2">
+                            <p className="text-xs text-on-surface-variant">
+                              <span className="text-primary font-medium mr-1">{j + 1}.</span>
                               {rec}
                             </p>
                           </div>
@@ -216,18 +209,18 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
             })}
 
             {result.query_patterns_evaluated?.length > 0 && (
-              <div className="border-t border-gray-800 pt-4">
+              <div className="border-t border-outline-variant/10 pt-4">
                 <button
                   onClick={() => setShowMethodology(!showMethodology)}
-                  className="inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors"
+                  className="inline-flex items-center gap-1 text-xs text-outline hover:text-on-surface-variant transition-colors"
                 >
                   {showMethodology ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                   Evaluation methodology
                 </button>
                 {showMethodology && (
-                  <div className="mt-2 rounded-lg border border-gray-800 bg-gray-900 p-4">
-                    <p className="text-xs text-gray-500 mb-2">Each entity was evaluated against these buyer-intent query patterns:</p>
-                    <ol className="space-y-1 text-xs text-gray-500 list-decimal list-inside">
+                  <div className="mt-2 rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+                    <p className="text-xs text-outline mb-2">Each entity was evaluated against these buyer-intent query patterns:</p>
+                    <ol className="space-y-1 text-xs text-outline list-decimal list-inside">
                       {result.query_patterns_evaluated.map((q, i) => (
                         <li key={i}>{q}</li>
                       ))}
@@ -238,8 +231,8 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
             )}
           </div>
         ) : (
-          <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-            <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+          <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+            <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
               {typeof result.assessments === "string" ? result.assessments : JSON.stringify(result, null, 2)}
             </div>
           </div>

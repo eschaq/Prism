@@ -4,14 +4,14 @@ export function Spinner({ size = "md" }) {
   const sizes = { sm: "h-4 w-4", md: "h-6 w-6", lg: "h-10 w-10" };
   return (
     <div
-      className={`${sizes[size]} animate-spin rounded-full border-2 border-gray-600 border-t-indigo-400`}
+      className={`${sizes[size]} animate-spin rounded-full border-2 border-outline border-t-primary`}
     />
   );
 }
 
 export function SkeletonBlock({ className = "" }) {
   return (
-    <div className={`animate-pulse rounded bg-gray-800 ${className}`} />
+    <div className={`animate-pulse rounded bg-surface-container-high ${className}`} />
   );
 }
 
@@ -19,14 +19,14 @@ export function LoadingOverlay({ message = "Analyzing..." }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-16">
       <Spinner size="lg" />
-      <p className="text-sm text-gray-400">{message}</p>
+      <p className="text-sm text-on-surface-variant">{message}</p>
     </div>
   );
 }
 
 export function CardSkeleton() {
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-3">
+    <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-3">
       <SkeletonBlock className="h-4 w-1/3" />
       <SkeletonBlock className="h-3 w-full" />
       <SkeletonBlock className="h-3 w-5/6" />
@@ -85,22 +85,22 @@ export function StepProgress({ steps, active }) {
             <div key={i} className="flex items-center gap-3">
               <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
                 {isComplete && (
-                  <div className="w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                  <div className="w-5 h-5 rounded-full bg-secondary/20 flex items-center justify-center">
                     <span className="text-white text-xs font-bold">{"\u2713"}</span>
                   </div>
                 )}
                 {isActive && <Spinner size="sm" />}
                 {isUpcoming && (
-                  <div className="w-5 h-5 rounded-full border border-gray-700 bg-gray-800" />
+                  <div className="w-5 h-5 rounded-full border border-outline-variant bg-surface-container-high" />
                 )}
               </div>
               <span
                 className={`text-sm ${
                   isComplete
-                    ? "text-green-400"
+                    ? "text-secondary"
                     : isActive
-                    ? "text-indigo-400 font-medium"
-                    : "text-gray-600"
+                    ? "text-primary font-medium"
+                    : "text-outline"
                 }`}
               >
                 {label}
@@ -110,7 +110,7 @@ export function StepProgress({ steps, active }) {
         })}
       </div>
       {active && (
-        <p className="text-xs text-gray-500 tabular-nums">{formatElapsed(elapsed)}</p>
+        <p className="text-xs text-outline tabular-nums">{formatElapsed(elapsed)}</p>
       )}
     </div>
   );

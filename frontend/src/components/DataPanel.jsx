@@ -102,14 +102,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-100">Data Analysis</h2>
-        <p className="text-sm text-gray-400 mt-1">
-          Upload one or more CSVs and get a plain-English business summary.
-        </p>
-      </div>
-
+    <div className="space-y-6 max-w-4xl">
       <div
         onDrop={handleDrop}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -117,12 +110,12 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
         onClick={() => inputRef.current?.click()}
         className={`cursor-pointer rounded-xl border-2 border-dashed p-10 text-center transition-colors ${
           dragOver
-            ? "border-indigo-500 bg-indigo-950"
-            : "border-gray-700 bg-gray-900 hover:border-gray-600"
+            ? "border-primary/40 bg-primary/10"
+            : "border-outline-variant bg-surface-container-low hover:border-outline-variant"
         }`}
       >
-        <p className="text-sm text-gray-400">
-          Drop <span className="text-indigo-400 font-medium">.csv</span> files here, or click to browse
+        <p className="text-sm text-on-surface-variant">
+          Drop <span className="text-primary font-medium">.csv</span> files here, or click to browse
         </p>
         <input
           ref={inputRef}
@@ -138,15 +131,15 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
         <button
           type="button"
           onClick={() => setShowDemoPicker(!showDemoPicker)}
-          className="rounded-md border border-gray-700 bg-gray-900 px-4 py-2 text-xs text-gray-300 hover:border-indigo-500 hover:text-indigo-300 hover:bg-indigo-950/40 transition-all duration-200"
+          className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 hover:border-primary/30 hover:text-primary"
         >
           {showDemoPicker ? "Hide Demo Data" : "Load Demo Data"}
         </button>
       </div>
 
       {showDemoPicker && (
-        <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-4">
-          <p className="text-xs font-medium text-gray-400">Select demo datasets to load</p>
+        <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-4">
+          <p className="text-xs font-medium text-on-surface-variant">Select demo datasets to load</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {DEMO_DATASETS.map((d) => {
               const isSelected = selectedDemos.has(d.id);
@@ -156,8 +149,8 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
                   onClick={() => toggleDemo(d.id)}
                   className={`text-left rounded-lg border px-3 py-2 transition-colors ${
                     isSelected
-                      ? "border-indigo-500 bg-indigo-950 text-indigo-300"
-                      : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+                      ? "border-primary/40 bg-primary/10 text-primary"
+                      : "border-outline-variant bg-surface-container-high text-on-surface-variant hover:border-outline-variant"
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -165,11 +158,11 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
                       type="checkbox"
                       checked={isSelected}
                       readOnly
-                      className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                      className="h-3 w-3 rounded border-outline-variant bg-surface-container-high text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
                     />
                     <div>
                       <div className="text-xs font-medium">{d.label}</div>
-                      <div className="text-xs text-gray-500">{d.description}</div>
+                      <div className="text-xs text-outline">{d.description}</div>
                     </div>
                   </div>
                 </button>
@@ -179,7 +172,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
           <button
             onClick={handleLoadDemos}
             disabled={selectedDemos.size === 0 || loadingDemos}
-            className="inline-flex items-center gap-1.5 rounded-md bg-indigo-600 px-4 py-2 text-xs font-medium text-white hover:bg-indigo-500 disabled:opacity-40 transition-colors"
+            className="inline-flex items-center gap-1.5 bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40"
           >
             {loadingDemos && <Spinner size="sm" />}
             {loadingDemos ? "Loading..." : `Load ${selectedDemos.size} Selected`}
@@ -193,13 +186,13 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
             {files.map((f, i) => (
               <span
                 key={`${f.name}-${i}`}
-                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-indigo-500 bg-indigo-950 text-indigo-300"
+                className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border border-primary/40 bg-primary/10 text-primary"
               >
                 {f.name}
                 <button
                   type="button"
                   onClick={() => removeFile(i)}
-                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                  className="text-outline hover:text-on-surface-variant transition-colors"
                 >
                   <X size={12} />
                 </button>
@@ -209,7 +202,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
           <button
             onClick={handleAnalyze}
             disabled={loading}
-            className="rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors"
+            className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {loading ? "Analyzing..." : `Analyze ${files.length} file${files.length !== 1 ? "s" : ""}`}
           </button>
@@ -217,7 +210,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
       )}
 
       {error && (
-        <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
           {error}
         </div>
       )}
@@ -237,26 +230,26 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
 
       {result && !loading && (
         <div className="space-y-4">
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-outline">
             {(result.file_count || 1) > 1 && `${result.file_count} files merged · `}
             {result.shape?.rows} rows · {result.shape?.columns} columns
           </div>
 
-          <div className="rounded-lg border border-gray-800 bg-gray-900 p-5">
-            <h3 className="text-sm font-semibold text-indigo-400 mb-3">Business Summary</h3>
-            <div className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+          <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+            <h3 className="text-sm font-semibold text-primary mb-3">Business Summary</h3>
+            <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
               {result.summary}
             </div>
           </div>
 
           {result.preview?.length > 0 && (
-            <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 overflow-x-auto">
-              <h3 className="text-xs font-semibold text-gray-400 mb-3">Data Preview</h3>
-              <table className="text-xs text-gray-300 w-full">
+            <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 overflow-x-auto">
+              <h3 className="text-xs font-semibold text-on-surface-variant mb-3">Data Preview</h3>
+              <table className="text-xs text-on-surface-variant w-full">
                 <thead>
                   <tr>
                     {Object.keys(result.preview[0]).map((col) => (
-                      <th key={col} className="text-left pr-4 pb-2 text-gray-500 font-medium">
+                      <th key={col} className="text-left pr-4 pb-2 text-outline font-medium">
                         {col}
                       </th>
                     ))}
@@ -264,7 +257,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
                 </thead>
                 <tbody>
                   {result.preview.map((row, i) => (
-                    <tr key={i} className="border-t border-gray-800">
+                    <tr key={i} className="border-t border-outline-variant/10">
                       {Object.values(row).map((val, j) => (
                         <td key={j} className="pr-4 py-1 truncate max-w-[120px]">
                           {String(val ?? "")}

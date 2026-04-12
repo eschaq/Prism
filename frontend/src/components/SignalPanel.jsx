@@ -206,18 +206,11 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
   const hasFeeds = checkedFeeds.length > 0;
 
   return (
-    <div className="space-y-6 max-w-3xl">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-100">Signal Collection</h2>
-        <p className="text-sm text-gray-400 mt-1">
-          Scrape Reddit{hasFeeds ? " and RSS feeds" : ""} and extract structured business themes.
-        </p>
-      </div>
-
+    <div className="space-y-6 max-w-4xl">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Subreddits section */}
         <div>
-          <label className="block text-xs font-medium text-gray-400 mb-2">
+          <label className="block text-xs font-medium text-on-surface-variant mb-2">
             Subreddits ({checkedSubreddits.length} selected)
           </label>
           <div className="flex flex-wrap gap-2">
@@ -226,15 +219,15 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                 key={s.name}
                 className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors ${
                   s.checked
-                    ? "border-indigo-500 bg-indigo-950 text-indigo-300"
-                    : "border-gray-700 bg-gray-900 text-gray-500"
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-outline-variant bg-surface-container-low text-on-surface-variant"
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={s.checked}
                   onChange={() => toggleSubreddit(s.name)}
-                  className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                  className="h-3 w-3 rounded border-outline-variant bg-surface-container-high text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
                 />
                 <span
                   className="cursor-pointer"
@@ -245,7 +238,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                 <button
                   type="button"
                   onClick={() => removeSubreddit(s.name)}
-                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                  className="text-outline hover:text-on-surface-variant transition-colors"
                 >
                   <X size={12} />
                 </button>
@@ -254,7 +247,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           </div>
 
           {loadingSuggestions && (
-            <p className="text-xs text-gray-500 mt-2">Loading subreddit suggestions...</p>
+            <p className="text-xs text-outline mt-2">Loading subreddit suggestions...</p>
           )}
 
           <div className="flex items-center gap-2 mt-3">
@@ -267,13 +260,13 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                   addCustom();
                 }
               }}
-              className="flex-1 rounded-md bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 rounded-md bg-surface-container-lowest border border-outline-variant/20 px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body"
               placeholder="Add subreddit..."
             />
             <button
               type="button"
               onClick={addCustom}
-              className="inline-flex items-center gap-1 rounded-md border border-gray-700 px-2.5 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+              className="inline-flex items-center gap-1 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-2.5 py-1.5"
             >
               <Plus size={12} />
               Add
@@ -283,7 +276,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           <button
             type="button"
             onClick={saveSubreddits}
-            className="mt-2 rounded-md border border-gray-700 px-3 py-1 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+            className="mt-2 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-3 py-1"
           >
             Save subreddits
           </button>
@@ -291,7 +284,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
 
         {/* RSS Feeds section */}
         <div>
-          <label className="block text-xs font-medium text-gray-400 mb-2">
+          <label className="block text-xs font-medium text-on-surface-variant mb-2">
             RSS Feeds ({checkedFeeds.length} selected)
           </label>
           <div className="flex flex-wrap gap-2">
@@ -300,15 +293,15 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                 key={f.url}
                 className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border transition-colors ${
                   f.checked
-                    ? "border-indigo-500 bg-indigo-950 text-indigo-300"
-                    : "border-gray-700 bg-gray-900 text-gray-500"
+                    ? "border-primary/40 bg-primary/10 text-primary"
+                    : "border-outline-variant bg-surface-container-low text-on-surface-variant"
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={f.checked}
                   onChange={() => toggleFeed(f.url)}
-                  className="h-3 w-3 rounded border-gray-600 bg-gray-800 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-0 cursor-pointer"
+                  className="h-3 w-3 rounded border-outline-variant bg-surface-container-high text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
                 />
                 <span
                   className="cursor-pointer"
@@ -320,7 +313,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                 <button
                   type="button"
                   onClick={() => removeFeed(f.url)}
-                  className="text-gray-500 hover:text-gray-300 transition-colors"
+                  className="text-outline hover:text-on-surface-variant transition-colors"
                 >
                   <X size={12} />
                 </button>
@@ -329,7 +322,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           </div>
 
           {loadingFeeds && (
-            <p className="text-xs text-gray-500 mt-2">Loading RSS feed suggestions...</p>
+            <p className="text-xs text-outline mt-2">Loading RSS feed suggestions...</p>
           )}
 
           <div className="flex items-center gap-2 mt-3">
@@ -342,13 +335,13 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                   addCustomFeed();
                 }
               }}
-              className="flex-1 rounded-md bg-gray-800 border border-gray-700 px-3 py-1.5 text-xs text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="flex-1 rounded-md bg-surface-container-lowest border border-outline-variant/20 px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body"
               placeholder="Add feed URL..."
             />
             <button
               type="button"
               onClick={addCustomFeed}
-              className="inline-flex items-center gap-1 rounded-md border border-gray-700 px-2.5 py-1.5 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+              className="inline-flex items-center gap-1 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-2.5 py-1.5"
             >
               <Plus size={12} />
               Add
@@ -358,27 +351,27 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           <button
             type="button"
             onClick={saveFeeds}
-            className="mt-2 rounded-md border border-gray-700 px-3 py-1 text-xs text-gray-400 hover:border-gray-500 hover:text-gray-200 transition-colors"
+            className="mt-2 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-3 py-1"
           >
             Save feeds
           </button>
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-400 mb-1">
+          <label className="block text-xs font-medium text-on-surface-variant mb-1">
             Search Query
           </label>
           <input
             value={query}
             onChange={(e) => { queryManuallyEdited.current = true; setQuery(e.target.value); }}
-            className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-full rounded-md bg-surface-container-lowest border border-outline-variant/20 px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body"
             placeholder="e.g. enterprise AI tools"
           />
         </div>
 
         <div className="flex items-center gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-400 mb-1">
+            <label className="block text-xs font-medium text-on-surface-variant mb-1">
               Post Limit (per source)
             </label>
             <input
@@ -387,13 +380,13 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
               max={100}
               value={limit}
               onChange={(e) => setLimit(Number(e.target.value))}
-              className="w-24 rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-24 rounded-md bg-surface-container-lowest border border-outline-variant/20 px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all font-body"
             />
           </div>
           <button
             type="submit"
             disabled={loading || totalSources === 0}
-            className="mt-5 rounded-md bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50 transition-colors"
+            className="mt-5 bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
           >
             {loading ? "Scraping..." : `Scan ${totalSources} source${totalSources !== 1 ? "s" : ""}`}
           </button>
@@ -401,7 +394,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
       </form>
 
       {error && (
-        <div className="rounded-md bg-red-950 border border-red-800 px-4 py-3 text-sm text-red-300">
+        <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
           {error}
         </div>
       )}
@@ -457,19 +450,19 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
 
         return (
         <div className="space-y-4">
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-outline">
             {sourceLabel} · "{result.query}" · {posts.length} posts
           </div>
 
           {posts.length > 0 && (
             <div className="flex items-center gap-4 text-xs">
-              <span className="text-green-400 font-medium">
+              <span className="text-secondary font-medium">
                 {wtpPercent}% WTP
-                <span className="text-gray-500 font-normal ml-1">
+                <span className="text-outline font-normal ml-1">
                   ({wtpCount} of {posts.length} posts)
                 </span>
               </span>
-              <span className="text-gray-700">|</span>
+              <span className="text-outline-variant">|</span>
               <span className={`font-medium ${PPS_COLORS.PRODUCT.split(" ").find((c) => c.startsWith("text-"))}`}>
                 {ppsDist.PRODUCT} PRODUCT
               </span>
@@ -484,19 +477,19 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
               </span>
               {recency && (
                 <>
-                  <span className="text-gray-700">|</span>
-                  <span className="text-gray-400">
+                  <span className="text-outline-variant">|</span>
+                  <span className="text-on-surface-variant">
                     Most recent: {recency}
                   </span>
                 </>
               )}
               {urgency && (
                 <>
-                  <span className="text-gray-700">|</span>
+                  <span className="text-outline-variant">|</span>
                   <div className="flex items-center gap-1.5">
                     <div className="flex items-end gap-px" style={{ width: 40, height: 10 }}>
                       <div
-                        className="bg-gray-600 rounded-sm"
+                        className="bg-outline rounded-sm"
                         style={{
                           width: `${(olderCount / (olderCount + recentCount)) * 100}%`,
                           height: "100%",
@@ -504,7 +497,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                       />
                       <div
                         className={`rounded-sm ${
-                          urgency === "Accelerating" ? "bg-red-500" : urgency === "Declining" ? "bg-blue-500" : "bg-gray-500"
+                          urgency === "Accelerating" ? "bg-error" : urgency === "Declining" ? "bg-primary-dim" : "bg-outline"
                         }`}
                         style={{
                           width: `${(recentCount / (olderCount + recentCount)) * 100}%`,
@@ -513,7 +506,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                       />
                     </div>
                     <span className={`font-medium ${
-                      urgency === "Accelerating" ? "text-red-400" : urgency === "Declining" ? "text-blue-400" : "text-gray-400"
+                      urgency === "Accelerating" ? "text-error" : urgency === "Declining" ? "text-primary-dim" : "text-on-surface-variant"
                     }`}>
                       {urgency === "Accelerating" ? "↑" : urgency === "Declining" ? "↓" : "→"} {urgency}
                     </span>
@@ -548,7 +541,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                       <span className={`text-xs font-semibold ${colorClass}`}>
                         {tier} ({grouped[tier].length})
                       </span>
-                      <div className="flex-1 h-px bg-gray-800" />
+                      <div className="flex-1 h-px bg-outline-variant/10" />
                     </div>
                     {grouped[tier].map((theme, i) => (
                       <ThemeCard key={`${tier}-${i}`} theme={theme} />
@@ -559,8 +552,8 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
             </div>
             );
           })() : (
-            <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
-              <pre className="text-xs text-gray-300 whitespace-pre-wrap">{result.themes}</pre>
+            <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+              <pre className="text-xs text-on-surface-variant whitespace-pre-wrap">{result.themes}</pre>
             </div>
           )}
         </div>
@@ -571,32 +564,32 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
 }
 
 const PPS_COLORS = {
-  PRODUCT: "text-purple-400 bg-purple-950 border-purple-800",
-  SERIES: "text-blue-400 bg-blue-950 border-blue-800",
-  POST: "text-gray-400 bg-gray-800 border-gray-700",
-  AWARENESS: "text-gray-500 bg-gray-900 border-gray-800",
-  OTHER: "text-gray-600 bg-gray-900 border-gray-800",
+  PRODUCT: "text-primary-container bg-primary-container/10 border-primary-container/20",
+  SERIES: "text-primary-dim bg-primary-dim/10 border-primary-dim/20",
+  POST: "text-on-surface-variant bg-surface-container-high border-outline-variant",
+  AWARENESS: "text-outline bg-surface-container-low border-outline-variant/10",
+  OTHER: "text-outline bg-surface-container-low border-outline-variant/10",
 };
 
 function ThemeCard({ theme }) {
   const sentimentColors = {
-    positive: "text-green-400 bg-green-950 border-green-800",
-    negative: "text-red-400 bg-red-950 border-red-800",
-    neutral: "text-gray-400 bg-gray-800 border-gray-700",
-    mixed: "text-yellow-400 bg-yellow-950 border-yellow-800",
+    positive: "text-secondary bg-secondary/10 border-secondary/20",
+    negative: "text-error bg-error-container/20 border-error-container",
+    neutral: "text-on-surface-variant bg-surface-container-high border-outline-variant",
+    mixed: "text-tertiary bg-tertiary/10 border-tertiary/20",
   };
   const color = sentimentColors[theme.sentiment] || sentimentColors.neutral;
   const ppsColor = PPS_COLORS[theme.pps_tier] || PPS_COLORS.AWARENESS;
 
   return (
-    <div className="rounded-lg border border-gray-800 bg-gray-900 p-4 space-y-2">
+    <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-2">
       <div className="flex items-center justify-between">
-        <span className="font-medium text-gray-100">{theme.theme}</span>
+        <span className="font-medium text-on-surface">{theme.theme}</span>
         <div className="flex gap-2">
           <span className={`text-xs px-2 py-0.5 rounded-full border ${color}`}>
             {theme.sentiment}
           </span>
-          <span className="text-xs px-2 py-0.5 rounded-full border border-gray-700 text-gray-400">
+          <span className="text-xs px-2 py-0.5 rounded-full border border-outline-variant text-on-surface-variant">
             {theme.frequency}
           </span>
           {theme.pps_tier && (
@@ -605,15 +598,15 @@ function ThemeCard({ theme }) {
             </span>
           )}
           {theme.wtp_signal && (
-            <span className="text-xs px-2 py-0.5 rounded-full border border-green-800 bg-green-950 text-green-400 font-bold">
+            <span className="text-xs px-2 py-0.5 rounded-full border border-secondary/20 bg-secondary/10 text-secondary font-bold">
               $
             </span>
           )}
         </div>
       </div>
-      <p className="text-sm text-gray-300">{theme.description}</p>
+      <p className="text-sm text-on-surface-variant">{theme.description}</p>
       {theme.business_relevance && (
-        <p className="text-xs text-gray-500">{theme.business_relevance}</p>
+        <p className="text-xs text-outline">{theme.business_relevance}</p>
       )}
     </div>
   );
