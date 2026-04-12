@@ -375,7 +375,7 @@ ${briefingHtml}
               )}
 
               {followUpAnswer && (
-                <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+                <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
                   <p className="text-xs font-medium text-primary font-label mb-2">{activeQuestion}</p>
                   <div className={PROSE_CLASSES}>
                     <ReactMarkdown>{followUpAnswer}</ReactMarkdown>
@@ -388,13 +388,13 @@ ${briefingHtml}
           {/* Briefing text — side by side when comparing */}
           {isComparing ? (
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+              <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
                 <p className="text-xs font-medium text-primary font-label mb-3">{audienceLabel}</p>
                 <div className={PROSE_CLASSES}>
                   <ReactMarkdown>{result.briefing}</ReactMarkdown>
                 </div>
               </div>
-              <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+              <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
                 <p className="text-xs font-medium text-primary font-label mb-3">{compareLabel}</p>
                 <div className={PROSE_CLASSES}>
                   <ReactMarkdown>{compareResult.briefing}</ReactMarkdown>
@@ -402,7 +402,7 @@ ${briefingHtml}
               </div>
             </div>
           ) : (
-            <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+            <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
               <div className={PROSE_CLASSES}>
                 <ReactMarkdown>{result.briefing}</ReactMarkdown>
               </div>

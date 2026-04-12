@@ -138,7 +138,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
       </div>
 
       {showDemoPicker && (
-        <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-4">
+        <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-4" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
           <p className="text-xs font-medium text-on-surface-variant">Select demo datasets to load</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {DEMO_DATASETS.map((d) => {
@@ -235,7 +235,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
             {result.shape?.rows} rows · {result.shape?.columns} columns
           </div>
 
-          <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+          <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
             <h3 className="text-sm font-semibold text-primary mb-3">Business Summary</h3>
             <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
               {result.summary}
@@ -243,7 +243,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
           </div>
 
           {result.preview?.length > 0 && (
-            <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 overflow-x-auto">
+            <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] overflow-x-auto" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
               <h3 className="text-xs font-semibold text-on-surface-variant mb-3">Data Preview</h3>
               <table className="text-xs text-on-surface-variant w-full">
                 <thead>

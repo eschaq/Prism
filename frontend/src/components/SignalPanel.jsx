@@ -553,7 +553,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
             </div>
             );
           })() : (
-            <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+            <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
               <pre className="text-xs text-on-surface-variant whitespace-pre-wrap">{result.themes}</pre>
             </div>
           )}
@@ -583,7 +583,7 @@ function ThemeCard({ theme }) {
   const ppsColor = PPS_COLORS[theme.pps_tier] || PPS_COLORS.AWARENESS;
 
   return (
-    <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-2">
+    <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-2" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
       <div className="flex items-center justify-between">
         <span className="font-medium text-on-surface">{theme.theme}</span>
         <div className="flex gap-2">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { PATHS } from "../paths";
 import prismLogo from "../assets/prism-logo.png";
+import prismBg from "../assets/prism-backround.png";
 
 const PATH_META = {
   signal_report: {
@@ -65,10 +66,12 @@ export default function PathSelector({ audienceLabel, onSelect, onHome }) {
 
   return (
     <div className="relative min-h-screen bg-surface text-on-surface font-body overflow-hidden">
+      {/* Background image */}
+      <img src={prismBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50 pointer-events-none z-0" />
       {/* Background effects */}
-      <div className="fixed inset-0 dot-matrix pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-secondary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
+      <div className="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
+      <div className="fixed bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-secondary/5 blur-[120px] rounded-full pointer-events-none z-0" />
 
       {/* Top bar: logo (clickable → home) */}
       <div className="absolute top-0 left-0 z-10 px-8 py-5">
@@ -118,7 +121,8 @@ export default function PathSelector({ audienceLabel, onSelect, onHome }) {
               <button
                 key={p.id}
                 onClick={() => onSelect(p.id)}
-                className={`group relative overflow-hidden bg-surface-container-low rounded-xl p-8 border border-outline-variant/10 ${a.hoverBorder} transition-all duration-500 text-left focus:outline-none focus:ring-1 focus:ring-primary`}
+                className={`group relative overflow-hidden rounded-xl p-8 border border-[rgba(174,186,255,0.08)] ${a.hoverBorder} transition-all duration-500 text-left focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-[12px]`}
+                style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}
               >
                 <div className={`absolute top-0 right-0 w-32 h-32 blur-[40px] transition-all ${a.glow}`}></div>
 

@@ -26,7 +26,7 @@ export function LoadingOverlay({ message = "Analyzing..." }) {
 
 export function CardSkeleton() {
   return (
-    <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-3">
+    <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-3" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
       <SkeletonBlock className="h-4 w-1/3" />
       <SkeletonBlock className="h-3 w-full" />
       <SkeletonBlock className="h-3 w-5/6" />

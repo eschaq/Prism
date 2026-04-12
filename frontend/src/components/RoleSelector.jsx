@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AUDIENCES from "../audiences";
 import prismLogo from "../assets/prism-logo.png";
+import prismBg from "../assets/prism-backround.png";
 
 const ROLE_ICONS = {
   cfo: "account_balance",
@@ -22,10 +23,12 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
 
   return (
     <div className="relative min-h-screen bg-surface text-on-surface font-body overflow-hidden">
+      {/* Background image */}
+      <img src={prismBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center opacity-35 pointer-events-none z-0" />
       {/* Background effects */}
-      <div className="fixed inset-0 dot-matrix pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-tertiary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
+      <div className="fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-tertiary/5 blur-[120px] rounded-full pointer-events-none z-0" />
 
       {/* Top bar: logo left, settings right */}
       <div className="absolute top-0 left-0 right-0 z-10 px-8 py-5 flex items-center justify-between">
@@ -75,7 +78,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
         </header>
 
         <div className="max-w-5xl mx-auto mb-10">
-          <div className="rounded-xl bg-surface-container-low border border-outline-variant/10 border-l-4 border-l-[#aebaff] p-6 max-w-2xl mx-auto">
+          <div className="rounded-xl border border-[rgba(174,186,255,0.08)] border-l-4 border-l-[#aebaff] p-6 max-w-2xl mx-auto backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
             <p className="text-base text-white leading-relaxed">
               83% of your buyers make decisions in channels your analytics will never see — Reddit threads, community forums, peer conversations. That's the dark funnel. Prism makes it visible. Pick your role below and it frames everything around what matters to you. Same data, different lens.
             </p>
@@ -89,7 +92,8 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
               <button
                 key={a.id}
                 onClick={() => onSelect(a.id)}
-                className="group relative overflow-hidden bg-surface-container-low rounded-xl p-6 border border-outline-variant/10 hover:border-primary/30 transition-all duration-500 text-left focus:outline-none focus:ring-1 focus:ring-primary"
+                className="group relative overflow-hidden rounded-xl p-6 border border-[rgba(174,186,255,0.08)] hover:border-primary/30 transition-all duration-500 text-left focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-[12px]"
+                style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 blur-[40px] group-hover:bg-primary/20 transition-all"></div>
                 <div className="flex items-start gap-3 relative">

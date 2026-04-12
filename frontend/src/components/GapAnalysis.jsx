@@ -125,7 +125,7 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
 
       {result && !loading && (
         typeof result.gaps === "string" ? (
-          <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+          <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
             <h3 className="text-sm font-semibold text-primary mb-3">Gap Analysis Report</h3>
             <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
               {result.gaps}

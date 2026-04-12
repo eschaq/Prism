@@ -108,7 +108,7 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
               const somColor = SOM_COLORS[a.visibility] || SOM_COLORS["Not Visible"];
               const queriesExpanded = expandedQueries.has(i);
               return (
-                <div key={i} className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6 space-y-3">
+                <div key={i} className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-3" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
                   <div className="flex items-center gap-4">
                     {a.estimated_som_percentage && (
                       <div className={`text-2xl font-bold ${somColor} flex-shrink-0`}>
@@ -218,7 +218,7 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
                   Evaluation methodology
                 </button>
                 {showMethodology && (
-                  <div className="mt-2 rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+                  <div className="mt-2 rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
                     <p className="text-xs text-outline mb-2">Each entity was evaluated against these buyer-intent query patterns:</p>
                     <ol className="space-y-1 text-xs text-outline list-decimal list-inside">
                       {result.query_patterns_evaluated.map((q, i) => (
@@ -231,7 +231,7 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
             )}
           </div>
         ) : (
-          <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low p-6">
+          <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
             <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
               {typeof result.assessments === "string" ? result.assessments : JSON.stringify(result, null, 2)}
             </div>

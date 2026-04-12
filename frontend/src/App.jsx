@@ -8,6 +8,7 @@ import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
 import { Spinner } from "./components/LoadingStates";
 import prismLogo from "./assets/prism-logo.png";
+import prismBg from "./assets/prism-backround.png";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 const STORAGE_KEY = "prism_profile";
@@ -205,10 +206,11 @@ export default function App() {
   // Screen 3: Wizard with sidebar
   return (
     <div className="min-h-screen bg-surface text-on-surface font-body">
-      {/* Background effects */}
-      <div className="fixed inset-0 dot-matrix pointer-events-none -z-10" />
-      <div className="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
-      <div className="fixed bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-tertiary/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+      {/* Background image + effects */}
+      <img src={prismBg} alt="" className="fixed inset-0 w-full h-full object-cover opacity-50 pointer-events-none z-0" />
+      <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
+      <div className="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
+      <div className="fixed bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-tertiary/5 blur-[120px] rounded-full pointer-events-none z-0" />
 
       {/* Top nav */}
       <nav className="fixed top-0 w-full z-50 bg-[#0c0e14]/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-8 h-20 flex justify-between items-center">
@@ -297,7 +299,7 @@ export default function App() {
 
         {/* Transition countdown */}
         {transitioning && nextStepLabel && (
-          <div className="mx-2 mb-2 rounded-xl bg-surface-container-low border border-outline-variant/20 p-3 space-y-2">
+          <div className="mx-2 mb-2 rounded-xl border border-[rgba(174,186,255,0.08)] p-3 space-y-2 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
             <div className="flex items-center gap-2">
               {!paused && <Spinner size="sm" />}
               <span className="text-[11px] text-on-surface-variant font-label">
