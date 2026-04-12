@@ -523,17 +523,46 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
             </div>
           )}
 
-          <div className="space-y-3">
-            {Array.isArray(result.themes) ? (
-              result.themes.map((theme, i) => (
-                <ThemeCard key={i} theme={theme} />
-              ))
-            ) : (
-              <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
-                <pre className="text-xs text-gray-300 whitespace-pre-wrap">{result.themes}</pre>
-              </div>
-            )}
-          </div>
+          {Array.isArray(result.themes) ? (() => {
+            const tiers = ["PRODUCT", "SERIES", "POST", "AWARENESS"];
+            const grouped = {};
+            tiers.forEach((t) => { grouped[t] = []; });
+            grouped["OTHER"] = [];
+            result.themes.forEach((theme) => {
+              const tier = tiers.includes(theme.pps_tier) ? theme.pps_tier : "OTHER";
+              grouped[tier].push(theme);
+            });
+
+            return (
+            <div className="space-y-6">
+              {[...tiers, "OTHER"].map((tier) => {
+                if (!grouped[tier].length) return null;
+                const colorClass = (PPS_COLORS[tier] || PPS_COLORS.OTHER)
+                  .split(" ").find((c) => c.startsWith("text-"));
+                const bgClass = (PPS_COLORS[tier] || PPS_COLORS.OTHER)
+                  .split(" ").find((c) => c.startsWith("bg-"));
+                return (
+                  <div key={tier} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${bgClass}`} />
+                      <span className={`text-xs font-semibold ${colorClass}`}>
+                        {tier} ({grouped[tier].length})
+                      </span>
+                      <div className="flex-1 h-px bg-gray-800" />
+                    </div>
+                    {grouped[tier].map((theme, i) => (
+                      <ThemeCard key={`${tier}-${i}`} theme={theme} />
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+            );
+          })() : (
+            <div className="rounded-lg border border-gray-800 bg-gray-900 p-4">
+              <pre className="text-xs text-gray-300 whitespace-pre-wrap">{result.themes}</pre>
+            </div>
+          )}
         </div>
         );
       })()}
@@ -546,6 +575,7 @@ const PPS_COLORS = {
   SERIES: "text-blue-400 bg-blue-950 border-blue-800",
   POST: "text-gray-400 bg-gray-800 border-gray-700",
   AWARENESS: "text-gray-500 bg-gray-900 border-gray-800",
+  OTHER: "text-gray-600 bg-gray-900 border-gray-800",
 };
 
 function ThemeCard({ theme }) {
