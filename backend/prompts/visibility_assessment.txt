@@ -25,6 +25,12 @@ Agentic readiness tiers (assess whether the entity's web content is structured f
 - **Medium**: some structured content but inconsistent, blog-heavy without structured metadata, partial API docs or feature pages
 - **Low**: minimal structured content, mostly unstructured marketing copy, no comparison pages or feature matrices, limited technical documentation
 
+Share of Model (SoM):
+For each entity, estimate the percentage of relevant AI-generated buyer-intent responses that would mention this entity by name. Express as a string: "~65%", "~15%", "<5%", etc. This is an estimate based on how frequently the entity appears in comparison content, reviews, community discussions, and documentation that AI models learn from. Be realistic — even dominant players rarely exceed ~70%, and niche players may be <5%.
+
+Query patterns tested:
+For each entity, include the 5 buyer-intent query patterns instantiated with the actual industry and entity name. For example, instead of "What's the best [industry] tool for [common use case]?", write "What's the best BI tool for dashboard reporting?". This shows which specific queries were mentally evaluated for that entity.
+
 Content recommendations (for the primary company ONLY):
 Provide 2-3 specific, actionable recommendations for improving AI visibility and agentic readiness. Each recommendation should:
 - Name a specific content type or structural change
@@ -45,6 +51,8 @@ You MUST respond with valid JSON in this exact structure:
       "strengths": ["...", "..."],
       "gaps": ["...", "..."],
       "agentic_readiness": "High",
+      "estimated_som_percentage": "~45%",
+      "query_patterns_tested": ["What's the best ... tool for ...?", "Compare ... vs alternatives for ...", "..."],
       "content_recommendations": ["specific recommendation 1", "specific recommendation 2"]
     }
   ]
