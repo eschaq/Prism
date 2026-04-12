@@ -7,25 +7,25 @@ const PATH_META = {
     icon: "sensors",
     accent: "primary",
     tag: "REDDIT LIVE",
-    tagline: "Aggregating raw spectral data from community nodes to surface market themes.",
+    tagline: "Pull live market signals from Reddit and RSS. See what your customers are actually talking about right now.",
   },
   data_brief: {
     icon: "analytics",
     accent: "secondary",
     tag: "CSV DEPTH",
-    tagline: "Applying multi-layered heuristic filters to translate your data into plain-English.",
+    tagline: "Upload your CSV and get a plain-English summary of what your numbers actually mean.",
   },
   gap_analysis: {
     icon: "hub",
     accent: "tertiary",
     tag: "CROSS-STREAM",
-    tagline: "Refracting signals against data to isolate opportunity gaps and blind spots.",
+    tagline: "Cross-reference market signals with your internal data. Find the gaps your competitors are filling and you're not.",
   },
   full_report: {
     icon: "auto_awesome",
     accent: "primary-container",
     tag: "FULL SYNTHESIS",
-    tagline: "Translating every tier into a single audience-specific strategic intelligence brief.",
+    tagline: "The whole pipeline. Signals, data, gaps, and a briefing written specifically for your role. Start here if you want everything.",
   },
 };
 
@@ -105,7 +105,7 @@ export default function PathSelector({ audienceLabel, onSelect, onHome }) {
             </span>
           </h1>
           <p className="text-on-surface-variant text-lg max-w-2xl leading-relaxed">
-            Your digital observatory is operational. Choose a path to refract signals across the processing tiers and generate an actionable narrative.
+            Pick how deep you want to go. Each path runs a different set of steps and delivers a different kind of output. Not sure? Start with the Full Intelligence Report.
           </p>
         </header>
 

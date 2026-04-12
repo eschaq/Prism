@@ -26,11 +26,11 @@ const PATHS = [
 ];
 
 const STEP_META = {
-  signals: { label: "Signal Collection", description: "Scrape Reddit for market themes" },
-  data: { label: "Data Analysis", description: "Upload and analyze CSV data" },
-  gaps: { label: "Gap Analysis", description: "Cross-reference signals with data" },
-  narrative: { label: "Narrative Engine", description: "Generate audience-specific briefing" },
-  visibility: { label: "AI Visibility", description: "Assess AI search visibility vs competitors" },
+  signals: { label: "Signal Collection", description: "What is your market saying right now?" },
+  data: { label: "Data Analysis", description: "What does your internal data show?" },
+  gaps: { label: "Gap Analysis", description: "Where do the signals and the data disagree?" },
+  narrative: { label: "Narrative Engine", description: "What does all of this mean for your role?" },
+  visibility: { label: "AI Visibility", description: "How visible are you in AI search results?" },
 };
 
 export { PATHS, STEP_META };

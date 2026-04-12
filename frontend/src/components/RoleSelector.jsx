@@ -72,12 +72,16 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
               Lens.
             </span>
           </h1>
-          <p className="text-on-surface-variant text-xl max-w-2xl mx-auto leading-relaxed">
-            Every role sees different signals. Select yours and Prism will refract the intelligence through the priorities that matter to you.
-          </p>
         </header>
 
-        {/* Role cards - bento grid */}
+        <div className="max-w-5xl mx-auto mb-10">
+          <div className="rounded-xl bg-surface-container-low border border-outline-variant/10 border-l-4 border-l-[#aebaff] p-6 max-w-2xl mx-auto">
+            <p className="text-base text-white leading-relaxed">
+              83% of your buyers make decisions in channels your analytics will never see — Reddit threads, community forums, peer conversations. That's the dark funnel. Prism makes it visible. Pick your role below and it frames everything around what matters to you. Same data, different lens.
+            </p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {AUDIENCES.map((a) => {
             const icon = ROLE_ICONS[a.id] || "person";

@@ -255,7 +255,7 @@ export default function App() {
           <h3 className="text-lg font-extrabold tracking-tight text-on-surface font-headline">
             Intelligence{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-              Refracted.
+              Synthesized.
             </span>
           </h3>
         </div>
@@ -349,9 +349,9 @@ export default function App() {
               STEP {activeIndex + 1} OF {steps.length} · {audienceLabel?.toUpperCase()}
             </div>
             <h1 className="text-4xl font-extrabold tracking-tighter text-on-surface mb-3 font-headline">
-              {STEP_META[activeStep].label}{" "}
+              {STEP_META[activeStep].label}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">
-                &amp; Refraction.
+                .
               </span>
             </h1>
             <p className="text-on-surface-variant text-base max-w-2xl leading-relaxed">
