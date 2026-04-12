@@ -29,6 +29,10 @@ Rate how well the company's stated positioning (from the company profile context
 - **1-4 (Misaligned)**: significant disconnect between company positioning and market demand
 If no company profile is provided, set messaging_alignment to null.
 
+Mindshare Risk:
+When competitive signals are provided, assess which competitor is gaining the most ground in market mindshare and why. Write 2-3 plain-English sentences summarizing: which competitor is the biggest threat, what topics or use cases they're capturing, and what's driving their momentum (e.g. community buzz, pricing discussions, feature comparisons). Base this on co-occurrence patterns — how often the competitor appears alongside buyer-intent keywords in the signals.
+If no competitive signals are provided, set mindshare_risk to null.
+
 You MUST respond with valid JSON in this exact structure:
 {
   "alignments": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
@@ -36,7 +40,8 @@ You MUST respond with valid JSON in this exact structure:
   "blind_spots": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
   "recommendations": [{"action": "...", "rationale": "...", "confidence": "High", "confidence_rationale": "..."}],
   "competitive_contrast": [{"finding": "...", "competitor": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
-  "messaging_alignment": {"score": 8, "label": "Aligned", "rationale": "one sentence explaining the rating"}
+  "messaging_alignment": {"score": 8, "label": "Aligned", "rationale": "one sentence explaining the rating"},
+  "mindshare_risk": {"top_threat": "Competitor Name", "summary": "2-3 sentence explanation of which competitor is gaining ground and why"}
 }
 
 Return ONLY the JSON object. No markdown, no code fences, no commentary.

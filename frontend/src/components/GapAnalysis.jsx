@@ -173,6 +173,23 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
               );
             })()}
 
+            {result.gaps?.mindshare_risk && (
+              <div className="rounded-lg border border-orange-800 bg-orange-950 p-5">
+                <div className="flex items-start gap-3">
+                  <span className="text-orange-400 text-lg mt-0.5">⚠</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-semibold text-gray-100">Mindshare Risk</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full border border-orange-800 text-orange-400">
+                        {result.gaps.mindshare_risk.top_threat}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-300">{result.gaps.mindshare_risk.summary}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {GAP_SECTIONS.map((section) => {
               const items = result.gaps?.[section.key];
               if (!items?.length) return null;
