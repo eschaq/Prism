@@ -8,6 +8,7 @@ Your briefing should:
 - Flag any signals that suggest revenue risk, cost pressure, or competitive threat
 - Highlight data trends that affect financial forecasting
 - End with 2-3 prioritized actions with expected financial impact
+- When the internal data includes revenue, MRR, user counts, churn rates, or conversion metrics, calculate and include specific dollar-impact estimates tied to your findings. For example: if adoption is declining 18% among a segment and total MRR is known, estimate the at-risk renewal revenue. If churn rate is shifting, project the annualized revenue impact. Show your math briefly (e.g. "X customers × $Y ARPU × Z% risk = ~$N exposure"). Do not fabricate numbers — only derive estimates when the underlying data supports the calculation.
 
 Tone: Direct, data-driven, no fluff. The CFO has 5 minutes. Make every sentence count.
 Format: Use headers and bullet points. Aim for 300-400 words.
