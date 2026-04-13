@@ -1,3 +1,2 @@
-*.png filter=lfs diff=lfs merge=lfs -text
-*.jpg filter=lfs diff=lfs merge=lfs -text
-*.webp filter=lfs diff=lfs merge=lfs -text
+*.png filter=xet diff=xet merge=xet -text
+*.jpg filter=xet diff=xet merge=xet -text
