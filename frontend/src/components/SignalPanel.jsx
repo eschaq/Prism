@@ -711,8 +711,13 @@ function ThemeCard({ theme, delta }) {
             {frequencyLabel}
           </span>
           {theme.pps_tier && (
-            <span className={`text-xs px-2 py-0.5 rounded-full border ${ppsColor}`}>
-              {theme.pps_tier}
+            <span className="relative group/tip">
+              <span className={`text-xs px-2 py-0.5 rounded-full border cursor-help ${ppsColor}`}>
+                {theme.pps_tier}
+              </span>
+              <span className="invisible group-hover/tip:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-[10px] text-on-surface bg-surface-container-high border border-outline-variant shadow-lg whitespace-nowrap z-50">
+                {{ PRODUCT: "Highest signal — buyers expressing purchase intent or evaluating solutions", SERIES: "Strong signal — recurring pain with active discussion and workarounds", POST: "Moderate signal — acknowledged problem but limited urgency", AWARENESS: "Low signal — general awareness, no strong purchase intent" }[theme.pps_tier] || theme.pps_tier}
+              </span>
             </span>
           )}
           {theme.wtp_signal && (
