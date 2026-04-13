@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { Copy, Download, Mail, X } from "lucide-react";
+import { Copy, Download, Mail, X, ChevronDown, ChevronUp } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import AUDIENCES from "../audiences";
 
@@ -27,6 +27,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const [allBriefsProgress, setAllBriefsProgress] = useState(0);
   const [expandedBrief, setExpandedBrief] = useState(null);
   const [expandedCopied, setExpandedCopied] = useState(false);
+  const [showEvidence, setShowEvidence] = useState(false);
   const progressTimer = useRef(null);
 
   const canRun = signals && analysis;
@@ -566,6 +567,143 @@ ${briefingHtml}
               <Copy size={14} />
               {copiedSlack ? "Copied" : "Slack"}
             </button>
+          </div>
+
+          {/* Evidence Trail */}
+          <div>
+            <button
+              onClick={() => setShowEvidence(!showEvidence)}
+              className="inline-flex items-center gap-1 text-xs text-outline hover:text-on-surface-variant transition-colors"
+            >
+              {showEvidence ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              {showEvidence ? "Hide evidence trail" : "Show evidence trail"}
+            </button>
+
+            {showEvidence && (() => {
+              // Signal source breakdown
+              const posts = signals?.raw_posts || [];
+              const redditCount = posts.filter((p) => p.source?.startsWith("r/")).length;
+              const webCount = posts.filter((p) => p.source?.startsWith("web:")).length;
+              const rssCount = posts.length - redditCount - webCount;
+              const subs = signals?.subreddits || [];
+              const feeds = signals?.rss_feeds || [];
+
+              // Data inputs
+              const fileCount = analysis?.file_count || 0;
+              const rows = analysis?.shape?.rows || 0;
+              const cols = analysis?.shape?.columns || 0;
+              const inputType = analysis?.input_type;
+              const textLen = analysis?.text_length;
+              const columns = analysis?.columns || [];
+
+              // Gap findings
+              const gapData = typeof gaps?.gaps === "object" && gaps?.gaps !== null ? gaps.gaps : null;
+              const alignCount = gapData?.alignments?.length || 0;
+              const gapCount = gapData?.gaps?.length || 0;
+              const blindCount = gapData?.blind_spots?.length || 0;
+              const recCount = gapData?.recommendations?.length || 0;
+              const ccCount = gapData?.competitive_contrast?.length || 0;
+              const maScore = gapData?.messaging_alignment?.score;
+              const msThreat = gapData?.mindshare_risk?.top_threat;
+
+              // Visibility
+              const visAssessments = visibility?.assessments;
+              const visCount = Array.isArray(visAssessments) ? visAssessments.length : 0;
+              const visVisible = Array.isArray(visAssessments) ? visAssessments.filter((a) => a.visibility === "Visible").length : 0;
+              const visPartial = Array.isArray(visAssessments) ? visAssessments.filter((a) => a.visibility === "Partially Visible").length : 0;
+              const visNot = Array.isArray(visAssessments) ? visAssessments.filter((a) => a.visibility === "Not Visible").length : 0;
+
+              const hasSignals = signals != null;
+              const hasAnalysis = analysis != null;
+              const hasGaps = gapData != null;
+              const hasVis = visCount > 0;
+
+              return (
+                <div className="mt-3 rounded-xl border border-[rgba(174,186,255,0.08)] p-5 backdrop-blur-[12px] space-y-4" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
+                  <p className="text-[10px] font-label text-outline uppercase tracking-widest">Evidence Trail</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    {/* Signal Sources */}
+                    {hasSignals && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-primary">Signal Sources</p>
+                        {redditCount > 0 && (
+                          <p className="text-[11px] text-on-surface-variant">
+                            {redditCount} Reddit posts from {subs.map((s) => `r/${s}`).join(", ")}
+                          </p>
+                        )}
+                        {rssCount > 0 && (
+                          <p className="text-[11px] text-on-surface-variant">{rssCount} RSS items</p>
+                        )}
+                        {webCount > 0 && (
+                          <p className="text-[11px] text-on-surface-variant">{webCount} web search results</p>
+                        )}
+                        <p className="text-[10px] text-outline">{posts.length} total posts analyzed</p>
+                      </div>
+                    )}
+
+                    {/* Data Inputs */}
+                    {hasAnalysis && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-primary">Data Inputs</p>
+                        {inputType === "text" ? (
+                          <p className="text-[11px] text-on-surface-variant">Text input — {textLen?.toLocaleString()} characters</p>
+                        ) : (
+                          <p className="text-[11px] text-on-surface-variant">
+                            {fileCount} file{fileCount !== 1 ? "s" : ""} — {rows.toLocaleString()} rows × {cols} columns
+                          </p>
+                        )}
+                        {columns.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {columns.slice(0, 5).map((col) => (
+                              <span key={col} className="text-[9px] px-1.5 py-0.5 rounded border border-outline-variant/30 text-outline">
+                                {col}
+                              </span>
+                            ))}
+                            {columns.length > 5 && (
+                              <span className="text-[9px] text-outline">+{columns.length - 5} more</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Gap Analysis */}
+                    {hasGaps && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-primary">Opportunity Gaps</p>
+                        <p className="text-[11px] text-on-surface-variant">
+                          {alignCount} alignments, {gapCount} gaps, {blindCount} blind spots, {recCount} recommendations
+                          {ccCount > 0 && `, ${ccCount} competitive contrasts`}
+                        </p>
+                        {maScore != null && (
+                          <p className="text-[10px] text-outline">Messaging alignment: {maScore}/10</p>
+                        )}
+                        {msThreat && (
+                          <p className="text-[10px] text-outline">Top mindshare threat: {msThreat}</p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* AI Visibility */}
+                    {hasVis && (
+                      <div className="space-y-1.5">
+                        <p className="text-xs font-semibold text-primary">AI Search Presence</p>
+                        <p className="text-[11px] text-on-surface-variant">{visCount} entities assessed</p>
+                        <p className="text-[10px] text-outline">
+                          {visVisible > 0 && `${visVisible} visible`}
+                          {visVisible > 0 && (visPartial > 0 || visNot > 0) && ", "}
+                          {visPartial > 0 && `${visPartial} partial`}
+                          {visPartial > 0 && visNot > 0 && ", "}
+                          {visNot > 0 && `${visNot} not visible`}
+                        </p>
+                      </div>
+                    )}
+
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </>
         );
