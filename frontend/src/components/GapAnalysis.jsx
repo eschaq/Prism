@@ -1,6 +1,9 @@
 import React, { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { Copy, ChevronDown, ChevronUp } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
+
+const PROSE_CLASSES = "prose prose-sm prose-invert prose-headings:text-on-surface prose-headings:text-sm prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4 prose-p:text-on-surface-variant prose-p:leading-relaxed prose-strong:text-on-surface prose-ul:text-on-surface-variant prose-ol:text-on-surface-variant prose-li:text-on-surface-variant max-w-none";
 
 const CONFIDENCE_COLORS = {
   High: "text-secondary border-secondary/20",
@@ -276,6 +279,100 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
               );
             })()}
 
+            {/* Action buttons */}
+            {hasGapResults && (
+              <div className="flex items-center gap-3">
+                {hasCompetitiveContrast && (
+                  <button
+                    onClick={handleGenerateBattlecard}
+                    disabled={battlecardLoading}
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 hover:border-tertiary/30 hover:text-tertiary disabled:opacity-40"
+                  >
+                    {battlecardLoading && <Spinner size="sm" />}
+                    <span className="material-symbols-outlined text-sm">swords</span>
+                    {battlecardLoading ? "Generating..." : "Generate Battlecard"}
+                  </button>
+                )}
+                <button
+                  onClick={handleStressTest}
+                  disabled={stressTestLoading}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 hover:border-primary/30 hover:text-primary disabled:opacity-40"
+                >
+                  {stressTestLoading && <Spinner size="sm" />}
+                  <span className="material-symbols-outlined text-sm">psychology</span>
+                  {stressTestLoading ? "Running..." : "Stress Test"}
+                </button>
+              </div>
+            )}
+
+            {/* Battlecard result */}
+            {battlecard && (
+              <div className="rounded-xl border border-[rgba(174,186,255,0.08)] bg-surface-container-low backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
+                <div className="flex items-center justify-between px-5 py-3 border-b border-outline-variant/10">
+                  <h3 className="text-sm font-semibold text-tertiary">Competitor Battlecard</h3>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleCopyBattlecard}
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs transition-colors ${
+                        battlecardCopied
+                          ? "border-secondary/30 text-secondary"
+                          : "border-outline-variant text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
+                      }`}
+                    >
+                      <Copy size={12} />
+                      {battlecardCopied ? "Copied" : "Copy"}
+                    </button>
+                    <button
+                      onClick={() => setShowBattlecard(!showBattlecard)}
+                      className="rounded-md border border-outline-variant p-1 text-on-surface-variant hover:text-on-surface transition-colors"
+                    >
+                      {showBattlecard ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
+                  </div>
+                </div>
+                {showBattlecard && (
+                  <div className="px-5 py-4">
+                    <div className={PROSE_CLASSES}>
+                      <ReactMarkdown>{battlecard}</ReactMarkdown>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {battlecardError && (
+              <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
+                {battlecardError}
+              </div>
+            )}
+
+            {/* Stress test result */}
+            {stressTestError && (
+              <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
+                {stressTestError}
+              </div>
+            )}
+
+            {stressTest && (
+              <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-3" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-tertiary">person_alert</span>
+                    <h3 className="text-sm font-semibold text-on-surface">Buyer Persona Reaction</h3>
+                  </div>
+                  <button
+                    onClick={() => setStressTest(null)}
+                    className="text-[10px] text-outline hover:text-on-surface-variant transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+                <p className="text-sm text-on-surface-variant leading-relaxed italic">
+                  {stressTest}
+                </p>
+              </div>
+            )}
+
             {GAP_SECTIONS.map((section) => {
               const items = result.gaps?.[section.key];
               if (!items?.length) return null;
@@ -322,99 +419,6 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
               );
             })}
 
-            {hasCompetitiveContrast && (
-              <div className="space-y-3">
-                <button
-                  onClick={handleGenerateBattlecard}
-                  disabled={battlecardLoading}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 disabled:opacity-40"
-                >
-                  {battlecardLoading && <Spinner size="sm" />}
-                  {battlecardLoading ? "Generating..." : "Generate Battlecard"}
-                </button>
-
-                {battlecardError && (
-                  <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
-                    {battlecardError}
-                  </div>
-                )}
-
-                {battlecard && (
-                  <div className="rounded-xl border border-outline-variant/10 bg-surface-container-low">
-                    <div className="flex items-center justify-between px-5 py-3 border-b border-outline-variant/10">
-                      <h3 className="text-sm font-semibold text-tertiary">Competitor Battlecard</h3>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={handleCopyBattlecard}
-                          className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-xs transition-colors ${
-                            battlecardCopied
-                              ? "border-secondary/30 text-secondary"
-                              : "border-outline-variant text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
-                          }`}
-                        >
-                          <Copy size={12} />
-                          {battlecardCopied ? "Copied" : "Copy"}
-                        </button>
-                        <button
-                          onClick={() => setShowBattlecard(!showBattlecard)}
-                          className="rounded-md border border-outline-variant p-1 text-on-surface-variant hover:border-outline-variant hover:text-on-surface transition-colors"
-                        >
-                          {showBattlecard ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                        </button>
-                      </div>
-                    </div>
-                    {showBattlecard && (
-                      <div className="px-5 py-4">
-                        <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
-                          {battlecard}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Stress Test */}
-            {hasGapResults && (
-              <div className="space-y-3">
-                <button
-                  onClick={handleStressTest}
-                  disabled={stressTestLoading}
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 hover:border-primary/30 hover:text-primary disabled:opacity-40"
-                >
-                  {stressTestLoading && <Spinner size="sm" />}
-                  <span className="material-symbols-outlined text-sm">psychology</span>
-                  {stressTestLoading ? "Running stress test..." : "Stress Test with Buyer Persona"}
-                </button>
-
-                {stressTestError && (
-                  <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
-                    {stressTestError}
-                  </div>
-                )}
-
-                {stressTest && (
-                  <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-3" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-tertiary">person_alert</span>
-                        <h3 className="text-sm font-semibold text-on-surface">Buyer Persona Reaction</h3>
-                      </div>
-                      <button
-                        onClick={() => setStressTest(null)}
-                        className="text-[10px] text-outline hover:text-on-surface-variant transition-colors"
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                    <p className="text-sm text-on-surface-variant leading-relaxed italic">
-                      {stressTest}
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         )
       )}

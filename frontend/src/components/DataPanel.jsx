@@ -148,7 +148,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
         <p className="text-sm text-on-surface-variant">
           Drop <span className="text-primary font-medium">.csv</span>, <span className="text-primary font-medium">.txt</span>, or <span className="text-primary font-medium">.md</span> files here, or click to browse
         </p>
-        <p className="text-[10px] text-outline mt-1">CSVs are analyzed with Pandas. Text and markdown files are analyzed qualitatively.</p>
+        <p className="text-[10px] text-outline mt-1">Upload CSV files for data analysis, or add text files and notes for qualitative insights.</p>
         <input
           ref={inputRef}
           type="file"

@@ -74,17 +74,26 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
     progressTimer.current = setInterval(() => {
       setAllBriefsProgress((prev) => Math.min(prev + 1, AUDIENCES.length - 1));
     }, 4000);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 300000); // 5 min timeout
     try {
       const res = await fetch(`${apiBase}/api/narrative/all`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ signals, analysis, gaps, profile, visibility }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       setAllBriefs(data.briefs);
     } catch (err) {
-      setAllBriefsError(err.message);
+      clearTimeout(timeout);
+      if (err.name === "AbortError") {
+        setAllBriefsError("Request timed out after 5 minutes. Click the button to retry.");
+      } else {
+        setAllBriefsError(err.message);
+      }
     } finally {
       clearInterval(progressTimer.current);
       setAllBriefsLoading(false);
@@ -375,14 +384,19 @@ ${briefingHtml}
         >
           {loading ? "Generating..." : `Generate ${audienceLabel} Briefing`}
         </button>
-        <button
-          onClick={handleGenerateAll}
-          disabled={!canRun || allBriefsLoading}
-          className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2.5 hover:border-primary/30 hover:text-primary disabled:opacity-40 flex items-center gap-1.5"
-        >
-          {allBriefsLoading && <Spinner size="sm" />}
-          {allBriefsLoading ? `Generating ${allBriefsProgress + 1} of ${AUDIENCES.length}...` : `Generate All ${AUDIENCES.length} Briefs`}
-        </button>
+        <div className="relative group/all">
+          <button
+            onClick={handleGenerateAll}
+            disabled={!canRun || allBriefsLoading}
+            className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2.5 hover:border-primary/30 hover:text-primary disabled:opacity-40 flex items-center gap-1.5"
+          >
+            {allBriefsLoading && <Spinner size="sm" />}
+            {allBriefsLoading ? `Generating ${allBriefsProgress + 1} of ${AUDIENCES.length}...` : `Generate All ${AUDIENCES.length} Briefs`}
+          </button>
+          <span className="invisible group-hover/all:visible absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg text-[10px] text-on-surface bg-surface-container-high border border-outline-variant shadow-lg whitespace-nowrap z-50">
+            Generates {AUDIENCES.length} briefings sequentially — may take 3-5 minutes.
+          </span>
+        </div>
       </div>
 
       {error && (
@@ -503,7 +517,15 @@ ${briefingHtml}
 
               {followUpAnswer && (
                 <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
-                  <p className="text-xs font-medium text-primary font-label mb-2">{activeQuestion}</p>
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="text-xs font-medium text-primary font-label">{activeQuestion}</p>
+                    <button
+                      onClick={() => { setFollowUpAnswer(null); setActiveQuestion(null); }}
+                      className="text-[10px] text-outline hover:text-on-surface-variant transition-colors shrink-0 ml-2"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
                   <div className={PROSE_CLASSES}>
                     <ReactMarkdown>{followUpAnswer}</ReactMarkdown>
                   </div>
