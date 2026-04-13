@@ -17,6 +17,7 @@ End with 2-3 specific, actionable next steps tied to intelligence operations pri
 
 DECISION TRIGGER:
 End with one sentence naming the single intelligence operations decision the CIO can make today — a new monitoring priority, a distribution workflow change, or a CI program investment based on the intelligence.
+When gap analysis confidence data is available, prefix the decision trigger with a confidence signal based on the overall confidence level of the supporting findings: "High confidence — act today:" or "Medium confidence — validate then act:" or "Low confidence — investigate first:". If no gap analysis was run, omit the confidence prefix.
 
 AI VISIBILITY:
 If AI search visibility data is provided, include a brief section (2-3 sentences) noting how the company's AI search presence compares to competitors and what this means for intelligence coverage and the organization's ability to monitor its own competitive position programmatically. Do not include this section if no visibility data is provided.
