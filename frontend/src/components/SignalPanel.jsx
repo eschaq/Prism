@@ -202,13 +202,22 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
       const data = await res.json();
       setResult(data);
       onSignals(data);
-      // Save snapshot for delta comparison on next scan
+      // Save rolling scan history (up to 3 snapshots)
       if (Array.isArray(data.themes)) {
-        const snapshot = {};
+        const snapshot = { timestamp: Date.now(), themes: {} };
         data.themes.forEach((t) => {
-          if (t.theme) snapshot[t.theme.toLowerCase()] = t.pps_tier || "AWARENESS";
+          if (t.theme) snapshot.themes[t.theme.toLowerCase()] = t.pps_tier || "AWARENESS";
         });
-        localStorage.setItem("prism_last_scan", JSON.stringify({ timestamp: Date.now(), themes: snapshot }));
+        let history = [];
+        try {
+          const stored = localStorage.getItem("prism_scan_history");
+          if (stored) history = JSON.parse(stored);
+          if (!Array.isArray(history)) history = [];
+        } catch { history = []; }
+        history = [snapshot, ...history].slice(0, 3);
+        localStorage.setItem("prism_scan_history", JSON.stringify(history));
+        // Backward compat
+        localStorage.setItem("prism_last_scan", JSON.stringify(snapshot));
       }
     } catch (err) {
       setError(err.message);
@@ -566,13 +575,16 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
             const TIER_ORDER = { AWARENESS: 0, POST: 1, SERIES: 2, PRODUCT: 3 };
             const tiers = ["PRODUCT", "SERIES", "POST", "AWARENESS"];
 
-            // Delta computation
-            let prevScan = null;
+            // Load scan history for delta + sparklines
+            let history = [];
             try {
-              const stored = localStorage.getItem("prism_last_scan");
-              if (stored) prevScan = JSON.parse(stored);
-            } catch { /* ignore */ }
+              const stored = localStorage.getItem("prism_scan_history");
+              if (stored) history = JSON.parse(stored);
+              if (!Array.isArray(history)) history = [];
+            } catch { history = []; }
 
+            // Delta computation — compare current (history[0]) vs previous (history[1])
+            const prevScan = history.length > 1 ? history[1] : null;
             const deltaMap = {};
             let newCount = 0;
             let risingCount = 0;
@@ -594,7 +606,6 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                   deltaMap[key] = "NEW"; newCount++;
                 }
               });
-              // Count GONE themes
               const currentKeys = new Set(result.themes.filter((t) => t.theme).map((t) => t.theme.toLowerCase()));
               Object.keys(prevThemes).forEach((k) => {
                 if (!currentKeys.has(k)) goneCount++;
@@ -602,6 +613,32 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
             }
 
             const hasDelta = prevScan?.themes && (newCount > 0 || risingCount > 0 || decliningCount > 0 || goneCount > 0);
+
+            // Sparkline data — up to 3 points per theme (oldest to newest)
+            const sparklineMap = {};
+            result.themes.forEach((t) => {
+              if (!t.theme) return;
+              const key = t.theme.toLowerCase();
+              const points = [];
+              // Walk history from oldest to newest
+              for (let hi = Math.min(history.length - 1, 2); hi >= 0; hi--) {
+                const snap = history[hi];
+                if (snap?.themes && key in snap.themes) {
+                  points.push(TIER_ORDER[snap.themes[key]] ?? 0);
+                } else {
+                  points.push(null);
+                }
+              }
+              // Current scan value (if not already in history[0] — but it should be since we just saved)
+              // Ensure the last point reflects current result
+              const curVal = TIER_ORDER[t.pps_tier] ?? 0;
+              if (points.length > 0) {
+                points[points.length - 1] = curVal;
+              } else {
+                points.push(curVal);
+              }
+              sparklineMap[key] = points;
+            });
 
             // Group themes
             const grouped = {};
@@ -647,7 +684,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                       <div className="flex-1 h-px bg-outline-variant/10" />
                     </div>
                     {grouped[tier].map((theme, i) => (
-                      <ThemeCard key={`${tier}-${i}`} theme={theme} delta={theme.theme ? deltaMap[theme.theme.toLowerCase()] : null} />
+                      <ThemeCard key={`${tier}-${i}`} theme={theme} delta={theme.theme ? deltaMap[theme.theme.toLowerCase()] : null} sparklineData={theme.theme ? sparklineMap[theme.theme.toLowerCase()] : null} />
                     ))}
                   </div>
                 );
@@ -681,7 +718,45 @@ const DELTA_STYLES = {
   DECLINING: { label: "↓ DECLINING", icon: null, className: "text-error border-error-container bg-error-container/20" },
 };
 
-function ThemeCard({ theme, delta }) {
+function Sparkline({ data }) {
+  // data is an array of up to 3 values (0-3) or null, oldest to newest
+  const valid = data.map((v, i) => v !== null ? { x: i, y: v } : null).filter(Boolean);
+  if (valid.length < 2) return null;
+
+  const w = 40;
+  const h = 16;
+  const pad = 2;
+  const maxVal = 3;
+
+  const points = valid.map((p) => {
+    const xPos = pad + (p.x / (data.length - 1)) * (w - pad * 2);
+    const yPos = pad + (1 - p.y / maxVal) * (h - pad * 2);
+    return { x: xPos, y: yPos };
+  });
+
+  const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
+  const first = valid[0].y;
+  const last = valid[valid.length - 1].y;
+  const strokeColor = last >= first ? "#71d7cd" : "#fd6f85";
+
+  return (
+    <svg width={w} height={h} className="flex-shrink-0" viewBox={`0 0 ${w} ${h}`}>
+      <polyline
+        points={polyline}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {points.map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r="1.5" fill={strokeColor} />
+      ))}
+    </svg>
+  );
+}
+
+function ThemeCard({ theme, delta, sparklineData }) {
   const sentimentColors = {
     positive: "text-secondary bg-secondary/10 border-secondary/20",
     negative: "text-error bg-error-container/20 border-error-container",
@@ -697,7 +772,10 @@ function ThemeCard({ theme, delta }) {
   return (
     <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-2" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
       <div className="flex items-center justify-between">
-        <span className="font-medium text-on-surface">{theme.theme}</span>
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-on-surface">{theme.theme}</span>
+          {sparklineData && <Sparkline data={sparklineData} />}
+        </div>
         <div className="flex gap-2">
           {deltaStyle && delta !== "STABLE" && (
             <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${deltaStyle.className}`}>
