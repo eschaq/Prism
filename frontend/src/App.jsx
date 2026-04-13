@@ -292,6 +292,22 @@ export default function App() {
     setActiveIndex(0);
   }
 
+  function handleNewAnalysis() {
+    if (!window.confirm("Start a new analysis? This will clear all current results.")) return;
+    setSignals(null);
+    setAnalysis(null);
+    setGaps(null);
+    setVisibility(null);
+    setNarrative(null);
+    setAgenticResult(null);
+    setAgenticError(null);
+    setAgenticPreflight(false);
+    setDemoConfig(null);
+    setActiveIndex(0);
+    setPath(null);
+    setAudience(null);
+  }
+
   // Screen 3: Wizard with sidebar
   return (
     <div className="min-h-screen bg-surface text-on-surface font-body">
@@ -324,6 +340,13 @@ export default function App() {
             className="text-on-surface-variant hover:text-white transition-colors font-body font-bold tracking-tight text-sm"
           >
             Change path
+          </button>
+          <button
+            onClick={handleNewAnalysis}
+            className="inline-flex items-center gap-1 text-on-surface-variant hover:text-white transition-colors font-body text-sm"
+          >
+            <span className="material-symbols-outlined text-sm">refresh</span>
+            New Analysis
           </button>
         </div>
         <div className="flex items-center gap-4">
