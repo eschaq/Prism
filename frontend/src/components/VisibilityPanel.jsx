@@ -70,6 +70,8 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <p className="text-sm text-on-surface-variant/70 italic leading-relaxed">73% of B2B buyers now use AI in their purchase research. This step checks how visible your company is in AI-generated answers — and what your competitors are doing better. Click Run Visibility Assessment to find out.</p>
+
       {!canRun && (
         <div className="rounded-md bg-tertiary/10 border border-tertiary/20 px-4 py-3 text-sm text-tertiary">
           Configure your company name and competitors in Profile Settings to run AI visibility assessment.

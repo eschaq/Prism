@@ -318,6 +318,8 @@ ${briefingHtml}
 
   return (
     <div className={`space-y-6 ${isComparing ? "max-w-5xl" : "max-w-4xl"}`}>
+      <p className="text-sm text-on-surface-variant/70 italic leading-relaxed">You've done the work. Now pick your audience and click Generate. Prism will write a complete executive briefing tailored to exactly what that person needs to hear — in their language, at their level.</p>
+
       {/* Decision Readiness Score */}
       <div className={`rounded-xl border p-5 ${readinessBorder} ${readinessBg}`}>
         <div className="flex items-center gap-4">

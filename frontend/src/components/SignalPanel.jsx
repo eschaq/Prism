@@ -221,6 +221,8 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <p className="text-sm text-on-surface-variant/70 italic leading-relaxed">Tell Prism where to listen. Select your subreddits and feeds, confirm your search query, and hit Scan. The more sources you add, the richer the signal.</p>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Subreddits section */}
         <div>

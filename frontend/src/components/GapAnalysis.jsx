@@ -93,9 +93,11 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <p className="text-sm text-on-surface-variant/70 italic leading-relaxed">This is where it gets interesting. Prism cross-references what the market is saying against what your data shows and finds the gaps your competitors are filling. Click Run Gap Analysis to see where you stand.</p>
+
       {!canRun && (
         <div className="rounded-md bg-tertiary/10 border border-tertiary/20 px-4 py-3 text-sm text-tertiary">
-          Complete both Signal Collection and Data Analysis before running gap analysis.
+          Complete both Market Intelligence and Data Insights before running gap analysis.
         </div>
       )}
 

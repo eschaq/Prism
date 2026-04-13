@@ -131,6 +131,8 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
 
   return (
     <div className="space-y-6 max-w-4xl">
+      <p className="text-sm text-on-surface-variant/70 italic leading-relaxed">Show Prism what you're working with. Upload your CSV files, paste meeting notes or call summaries, or load one of our demo datasets. This step is optional — skip it if you only want market signals.</p>
+
       {/* File drop zone */}
       <div
         onDrop={handleDrop}
