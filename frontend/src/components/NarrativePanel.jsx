@@ -31,7 +31,7 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const [showEvidence, setShowEvidence] = useState(false);
   const progressTimer = useRef(null);
 
-  const canRun = signals && analysis;
+  const canRun = !!(signals || analysis);
   const audienceLabel = AUDIENCES.find((a) => a.id === audience)?.label ?? audience;
   const compareLabel = AUDIENCES.find((a) => a.id === compareAudience)?.label ?? compareAudience;
 
@@ -363,7 +363,7 @@ ${briefingHtml}
 
       {!canRun && (
         <div className="rounded-md bg-tertiary/10 border border-tertiary/20 px-4 py-3 text-sm text-tertiary">
-          Complete both Market Intelligence and Data Insights before generating briefings.
+          Run Market Intelligence or Data Insights first to generate a briefing.
         </div>
       )}
 
