@@ -183,6 +183,73 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
               </div>
             )}
 
+            {/* Competitive Gap Heat Map */}
+            {(() => {
+              const cc = result.gaps?.competitive_contrast || [];
+              const scored = cc.filter((item) => item.pain_intensity != null && item.competitor_presence != null);
+              if (scored.length === 0) return null;
+
+              const quadrants = {
+                opportunity: { label: "Your Opportunity", desc: "High pain, low competitor", color: "border-secondary/20 bg-secondary/10", textColor: "text-secondary", chipColor: "border-secondary/30 bg-secondary/5 text-secondary", items: [] },
+                contested: { label: "Contested", desc: "High pain, high competitor", color: "border-tertiary/20 bg-tertiary/10", textColor: "text-tertiary", chipColor: "border-tertiary/30 bg-tertiary/5 text-tertiary", items: [] },
+                monitor: { label: "Monitor", desc: "Low pain, low competitor", color: "border-outline-variant/20 bg-surface-container-high", textColor: "text-outline", chipColor: "border-outline-variant bg-surface-container-low text-on-surface-variant", items: [] },
+                ceded: { label: "Ceded", desc: "Low pain, high competitor", color: "border-error-container bg-error-container/10", textColor: "text-error", chipColor: "border-error-container/30 bg-error-container/5 text-error", items: [] },
+              };
+
+              scored.forEach((item) => {
+                const highPain = item.pain_intensity >= 4;
+                const highComp = item.competitor_presence >= 4;
+                if (highPain && !highComp) quadrants.opportunity.items.push(item);
+                else if (highPain && highComp) quadrants.contested.items.push(item);
+                else if (!highPain && !highComp) quadrants.monitor.items.push(item);
+                else quadrants.ceded.items.push(item);
+              });
+
+              return (
+                <div className="space-y-3">
+                  <h3 className="text-sm font-semibold text-on-surface">Competitive Gap Heat Map</h3>
+                  <div className="flex gap-2">
+                    {/* Y-axis label */}
+                    <div className="flex items-center">
+                      <span className="text-[9px] font-label text-outline uppercase tracking-widest" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>
+                        Pain Intensity →
+                      </span>
+                    </div>
+                    {/* 2x2 grid */}
+                    <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-2">
+                      {/* Top-left: Your Opportunity (high pain, low competitor) */}
+                      {[["opportunity", "contested"], ["monitor", "ceded"]].map((row, ri) => (
+                        row.map((key) => {
+                          const q = quadrants[key];
+                          return (
+                            <div key={key} className={`rounded-xl border p-4 min-h-[100px] ${q.color}`}>
+                              <p className={`text-[10px] font-label font-bold uppercase tracking-widest mb-1 ${q.textColor}`}>{q.label}</p>
+                              <p className="text-[9px] text-outline mb-2">{q.desc}</p>
+                              {q.items.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {q.items.map((item, i) => (
+                                    <span key={i} className={`text-[10px] px-2 py-0.5 rounded-full border ${q.chipColor}`}>
+                                      {item.finding?.slice(0, 30)}{item.finding?.length > 30 ? "..." : ""} · {item.competitor}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-[9px] text-outline/50 italic">No findings</p>
+                              )}
+                            </div>
+                          );
+                        })
+                      ))}
+                    </div>
+                  </div>
+                  {/* X-axis label */}
+                  <div className="text-center ml-6">
+                    <span className="text-[9px] font-label text-outline uppercase tracking-widest">Competitor Presence →</span>
+                  </div>
+                </div>
+              );
+            })()}
+
             {GAP_SECTIONS.map((section) => {
               const items = result.gaps?.[section.key];
               if (!items?.length) return null;

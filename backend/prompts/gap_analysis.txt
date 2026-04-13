@@ -29,6 +29,19 @@ Rate how well the company's stated positioning (from the company profile context
 - **1-4 (Misaligned)**: significant disconnect between company positioning and market demand
 If no company profile is provided, set messaging_alignment to null.
 
+Competitive Heat Map Scoring:
+For each competitive_contrast finding, rate two dimensions:
+- **pain_intensity** (1-5): how loudly and frequently the market expresses this pain point. 5 = urgent market demand with emotional language, workarounds, and WTP signals. 1 = mild inconvenience rarely discussed.
+- **competitor_presence** (1-5): how often competitors are mentioned in the same context as this problem. 5 = competitor dominates this space with frequent mentions, comparisons, and switching intent. 1 = competitor rarely mentioned here.
+
+These scores map to a 2x2 matrix:
+- High pain (4-5) + Low competitor (1-3) = "Your Opportunity" — the market needs this and no one owns it yet
+- High pain (4-5) + High competitor (4-5) = "Contested" — a battleground where you must compete
+- Low pain (1-3) + Low competitor (1-3) = "Monitor" — not urgent, keep watching
+- Low pain (1-3) + High competitor (4-5) = "Ceded" — competitors own this but the market doesn't care much
+
+Only populate these fields on competitive_contrast items. If no competitive signals are provided, return an empty competitive_contrast array.
+
 Mindshare Risk:
 When competitive signals are provided, assess which competitor is gaining the most ground in market mindshare and why. Write 2-3 plain-English sentences summarizing: which competitor is the biggest threat, what topics or use cases they're capturing, and what's driving their momentum (e.g. community buzz, pricing discussions, feature comparisons). Base this on co-occurrence patterns — how often the competitor appears alongside buyer-intent keywords in the signals.
 If no competitive signals are provided, set mindshare_risk to null.
@@ -39,7 +52,7 @@ You MUST respond with valid JSON in this exact structure:
   "gaps": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
   "blind_spots": [{"finding": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
   "recommendations": [{"action": "...", "rationale": "...", "confidence": "High", "confidence_rationale": "..."}],
-  "competitive_contrast": [{"finding": "...", "competitor": "...", "evidence": "...", "confidence": "High", "confidence_rationale": "..."}],
+  "competitive_contrast": [{"finding": "...", "competitor": "...", "evidence": "...", "pain_intensity": 4, "competitor_presence": 2, "confidence": "High", "confidence_rationale": "..."}],
   "messaging_alignment": {"score": 8, "label": "Aligned", "rationale": "one sentence explaining the rating"},
   "mindshare_risk": {"top_threat": "Competitor Name", "summary": "2-3 sentence explanation of which competitor is gaining ground and why"}
 }
