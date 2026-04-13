@@ -7,7 +7,6 @@ import PathSelector from "./components/PathSelector";
 import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
 import AgenticProgress from "./components/AgenticProgress";
-import { Spinner } from "./components/LoadingStates";
 import prismLogo from "./assets/prism-logo.png";
 import prismBg from "./assets/prism-backround.png";
 
@@ -69,10 +68,6 @@ export default function App() {
   // Lifted wizard state
   const [activeIndex, setActiveIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-  const [countdown, setCountdown] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const advanceTimer = useRef(null);
-  const countdownTimer = useRef(null);
 
   function handleSaveProfile(data) {
     setProfile(data);
@@ -206,35 +201,8 @@ export default function App() {
   }
 
   function advanceNow() {
-    clearTimeout(advanceTimer.current);
-    clearInterval(countdownTimer.current);
     setTransitioning(false);
-    setCountdown(0);
-    setPaused(false);
     setActiveIndex((prev) => prev + 1);
-  }
-
-  function togglePause() {
-    if (paused) {
-      countdownTimer.current = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) { clearInterval(countdownTimer.current); return 0; }
-          return prev - 1;
-        });
-      }, 1000);
-      advanceTimer.current = setTimeout(() => {
-        clearInterval(countdownTimer.current);
-        setTransitioning(false);
-        setCountdown(0);
-        setPaused(false);
-        setActiveIndex((prev) => prev + 1);
-      }, countdown * 1000);
-      setPaused(false);
-    } else {
-      clearTimeout(advanceTimer.current);
-      clearInterval(countdownTimer.current);
-      setPaused(true);
-    }
   }
 
   useEffect(() => {
@@ -242,25 +210,7 @@ export default function App() {
     const currentStep = steps[activeIndex];
     if (completionMap[currentStep] && activeIndex < steps.length - 1) {
       setTransitioning(true);
-      setPaused(false);
-      setCountdown(10);
-      countdownTimer.current = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) { clearInterval(countdownTimer.current); return 0; }
-          return prev - 1;
-        });
-      }, 1000);
-      advanceTimer.current = setTimeout(() => {
-        clearInterval(countdownTimer.current);
-        setTransitioning(false);
-        setCountdown(0);
-        setActiveIndex(activeIndex + 1);
-      }, 10000);
     }
-    return () => {
-      clearTimeout(advanceTimer.current);
-      clearInterval(countdownTimer.current);
-    };
   }, [signals, analysis, gaps, narrative, visibility]);
 
   // Screen 1: Role selection
@@ -390,7 +340,7 @@ export default function App() {
             const meta = STEP_META[stepId];
             const isComplete = completionMap[stepId];
             const isActive = i === activeIndex;
-            const clickable = canNavigate(i) && !transitioning && !paused;
+            const clickable = canNavigate(i) && !transitioning;
             const icon = STEP_ICONS[stepId] || "circle";
 
             return (
@@ -420,30 +370,15 @@ export default function App() {
           })}
         </div>
 
-        {/* Transition countdown */}
+        {/* Continue button */}
         {transitioning && nextStepLabel && (
-          <div className="mx-2 mb-2 rounded-xl border border-[rgba(174,186,255,0.08)] p-3 space-y-2 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
-            <div className="flex items-center gap-2">
-              {!paused && <Spinner size="sm" />}
-              <span className="text-[11px] text-on-surface-variant font-label">
-                {paused ? `Paused — ${countdown}s` : `Next in ${countdown}s...`}
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={togglePause}
-                className="flex-1 rounded-lg border border-outline-variant/30 px-2 py-1 text-[10px] font-label text-on-surface-variant hover:text-white hover:bg-surface-container transition-colors"
-              >
-                {paused ? "Resume" : "Pause"}
-              </button>
-              <button
-                onClick={advanceNow}
-                className="flex-1 rounded-lg bg-[#5C6BC0]/20 px-2 py-1 text-[10px] font-label text-[#5C6BC0] hover:bg-[#5C6BC0]/30 transition-colors"
-              >
-                Continue
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={advanceNow}
+            className="mx-2 mt-2 w-[calc(100%-16px)] rounded-xl bg-[#5C6BC0] text-white py-2.5 font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+          >
+            <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            Continue to {nextStepLabel}
+          </button>
         )}
 
         {/* Bottom tools */}
