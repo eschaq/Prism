@@ -108,7 +108,7 @@ export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenti
             </span>
           </h1>
           <p className="text-on-surface-variant text-lg max-w-2xl leading-relaxed">
-            Pick how deep you want to go. Each path runs a different set of steps and delivers a different kind of output. Not sure? Start with the Full Intelligence Report.
+            Pick how deep you want to go. Each path runs a different set of steps and delivers a different kind of output. Not sure? Start with the Full Intelligence Report — it's the whole narrative intelligence pipeline in one click.
           </p>
         </header>
 

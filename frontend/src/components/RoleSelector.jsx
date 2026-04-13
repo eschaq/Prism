@@ -105,7 +105,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
         <div className="max-w-5xl mx-auto mb-10">
           <div className="rounded-xl border border-[rgba(174,186,255,0.08)] border-l-4 border-l-[#aebaff] p-6 max-w-2xl mx-auto backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
             <p className="text-base text-white leading-relaxed">
-              83% of your buyers make decisions in channels your analytics will never see — Reddit threads, community forums, peer conversations. That's the dark funnel. Prism makes it visible. Pick your role below and it frames everything around what matters to you. Same data, different lens.
+              83% of your buyers make decisions in channels your analytics will never see — Reddit threads, community forums, peer conversations. That's the dark funnel. Prism makes it visible. Pick your role below and it frames everything around what matters to you. Same data, different lens. Prism is the narrative intelligence layer your BI tools and market research were never designed to be.
             </p>
           </div>
         </div>
