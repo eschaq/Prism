@@ -202,6 +202,14 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
       const data = await res.json();
       setResult(data);
       onSignals(data);
+      // Save snapshot for delta comparison on next scan
+      if (Array.isArray(data.themes)) {
+        const snapshot = {};
+        data.themes.forEach((t) => {
+          if (t.theme) snapshot[t.theme.toLowerCase()] = t.pps_tier || "AWARENESS";
+        });
+        localStorage.setItem("prism_last_scan", JSON.stringify({ timestamp: Date.now(), themes: snapshot }));
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -547,7 +555,47 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           )}
 
           {Array.isArray(result.themes) ? (() => {
+            const TIER_ORDER = { AWARENESS: 0, POST: 1, SERIES: 2, PRODUCT: 3 };
             const tiers = ["PRODUCT", "SERIES", "POST", "AWARENESS"];
+
+            // Delta computation
+            let prevScan = null;
+            try {
+              const stored = localStorage.getItem("prism_last_scan");
+              if (stored) prevScan = JSON.parse(stored);
+            } catch { /* ignore */ }
+
+            const deltaMap = {};
+            let newCount = 0;
+            let risingCount = 0;
+            let decliningCount = 0;
+            let goneCount = 0;
+
+            if (prevScan?.themes) {
+              const prevThemes = prevScan.themes;
+              result.themes.forEach((t) => {
+                if (!t.theme) return;
+                const key = t.theme.toLowerCase();
+                const curTier = TIER_ORDER[t.pps_tier] ?? 0;
+                if (key in prevThemes) {
+                  const prevTier = TIER_ORDER[prevThemes[key]] ?? 0;
+                  if (curTier > prevTier) { deltaMap[key] = "RISING"; risingCount++; }
+                  else if (curTier < prevTier) { deltaMap[key] = "DECLINING"; decliningCount++; }
+                  else { deltaMap[key] = "STABLE"; }
+                } else {
+                  deltaMap[key] = "NEW"; newCount++;
+                }
+              });
+              // Count GONE themes
+              const currentKeys = new Set(result.themes.filter((t) => t.theme).map((t) => t.theme.toLowerCase()));
+              Object.keys(prevThemes).forEach((k) => {
+                if (!currentKeys.has(k)) goneCount++;
+              });
+            }
+
+            const hasDelta = prevScan?.themes && (newCount > 0 || risingCount > 0 || decliningCount > 0 || goneCount > 0);
+
+            // Group themes
             const grouped = {};
             tiers.forEach((t) => { grouped[t] = []; });
             grouped["OTHER"] = [];
@@ -558,6 +606,23 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
 
             return (
             <div className="space-y-6">
+              {/* Delta summary */}
+              {hasDelta && (
+                <div className="flex items-center gap-3 text-xs text-on-surface-variant">
+                  <span className="material-symbols-outlined text-sm text-outline">compare_arrows</span>
+                  <span>
+                    {newCount > 0 && <span className="text-secondary font-medium">{newCount} new</span>}
+                    {newCount > 0 && (risingCount > 0 || decliningCount > 0 || goneCount > 0) && ", "}
+                    {risingCount > 0 && <span className="text-secondary font-medium">{risingCount} rising</span>}
+                    {risingCount > 0 && (decliningCount > 0 || goneCount > 0) && ", "}
+                    {decliningCount > 0 && <span className="text-error font-medium">{decliningCount} declining</span>}
+                    {decliningCount > 0 && goneCount > 0 && ", "}
+                    {goneCount > 0 && <span className="text-outline font-medium">{goneCount} gone</span>}
+                    <span className="text-outline ml-1">since last scan</span>
+                  </span>
+                </div>
+              )}
+
               {[...tiers, "OTHER"].map((tier) => {
                 if (!grouped[tier].length) return null;
                 const colorClass = (PPS_COLORS[tier] || PPS_COLORS.OTHER)
@@ -574,7 +639,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
                       <div className="flex-1 h-px bg-outline-variant/10" />
                     </div>
                     {grouped[tier].map((theme, i) => (
-                      <ThemeCard key={`${tier}-${i}`} theme={theme} />
+                      <ThemeCard key={`${tier}-${i}`} theme={theme} delta={theme.theme ? deltaMap[theme.theme.toLowerCase()] : null} />
                     ))}
                   </div>
                 );
@@ -601,7 +666,14 @@ const PPS_COLORS = {
   OTHER: "text-outline bg-surface-container-low border-outline-variant/10",
 };
 
-function ThemeCard({ theme }) {
+const DELTA_STYLES = {
+  NEW: { label: "NEW", icon: "✦", className: "text-secondary border-secondary/20 bg-secondary/10" },
+  RISING: { label: "↑ RISING", icon: null, className: "text-secondary border-secondary/20 bg-secondary/10" },
+  STABLE: { label: "→", icon: null, className: "text-outline border-outline-variant bg-surface-container-high" },
+  DECLINING: { label: "↓ DECLINING", icon: null, className: "text-error border-error-container bg-error-container/20" },
+};
+
+function ThemeCard({ theme, delta }) {
   const sentimentColors = {
     positive: "text-secondary bg-secondary/10 border-secondary/20",
     negative: "text-error bg-error-container/20 border-error-container",
@@ -610,12 +682,18 @@ function ThemeCard({ theme }) {
   };
   const color = sentimentColors[theme.sentiment] || sentimentColors.neutral;
   const ppsColor = PPS_COLORS[theme.pps_tier] || PPS_COLORS.AWARENESS;
+  const deltaStyle = delta ? DELTA_STYLES[delta] : null;
 
   return (
     <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-2" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
       <div className="flex items-center justify-between">
         <span className="font-medium text-on-surface">{theme.theme}</span>
         <div className="flex gap-2">
+          {deltaStyle && delta !== "STABLE" && (
+            <span className={`text-[10px] px-2 py-0.5 rounded-full border font-bold ${deltaStyle.className}`}>
+              {deltaStyle.label}
+            </span>
+          )}
           <span className={`text-xs px-2 py-0.5 rounded-full border ${color}`}>
             {theme.sentiment}
           </span>
