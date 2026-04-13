@@ -14,6 +14,7 @@ AUDIENCE_PROMPTS = {
     "risk_compliance": "narrative_risk_compliance.txt",
     "board": "narrative_board.txt",
     "small_business": "narrative_small_business.txt",
+    "cio": "narrative_cio.txt",
 }
 
 FOLLOW_UP_DELIMITER = "---FOLLOW_UP---"

@@ -11,6 +11,7 @@ const AUDIENCES = [
   { id: "risk_compliance", label: "Risk / Compliance", description: "Regulatory signals, audit readiness" },
   { id: "board", label: "Board / Executive Summary", description: "Strategic position, key decisions" },
   { id: "small_business", label: "Small Business Owner", description: "Revenue, growth, and practical decisions" },
+  { id: "cio", label: "Chief Intelligence Officer", description: "Cross-functional CI, competitive preparedness, strategic signals" },
 ];
 
 export default AUDIENCES;

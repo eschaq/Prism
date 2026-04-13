@@ -25,14 +25,14 @@ def strip_code_fences(text: str) -> str:
     return stripped
 
 
-def call_claude_with_search(system_prompt: str, user_message: str, temperature: float = 0.3) -> str:
+def call_claude_with_search(system_prompt: str, user_message: str, temperature: float = 0.3, max_tokens: int = 4096) -> str:
     """Call Claude with the built-in web search tool enabled.
 
     Handles multi-block responses — extracts the final text block after tool use.
     """
     message = client.messages.create(
         model="claude-sonnet-4-5",
-        max_tokens=4096,
+        max_tokens=max_tokens,
         temperature=temperature,
         system=system_prompt,
         messages=[{"role": "user", "content": user_message}],

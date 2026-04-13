@@ -5,6 +5,7 @@ import logging
 import time
 from urllib.parse import urlparse
 
+import anthropic
 from claude_client import call_claude_with_search, strip_code_fences
 
 logger = logging.getLogger(__name__)
@@ -43,11 +44,23 @@ def search_web(query: str, industry: str = "", limit: int = 5) -> list[dict]:
         f"Prioritize content from the last 30 days."
     )
 
-    try:
-        time.sleep(2)  # Rate limit buffer when combined with Reddit/RSS
-        raw = call_claude_with_search(system_prompt, user_message)
-    except Exception:
-        logger.exception("Web search call failed")
+    max_retries = 3
+    raw = None
+    for attempt in range(max_retries):
+        try:
+            time.sleep(2)  # Rate limit buffer when combined with Reddit/RSS
+            raw = call_claude_with_search(system_prompt, user_message, max_tokens=1024)
+            break
+        except anthropic.RateLimitError:
+            wait = 5 * (2 ** attempt)  # 5s, 10s, 20s
+            logger.warning("Web search rate limited (attempt %d/%d), retrying in %ds", attempt + 1, max_retries, wait)
+            time.sleep(wait)
+        except Exception:
+            logger.exception("Web search call failed")
+            return []
+
+    if raw is None:
+        logger.warning("Web search exhausted all %d retries", max_retries)
         return []
 
     # Parse the JSON response
