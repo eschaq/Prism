@@ -7,13 +7,13 @@ const PATH_META = {
   signal_report: {
     icon: "sensors",
     accent: "primary",
-    tag: "REDDIT LIVE",
+    tag: "MULTI-SOURCE",
     tagline: "Pull live market signals from Reddit and RSS. See what your customers are actually talking about right now.",
   },
   data_brief: {
     icon: "analytics",
     accent: "secondary",
-    tag: "CSV DEPTH",
+    tag: "DATA INSIGHTS",
     tagline: "Upload your CSV and get a plain-English summary of what your numbers actually mean.",
   },
   gap_analysis: {
@@ -182,7 +182,7 @@ export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenti
 
             <div className="flex items-center gap-2 pt-4 mt-4 border-t border-outline-variant/10">
               <span className="text-[10px] font-label text-secondary uppercase tracking-widest">
-                Signals → Data → Gaps → Visibility → Narrative
+                Intelligence → Insights → Gaps → Presence → Briefing
               </span>
             </div>
           </button>

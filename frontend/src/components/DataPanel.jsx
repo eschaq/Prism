@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { X, ChevronDown, ChevronUp } from "lucide-react";
+import { X, ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import DEMO_DATASETS from "../demo_datasets";
 
@@ -155,6 +155,11 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
           className="hidden"
           onChange={(e) => { addFiles(e.target.files); e.target.value = ""; }}
         />
+      </div>
+
+      <div className="flex items-center gap-1.5 text-[10px] text-outline">
+        <Lock size={10} />
+        <span>Your data is processed securely and never stored on our servers. Uploaded files and pasted text are analyzed in memory and discarded after processing.</span>
       </div>
 
       {/* Action row */}

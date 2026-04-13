@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AUDIENCES from "../audiences";
 import prismLogo from "../assets/prism-logo.png";
 import prismBg from "../assets/prism-backround.png";
@@ -20,6 +20,14 @@ const ROLE_ICONS = {
 
 export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoadDemo }) {
   const [logoFailed, setLogoFailed] = useState(false);
+  const profileIncomplete = !profile || !profile.companyName || !profile.industry;
+
+  // Auto-open profile settings on first visit if empty
+  useEffect(() => {
+    if (!profile) {
+      onOpenSettings();
+    }
+  }, []);
 
   return (
     <div className="relative min-h-screen bg-surface text-on-surface font-body overflow-hidden">
@@ -84,6 +92,21 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
             </p>
           </div>
         </div>
+
+        {profileIncomplete && (
+          <div className="max-w-5xl mx-auto mb-6 flex items-center justify-between gap-4 rounded-xl border border-tertiary/20 bg-tertiary/5 px-5 py-3 backdrop-blur-[12px]">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-tertiary text-sm">info</span>
+              <p className="text-sm text-tertiary">Set up your company profile for personalized results.</p>
+            </div>
+            <button
+              onClick={onOpenSettings}
+              className="shrink-0 rounded-lg bg-tertiary/10 border border-tertiary/20 px-4 py-1.5 text-xs font-label font-bold text-tertiary hover:bg-tertiary/20 transition-colors"
+            >
+              Set up profile
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {AUDIENCES.map((a) => {
