@@ -13,11 +13,15 @@ from narrative_engine import generate_narrative
 logger = logging.getLogger(__name__)
 
 
-def _run_step(name, fn):
-    """Run a step function, capture result, error, and duration."""
+async def _run_step(name, fn):
+    """Run a step function (sync or async), capture result, error, and duration."""
+    import asyncio
     start = time.time()
     try:
         result = fn()
+        # If the function returned a coroutine, await it
+        if asyncio.iscoroutine(result):
+            result = await result
         duration = int((time.time() - start) * 1000)
         return result, {"status": "completed", "duration_ms": duration}
     except Exception as e:
@@ -31,7 +35,7 @@ def _skip_step(reason):
     return None, {"status": "skipped", "reason": reason}
 
 
-def run_full_pipeline(
+async def run_full_pipeline(
     subreddits: list[str],
     query: str,
     limit: int = 25,
@@ -59,19 +63,19 @@ def run_full_pipeline(
     competitors_raw = (profile or {}).get("competitors", "")
     competitors = [c.strip() for c in competitors_raw.split(",") if c.strip()] if competitors_raw else None
 
-    # --- Step 1: Signal Collection ---
-    signals_result, steps_status["signals"] = _run_step("signals", lambda: scrape_signals(
+    # --- Step 1: Signal Collection (async — uses asyncpraw) ---
+    signals_result, steps_status["signals"] = await _run_step("signals", lambda: scrape_signals(
         subreddits, query, limit, profile, rss_feeds, competitors,
     ))
 
-    # --- Step 2: Data Analysis ---
+    # --- Step 2: Data Analysis (sync) ---
     if csv_objs or text_content:
         if csv_objs and not text_content:
-            analysis_result, steps_status["analysis"] = _run_step("analysis", lambda: process_csvs(
+            analysis_result, steps_status["analysis"] = await _run_step("analysis", lambda: process_csvs(
                 csv_objs, profile,
             ))
         elif text_content and not csv_objs:
-            analysis_result, steps_status["analysis"] = _run_step("analysis", lambda: process_text(
+            analysis_result, steps_status["analysis"] = await _run_step("analysis", lambda: process_text(
                 text_content, text_filenames or ["pasted_text"], profile,
             ))
         else:
@@ -89,14 +93,14 @@ def run_full_pipeline(
                     "text_length": text_result["text_length"],
                     "source_files": text_result["source_files"],
                 }
-            analysis_result, steps_status["analysis"] = _run_step("analysis", _mixed_analysis)
+            analysis_result, steps_status["analysis"] = await _run_step("analysis", _mixed_analysis)
     else:
         analysis_result, steps_status["analysis"] = _skip_step("no data files or text provided")
 
-    # --- Step 3: Gap Analysis ---
+    # --- Step 3: Gap Analysis (sync) ---
     if signals_result and analysis_result:
         competitor_signals = signals_result.get("competitor_signals")
-        gaps_result, steps_status["gaps"] = _run_step("gaps", lambda: analyze_gaps(
+        gaps_result, steps_status["gaps"] = await _run_step("gaps", lambda: analyze_gaps(
             signals_result, analysis_result, profile, competitor_signals,
         ))
     else:
@@ -107,11 +111,11 @@ def run_full_pipeline(
             reasons.append("analysis step failed or skipped")
         gaps_result, steps_status["gaps"] = _skip_step(" and ".join(reasons))
 
-    # --- Step 4: AI Visibility (independent) ---
+    # --- Step 4: AI Visibility (sync, independent) ---
     company = (profile or {}).get("companyName", "")
     industry = (profile or {}).get("industry", "General")
     if company and competitors:
-        visibility_result, steps_status["visibility"] = _run_step("visibility", lambda: assess_visibility(
+        visibility_result, steps_status["visibility"] = await _run_step("visibility", lambda: assess_visibility(
             company, industry, competitors,
         ))
     else:
@@ -119,10 +123,10 @@ def run_full_pipeline(
             "company name or competitors not configured in profile"
         )
 
-    # --- Step 5: Narrative Engine ---
+    # --- Step 5: Narrative Engine (sync) ---
     # Runs if signals exist; analysis/gaps/visibility are optional
     if signals_result:
-        narrative_result, steps_status["narrative"] = _run_step("narrative", lambda: generate_narrative(
+        narrative_result, steps_status["narrative"] = await _run_step("narrative", lambda: generate_narrative(
             audience, signals_result, analysis_result or {}, gaps_result, profile, visibility_result,
         ))
     else:

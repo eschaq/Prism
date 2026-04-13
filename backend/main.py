@@ -86,7 +86,6 @@ class NarrativeAllRequest(BaseModel):
     gaps: Optional[dict] = None
     profile: Optional[dict] = None
     visibility: Optional[dict] = None
-        return normalized
 
 
 class FollowUpRequest(BaseModel):
@@ -147,7 +146,7 @@ async def get_signals(request: SignalRequest):
     try:
         competitors_raw = (request.profile or {}).get("competitors", "")
         competitors = [c.strip() for c in competitors_raw.split(",") if c.strip()] if competitors_raw else None
-        result = scrape_signals(request.subreddits, request.query, request.limit, request.profile, request.rss_feeds, competitors, request.web_search)
+        result = await scrape_signals(request.subreddits, request.query, request.limit, request.profile, request.rss_feeds, competitors, request.web_search)
         return result
     except ValueError as e:
         # Bad subreddit name, private sub, etc. — caller's fault
@@ -536,7 +535,7 @@ async def run_all(
     text_content = "\n\n---\n\n".join(text_parts) if text_parts else None
 
     try:
-        result = run_full_pipeline(
+        result = await run_full_pipeline(
             subreddits=subreddits,
             query=query,
             limit=limit,

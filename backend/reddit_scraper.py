@@ -2,8 +2,8 @@ import os
 import json
 import logging
 
-import praw
-import prawcore
+import asyncpraw
+import asyncprawcore
 
 from claude_client import call_claude, load_prompt, strip_code_fences
 from formatting import format_profile
@@ -21,13 +21,13 @@ from scoring import (
 logger = logging.getLogger(__name__)
 
 # Module-level singleton — created once, reused across requests
-_reddit: praw.Reddit | None = None
+_reddit: asyncpraw.Reddit | None = None
 
 
-def _get_reddit_client() -> praw.Reddit:
+def _get_reddit_client() -> asyncpraw.Reddit:
     global _reddit
     if _reddit is None:
-        _reddit = praw.Reddit(
+        _reddit = asyncpraw.Reddit(
             client_id=os.environ["REDDIT_CLIENT_ID"],
             client_secret=os.environ["REDDIT_CLIENT_SECRET"],
             user_agent=os.environ.get("REDDIT_USER_AGENT", "Prism/1.0"),
@@ -35,13 +35,13 @@ def _get_reddit_client() -> praw.Reddit:
     return _reddit
 
 
-def _enrich_with_comments(submission) -> tuple[str, bool, list[str]]:
+async def _enrich_with_comments(submission) -> tuple[str, bool, list[str]]:
     """Fetch top 3 comments for a submission.
 
     Returns (comment_text, wtp_detected_in_comments, wtp_matches_in_comments).
     """
     try:
-        submission.comments.replace_more(limit=0)
+        await submission.comments.replace_more(limit=0)
         top_comments = sorted(
             submission.comments.list(),
             key=lambda c: c.score,
@@ -56,27 +56,30 @@ def _enrich_with_comments(submission) -> tuple[str, bool, list[str]]:
     return (comment_text, wtp_detected, wtp_matches)
 
 
-def _fetch_subreddit(reddit, subreddit_name: str, query: str, limit: int) -> list:
-    """Fetch submissions from a single subreddit. Returns list of PRAW submissions."""
+async def _fetch_subreddit(reddit, subreddit_name: str, query: str, limit: int) -> list:
+    """Fetch submissions from a single subreddit. Returns list of asyncpraw submissions."""
     try:
-        sub = reddit.subreddit(subreddit_name)
-        return list(sub.search(query, limit=limit, sort="relevance", time_filter="month"))
-    except prawcore.exceptions.NotFound:
+        sub = await reddit.subreddit(subreddit_name)
+        submissions = []
+        async for submission in sub.search(query, limit=limit, sort="relevance", time_filter="month"):
+            submissions.append(submission)
+        return submissions
+    except asyncprawcore.exceptions.NotFound:
         logger.warning("Subreddit r/%s does not exist, skipping.", subreddit_name)
         return []
-    except prawcore.exceptions.Forbidden:
+    except asyncprawcore.exceptions.Forbidden:
         logger.warning("r/%s is private or banned, skipping.", subreddit_name)
         return []
-    except prawcore.exceptions.TooManyRequests:
+    except asyncprawcore.exceptions.TooManyRequests:
         raise RuntimeError("Reddit rate limit reached. Please try again in a moment.")
-    except prawcore.exceptions.ResponseException as e:
+    except asyncprawcore.exceptions.ResponseException as e:
         raise RuntimeError(f"Reddit API error: {e}")
 
 
-def scan_competitors(
+async def scan_competitors(
     competitors: list[str], subreddits: list[str], limit: int = 10
 ) -> dict[str, list[dict]]:
-    """Run parallel Reddit scans for each competitor name.
+    """Run Reddit scans for each competitor name.
 
     Returns a dict mapping competitor name to a list of scored post dicts.
     """
@@ -86,7 +89,7 @@ def scan_competitors(
     for competitor in competitors:
         submissions = []
         for sub_name in subreddits:
-            submissions.extend(_fetch_subreddit(reddit, sub_name, competitor, limit))
+            submissions.extend(await _fetch_subreddit(reddit, sub_name, competitor, limit))
 
         # Career filter
         submissions = [s for s in submissions if not is_career_post(s.title, s.selftext)]
@@ -125,7 +128,7 @@ def scan_competitors(
     return results
 
 
-def scrape_signals(
+async def scrape_signals(
     subreddits: list[str],
     query: str,
     limit: int = 25,
@@ -140,14 +143,14 @@ def scrape_signals(
     # --- Fetch posts from all subreddits ---
     submissions = []
     for sub_name in subreddits:
-        submissions.extend(_fetch_subreddit(reddit, sub_name, query, limit))
+        submissions.extend(await _fetch_subreddit(reddit, sub_name, query, limit))
 
-    # --- Fetch RSS feed items ---
+    # --- Fetch RSS feed items (sync — no PRAW) ---
     rss_items = []
     if rss_feeds:
         rss_items = fetch_rss_feeds(rss_feeds, query, limit)
 
-    # --- Fetch web search results ---
+    # --- Fetch web search results (sync — no PRAW) ---
     web_items = []
     if web_search:
         industry = (profile or {}).get("industry", "")
@@ -279,7 +282,7 @@ def scrape_signals(
     for post in scored_posts[:10]:
         if post["submission"] is None:
             continue
-        comment_text, comment_wtp, comment_wtp_matches = _enrich_with_comments(
+        comment_text, comment_wtp, comment_wtp_matches = await _enrich_with_comments(
             post["submission"]
         )
         post["comments_text"] = comment_text
@@ -338,7 +341,7 @@ def scrape_signals(
         logger.warning("Claude returned non-JSON signal extraction response; storing raw text.")
         themes = extracted_str
 
-    # --- Build raw_posts for frontend (drop PRAW submission objects) ---
+    # --- Build raw_posts for frontend (drop asyncpraw submission objects) ---
     raw_posts = []
     for p in scored_posts:
         raw_posts.append({
@@ -361,7 +364,7 @@ def scrape_signals(
     # --- Step 7: Competitive scanning (separate from main pipeline) ---
     competitor_signals = {}
     if competitors:
-        competitor_signals = scan_competitors(competitors, subreddits, limit=10)
+        competitor_signals = await scan_competitors(competitors, subreddits, limit=10)
 
     return {
         "themes": themes,
