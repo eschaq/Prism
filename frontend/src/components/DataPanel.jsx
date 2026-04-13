@@ -1,7 +1,10 @@
 import React, { useState, useRef } from "react";
+import ReactMarkdown from "react-markdown";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import DEMO_DATASETS from "../demo_datasets";
+
+const PROSE_CLASSES = "prose prose-sm prose-invert prose-headings:text-on-surface prose-headings:text-sm prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4 prose-p:text-on-surface-variant prose-p:leading-relaxed prose-strong:text-on-surface prose-ul:text-on-surface-variant prose-ol:text-on-surface-variant prose-li:text-on-surface-variant max-w-none";
 
 const ACCEPTED_EXTENSIONS = [".csv", ".txt", ".md"];
 
@@ -314,8 +317,8 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
 
           <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px]" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
             <h3 className="text-sm font-semibold text-primary mb-3">Business Summary</h3>
-            <div className="text-sm text-on-surface-variant whitespace-pre-wrap leading-relaxed">
-              {result.summary}
+            <div className={PROSE_CLASSES}>
+              <ReactMarkdown>{result.summary}</ReactMarkdown>
             </div>
           </div>
 
