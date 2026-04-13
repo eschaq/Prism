@@ -65,8 +65,8 @@ VALID_AUDIENCES = set(AUDIENCE_PROMPTS.keys())
 
 class NarrativeRequest(BaseModel):
     audience: str
-    signals: dict
-    analysis: dict
+    signals: Optional[dict] = None
+    analysis: Optional[dict] = None
     gaps: Optional[dict] = None
     profile: Optional[dict] = None
     visibility: Optional[dict] = None
@@ -81,8 +81,8 @@ class NarrativeRequest(BaseModel):
 
 
 class NarrativeAllRequest(BaseModel):
-    signals: dict
-    analysis: dict
+    signals: Optional[dict] = None
+    analysis: Optional[dict] = None
     gaps: Optional[dict] = None
     profile: Optional[dict] = None
     visibility: Optional[dict] = None

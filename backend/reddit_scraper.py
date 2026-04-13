@@ -36,7 +36,7 @@ def _get_reddit_client() -> asyncpraw.Reddit:
 
 
 async def _enrich_with_comments(submission) -> tuple[str, bool, list[str]]:
-    """Fetch top 3 comments for a submission.
+    """Fetch top 2 comments for a submission.
 
     Returns (comment_text, wtp_detected_in_comments, wtp_matches_in_comments).
     """
@@ -46,7 +46,7 @@ async def _enrich_with_comments(submission) -> tuple[str, bool, list[str]]:
             submission.comments.list(),
             key=lambda c: c.score,
             reverse=True,
-        )[:3]
+        )[:2]
         comment_text = "\n---\n".join(c.body[:500] for c in top_comments)
     except Exception:
         logger.warning("Failed to fetch comments for post %s", submission.id)
@@ -278,8 +278,8 @@ async def scrape_signals(
     # --- Step 3: Sort by PPS descending ---
     scored_posts.sort(key=lambda p: p["pps_total"], reverse=True)
 
-    # --- Step 4: Comment enrichment for top 10 (Reddit posts only) ---
-    for post in scored_posts[:10]:
+    # --- Step 4: Comment enrichment for top 5 (Reddit posts only) ---
+    for post in scored_posts[:5]:
         if post["submission"] is None:
             continue
         comment_text, comment_wtp, comment_wtp_matches = await _enrich_with_comments(
