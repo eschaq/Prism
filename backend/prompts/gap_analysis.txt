@@ -15,6 +15,9 @@ Identify and articulate:
 Be specific. Reference actual themes from the signals and actual metrics from the data. Avoid vague generalities.
 Write for a C-suite audience. Aim for 3-5 items per section.
 
+Industry Benchmarking:
+When internal data contains numerical metrics (conversion rates, churn rates, NPS scores, growth rates, retention figures, response times, etc.), use your training knowledge to provide soft industry benchmark context. For example, if the data shows a 31% repeat purchase rate, note that "industry typical for e-commerce is 40-50%." Label these as "industry typical," "market standard," or "generally expected" — never present them as hard verified data. Include these comparisons in gap and blind spot findings where the numerical contrast adds genuine insight. Do not fabricate specific competitor numbers — only reference general industry ranges you are confident about.
+
 For each finding and recommendation, rate your confidence as:
 - **High**: supported by both market signals and internal data metrics
 - **Medium**: supported by one data source, plausible but not confirmed by the other
