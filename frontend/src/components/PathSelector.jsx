@@ -61,7 +61,7 @@ const ACCENT_CLASSES = {
   },
 };
 
-export default function PathSelector({ audienceLabel, onSelect, onHome }) {
+export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenticMode }) {
   const [logoFailed, setLogoFailed] = useState(false);
 
   return (
@@ -153,6 +153,39 @@ export default function PathSelector({ audienceLabel, onSelect, onHome }) {
               </button>
             );
           })}
+        </div>
+
+        {/* Agentic Mode */}
+        <div className="mt-8">
+          <button
+            onClick={onAgenticMode}
+            className="group relative overflow-hidden w-full rounded-xl p-8 border border-secondary/20 hover:border-secondary/40 transition-all duration-500 text-left focus:outline-none focus:ring-1 focus:ring-secondary backdrop-blur-[12px]"
+            style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}
+          >
+            <div className="absolute top-0 right-0 w-48 h-48 bg-secondary/10 blur-[60px] group-hover:bg-secondary/20 transition-all"></div>
+
+            <div className="flex justify-between items-start mb-4 relative">
+              <div className="p-3 rounded-lg bg-secondary/10 text-secondary">
+                <span className="material-symbols-outlined text-3xl">bolt</span>
+              </div>
+              <span className="font-label text-xs font-bold px-2 py-1 rounded border text-secondary bg-secondary/5 border-secondary/20">
+                AGENTIC
+              </span>
+            </div>
+
+            <h3 className="text-xl font-bold text-on-surface mb-2 font-headline group-hover:text-secondary transition-colors">
+              Run Everything
+            </h3>
+            <p className="text-on-surface-variant text-sm leading-relaxed">
+              One click. All five steps run automatically. Get your complete intelligence report without lifting a finger.
+            </p>
+
+            <div className="flex items-center gap-2 pt-4 mt-4 border-t border-outline-variant/10">
+              <span className="text-[10px] font-label text-secondary uppercase tracking-widest">
+                Signals → Data → Gaps → Visibility → Narrative
+              </span>
+            </div>
+          </button>
         </div>
       </main>
     </div>

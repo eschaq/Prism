@@ -18,6 +18,7 @@ from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
 from rss_feed_map import INDUSTRY_FEEDS, DEFAULT_FEEDS
 from claude_client import call_claude, strip_code_fences
 from visibility import assess_visibility
+from orchestrator import run_full_pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -423,6 +424,89 @@ async def get_demo_data(filepath: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Demo file not found: {filepath}")
     filename = os.path.basename(resolved)
     return FileResponse(resolved, media_type=DEMO_MEDIA_TYPES[ext], filename=filename)
+
+
+# ---------------------------------------------------------------------------
+# POST /api/run-all — Agentic mode: chain all 5 steps
+# ---------------------------------------------------------------------------
+@app.post("/api/run-all", tags=["pipeline"])
+async def run_all(
+    config: str = Form(...),
+    files: list[UploadFile] = File(None),
+):
+    try:
+        cfg = json.loads(config)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid config JSON.")
+
+    subreddits = cfg.get("subreddits", [])
+    query = cfg.get("query", "")
+    limit = cfg.get("limit", 25)
+    rss_feeds = cfg.get("rss_feeds") or None
+    audience = cfg.get("audience", "cfo")
+    profile = cfg.get("profile") or None
+    pasted_text = cfg.get("text", "").strip() or None
+
+    if not subreddits or not query:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="config must include 'subreddits' (non-empty list) and 'query' (non-empty string).",
+        )
+
+    # Process uploaded files into CSV and text buckets
+    max_size = 10 * 1024 * 1024
+    csv_objs = []
+    text_parts = []
+    text_filenames = []
+
+    if files:
+        for f in files:
+            if not f.filename:
+                continue
+            ext = f.filename.lower()[f.filename.rfind("."):]
+            if ext not in {".csv", ".txt", ".md"}:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Unsupported file type: {f.filename}. Accepted: .csv, .txt, .md",
+                )
+            contents = await f.read()
+            if not contents:
+                continue
+            if len(contents) > max_size:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File too large: {f.filename}. Maximum is 10 MB per file.",
+                )
+            if ext == ".csv":
+                csv_objs.append(io.BytesIO(contents))
+            else:
+                text_parts.append(contents.decode("utf-8", errors="replace"))
+                text_filenames.append(f.filename)
+
+    # Combine pasted text
+    if pasted_text:
+        text_parts.append(pasted_text)
+        if not text_filenames:
+            text_filenames.append("pasted_text")
+
+    text_content = "\n\n---\n\n".join(text_parts) if text_parts else None
+
+    try:
+        result = run_full_pipeline(
+            subreddits=subreddits,
+            query=query,
+            limit=limit,
+            rss_feeds=rss_feeds,
+            csv_objs=csv_objs if csv_objs else None,
+            text_content=text_content,
+            text_filenames=text_filenames if text_filenames else None,
+            audience=audience,
+            profile=profile,
+        )
+        return result
+    except Exception as e:
+        logger.exception("Unexpected error in /api/run-all")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
 # ---------------------------------------------------------------------------

@@ -6,6 +6,7 @@ import RoleSelector from "./components/RoleSelector";
 import PathSelector from "./components/PathSelector";
 import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
+import AgenticProgress from "./components/AgenticProgress";
 import { Spinner } from "./components/LoadingStates";
 import prismLogo from "./assets/prism-logo.png";
 import prismBg from "./assets/prism-backround.png";
@@ -60,6 +61,10 @@ export default function App() {
   const [profile, setProfile] = useState(loadProfile);
   const [showSettings, setShowSettings] = useState(false);
   const [demoConfig, setDemoConfig] = useState(null);
+  const [agenticRunning, setAgenticRunning] = useState(false);
+  const [agenticResult, setAgenticResult] = useState(null);
+  const [agenticError, setAgenticError] = useState(null);
+  const agenticCancelled = useRef(false);
 
   // Lifted wizard state
   const [activeIndex, setActiveIndex] = useState(0);
@@ -83,6 +88,98 @@ export default function App() {
     setAudience(DEMO_CONFIG.audience);
     setPath(DEMO_CONFIG.path);
     setDemoConfig({ subreddits: DEMO_CONFIG.subreddits, query: DEMO_CONFIG.query });
+  }
+
+  async function handleAgenticMode() {
+    // Read saved sources from localStorage
+    let subreddits = [];
+    try {
+      const stored = localStorage.getItem("prism_subreddits");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        subreddits = parsed.filter((s) => s.checked).map((s) => s.name);
+      }
+    } catch { /* ignore */ }
+
+    let rssFeeds = [];
+    try {
+      const stored = localStorage.getItem("prism_feeds");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        rssFeeds = parsed.filter((f) => f.checked).map((f) => f.url);
+      }
+    } catch { /* ignore */ }
+
+    // Derive query from profile industry
+    const industry = profile?.industry || "";
+    const query = industry
+      ? industry.toLowerCase().replace(/&/g, "").replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim() + " tools"
+      : "enterprise intelligence tools";
+
+    // If no subreddits saved, get defaults from industry
+    if (subreddits.length === 0) {
+      subreddits = ["datascience", "analytics", "BusinessIntelligence"];
+    }
+
+    const config = {
+      subreddits,
+      query,
+      limit: 25,
+      rss_feeds: rssFeeds.length > 0 ? rssFeeds : undefined,
+      audience: audience || "cfo",
+      profile: profile || undefined,
+    };
+
+    setAgenticRunning(true);
+    setAgenticResult(null);
+    setAgenticError(null);
+    agenticCancelled.current = false;
+
+    try {
+      const form = new FormData();
+      form.append("config", JSON.stringify(config));
+
+      const res = await fetch(`${API_BASE}/api/run-all`, {
+        method: "POST",
+        body: form,
+      });
+
+      if (agenticCancelled.current) return;
+
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+
+      if (agenticCancelled.current) return;
+
+      // Store all results
+      setAgenticResult(data);
+      if (data.signals) setSignals(data.signals);
+      if (data.analysis) setAnalysis(data.analysis);
+      if (data.gaps) setGaps(data.gaps);
+      if (data.visibility) setVisibility(data.visibility);
+      if (data.narrative) setNarrative(data.narrative);
+
+      // Land on narrative step in full_report path
+      setTimeout(() => {
+        setPath("full_report");
+        const fullReportSteps = PATHS.find((p) => p.id === "full_report")?.steps || [];
+        const narrativeIndex = fullReportSteps.indexOf("narrative");
+        setActiveIndex(narrativeIndex >= 0 ? narrativeIndex : fullReportSteps.length - 1);
+        setAgenticRunning(false);
+      }, 1500);
+    } catch (err) {
+      if (!agenticCancelled.current) {
+        setAgenticError(err.message);
+        setAgenticRunning(false);
+      }
+    }
+  }
+
+  function handleCancelAgentic() {
+    agenticCancelled.current = true;
+    setAgenticRunning(false);
+    setAgenticResult(null);
+    setAgenticError(null);
   }
 
   // Completion map
@@ -187,7 +284,33 @@ export default function App() {
 
   // Screen 2: Path selection
   if (!path) {
-    return <PathSelector audienceLabel={audienceLabel} onSelect={setPath} onHome={() => setAudience(null)} />;
+    if (agenticRunning || agenticResult) {
+      return (
+        <AgenticProgress
+          stepsStatus={agenticResult?.steps_status || null}
+          running={agenticRunning}
+          onCancel={handleCancelAgentic}
+        />
+      );
+    }
+
+    if (agenticError) {
+      return (
+        <div className="min-h-screen bg-surface flex items-center justify-center">
+          <div className="max-w-md text-center space-y-4">
+            <p className="text-error text-sm">{agenticError}</p>
+            <button
+              onClick={() => setAgenticError(null)}
+              className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-6 py-2"
+            >
+              Back to Path Selection
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return <PathSelector audienceLabel={audienceLabel} onSelect={setPath} onHome={() => setAudience(null)} onAgenticMode={handleAgenticMode} />;
   }
 
   const pathLabel = activePath?.label ?? path;
