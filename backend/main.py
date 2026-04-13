@@ -281,13 +281,13 @@ async def get_gaps(request: GapRequest):
 # ---------------------------------------------------------------------------
 @app.post("/api/narrative", tags=["narrative"])
 async def get_narrative(request: NarrativeRequest):
-    if not request.signals or not request.analysis:
+    if not request.signals and not request.analysis:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Both 'signals' and 'analysis' must be non-empty.",
+            detail="Either 'signals' or 'analysis' must be provided.",
         )
     try:
-        result = generate_narrative(request.audience, request.signals, request.analysis, request.gaps, request.profile, request.visibility)
+        result = generate_narrative(request.audience, request.signals or {}, request.analysis or {}, request.gaps, request.profile, request.visibility)
         return result
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -301,16 +301,16 @@ async def get_narrative(request: NarrativeRequest):
 # ---------------------------------------------------------------------------
 @app.post("/api/narrative/all", tags=["narrative"])
 async def get_all_narratives(request: NarrativeAllRequest):
-    if not request.signals or not request.analysis:
+    if not request.signals and not request.analysis:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Both 'signals' and 'analysis' must be non-empty.",
+            detail="Either 'signals' or 'analysis' must be provided.",
         )
     briefs = []
     for audience_key in AUDIENCE_PROMPTS:
         try:
             result = generate_narrative(
-                audience_key, request.signals, request.analysis,
+                audience_key, request.signals or {}, request.analysis or {},
                 request.gaps, request.profile, request.visibility,
             )
             briefs.append({
