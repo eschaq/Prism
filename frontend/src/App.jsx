@@ -11,7 +11,7 @@ import AgenticPreflight from "./components/AgenticPreflight";
 import prismLogo from "./assets/prism-logo.png";
 import prismBg from "./assets/prism-backround.png";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL || "";
 const STORAGE_KEY = "prism_profile";
 
 const STEP_ICONS = {

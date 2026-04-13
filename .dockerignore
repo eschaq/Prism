@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build artifacts (rebuilt in Docker)
+frontend/dist/
+
+# Environment and secrets
+.env
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code
+.claude/
+
+# Misc
+*.log
