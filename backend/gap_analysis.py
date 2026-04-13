@@ -56,3 +56,41 @@ def generate_battlecard(competitive_contrast: list, signals: dict, profile: dict
 
     battlecard = call_claude(system_prompt, user_message)
     return {"battlecard": battlecard}
+
+
+def stress_test_gaps(gaps: dict, profile: dict | None = None) -> dict:
+    """Roleplay as a skeptical buyer reacting to the gap findings."""
+    system_prompt = load_prompt("stress_test.txt")
+    profile_section = f"COMPANY PROFILE:\n{format_profile(profile)}\n\n" if profile else ""
+
+    # Format gap findings as readable text
+    sections = []
+    for key, label in [
+        ("alignments", "Alignments"),
+        ("gaps", "Critical Gaps"),
+        ("blind_spots", "Blind Spots"),
+        ("recommendations", "Recommendations"),
+        ("competitive_contrast", "Competitive Contrast"),
+    ]:
+        items = gaps.get(key, [])
+        if not items:
+            continue
+        sections.append(f"{label}:")
+        for i, item in enumerate(items, 1):
+            finding = item.get("finding") or item.get("action", "")
+            evidence = item.get("evidence") or item.get("rationale", "")
+            sections.append(f"  {i}. {finding}")
+            if evidence:
+                sections.append(f"     {evidence}")
+
+    ma = gaps.get("messaging_alignment")
+    if ma:
+        sections.append(f"\nMessaging Alignment Score: {ma.get('score', '?')}/10 — {ma.get('rationale', '')}")
+
+    user_message = (
+        f"{profile_section}"
+        f"GAP ANALYSIS FINDINGS:\n{chr(10).join(sections)}"
+    )
+
+    response = call_claude(system_prompt, user_message)
+    return {"response": response}

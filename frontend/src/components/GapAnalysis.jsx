@@ -25,6 +25,9 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
   const [battlecardError, setBattlecardError] = useState(null);
   const [showBattlecard, setShowBattlecard] = useState(false);
   const [battlecardCopied, setBattlecardCopied] = useState(false);
+  const [stressTest, setStressTest] = useState(null);
+  const [stressTestLoading, setStressTestLoading] = useState(false);
+  const [stressTestError, setStressTestError] = useState(null);
 
   const canRun = signals && analysis;
 
@@ -88,8 +91,29 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
     });
   }
 
+  async function handleStressTest() {
+    setStressTestLoading(true);
+    setStressTestError(null);
+    setStressTest(null);
+    try {
+      const res = await fetch(`${apiBase}/api/gaps/stress-test`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ gaps: result.gaps, profile }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setStressTest(data.response);
+    } catch (err) {
+      setStressTestError(err.message);
+    } finally {
+      setStressTestLoading(false);
+    }
+  }
+
   const hasCompetitiveContrast =
     result && typeof result.gaps !== "string" && result.gaps?.competitive_contrast?.length > 0;
+  const hasGapResults = result && typeof result.gaps !== "string";
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -346,6 +370,47 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Stress Test */}
+            {hasGapResults && (
+              <div className="space-y-3">
+                <button
+                  onClick={handleStressTest}
+                  disabled={stressTestLoading}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2 hover:border-primary/30 hover:text-primary disabled:opacity-40"
+                >
+                  {stressTestLoading && <Spinner size="sm" />}
+                  <span className="material-symbols-outlined text-sm">psychology</span>
+                  {stressTestLoading ? "Running stress test..." : "Stress Test with Buyer Persona"}
+                </button>
+
+                {stressTestError && (
+                  <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
+                    {stressTestError}
+                  </div>
+                )}
+
+                {stressTest && (
+                  <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-3" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="material-symbols-outlined text-tertiary">person_alert</span>
+                        <h3 className="text-sm font-semibold text-on-surface">Buyer Persona Reaction</h3>
+                      </div>
+                      <button
+                        onClick={() => setStressTest(null)}
+                        className="text-[10px] text-outline hover:text-on-surface-variant transition-colors"
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                    <p className="text-sm text-on-surface-variant leading-relaxed italic">
+                      {stressTest}
+                    </p>
                   </div>
                 )}
               </div>

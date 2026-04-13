@@ -13,7 +13,7 @@ from typing import Optional
 from reddit_scraper import scrape_signals
 from data_processor import process_csvs, process_text
 from narrative_engine import generate_narrative, answer_follow_up, AUDIENCE_PROMPTS
-from gap_analysis import analyze_gaps, generate_battlecard
+from gap_analysis import analyze_gaps, generate_battlecard, stress_test_gaps
 from subreddit_map import INDUSTRY_SUBREDDITS, DEFAULT_SUBREDDITS
 from rss_feed_map import INDUSTRY_FEEDS, DEFAULT_FEEDS
 from claude_client import call_claude, strip_code_fences
@@ -121,6 +121,11 @@ class CompetitorSuggestionRequest(BaseModel):
 class BattlecardRequest(BaseModel):
     competitive_contrast: list
     signals: dict
+    profile: Optional[dict] = None
+
+
+class StressTestRequest(BaseModel):
+    gaps: dict
     profile: Optional[dict] = None
 
 
@@ -401,6 +406,24 @@ async def get_battlecard(request: BattlecardRequest):
         return result
     except Exception as e:
         logger.exception("Unexpected error in /api/battlecard")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# POST /api/gaps/stress-test — Synthetic audience stress test
+# ---------------------------------------------------------------------------
+@app.post("/api/gaps/stress-test", tags=["analysis"])
+async def get_stress_test(request: StressTestRequest):
+    if not request.gaps:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="gaps must be non-empty.",
+        )
+    try:
+        result = stress_test_gaps(request.gaps, request.profile)
+        return result
+    except Exception as e:
+        logger.exception("Unexpected error in /api/gaps/stress-test")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
