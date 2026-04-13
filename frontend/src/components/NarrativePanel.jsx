@@ -242,11 +242,67 @@ ${briefingHtml}
 
   const isComparing = !!compareResult;
 
+  // Decision Readiness Score
+  let readinessScore = 0;
+  const contributions = [];
+  const missingInputs = [];
+
+  if (signals) { readinessScore += 2; contributions.push("Signals"); }
+  else { missingInputs.push("Signals"); }
+  if (analysis) { readinessScore += 2; contributions.push("Data"); }
+  else { missingInputs.push("Data"); }
+  if (gaps) { readinessScore += 2; contributions.push("Gaps"); }
+  else { missingInputs.push("Gaps"); }
+  if (visibility) { readinessScore += 2; contributions.push("Visibility"); }
+  else { missingInputs.push("Visibility"); }
+  if (profile?.companyName) { readinessScore += 1; contributions.push("Profile"); }
+  else { missingInputs.push("Profile"); }
+  if (profile?.competitors) { readinessScore += 1; contributions.push("Competitors"); }
+  else { missingInputs.push("Competitors"); }
+
+  const readinessTier = readinessScore >= 8 ? "Ready" : readinessScore >= 6 ? "Strong" : readinessScore >= 4 ? "Partial" : "Limited";
+  const readinessColor = readinessScore >= 6
+    ? "text-secondary border-secondary/20 bg-secondary/10"
+    : readinessScore >= 4
+    ? "text-tertiary border-tertiary/20 bg-tertiary/10"
+    : "text-error border-error-container bg-error-container/20";
+  const [readinessText, readinessBorder, readinessBg] = readinessColor.split(" ");
+  const readinessLabelColor = readinessScore >= 6
+    ? "text-secondary border-secondary/20"
+    : readinessScore >= 4
+    ? "text-tertiary border-tertiary/20"
+    : "text-error border-error-container";
+
   return (
     <div className={`space-y-6 ${isComparing ? "max-w-5xl" : "max-w-4xl"}`}>
+      {/* Decision Readiness Score */}
+      <div className={`rounded-xl border p-5 ${readinessBorder} ${readinessBg}`}>
+        <div className="flex items-center gap-4">
+          <div className={`text-3xl font-bold ${readinessText}`}>
+            {readinessScore}
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm font-semibold text-on-surface">Decision Readiness</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full border ${readinessLabelColor}`}>
+                {readinessTier} — {readinessScore}/10
+              </span>
+            </div>
+            <p className="text-[11px] text-on-surface-variant">
+              Contributing: {contributions.length > 0 ? contributions.join(", ") : "None"}
+            </p>
+            {missingInputs.length > 0 && (
+              <p className="text-[10px] text-outline mt-0.5">
+                Add {missingInputs.join(", ")} to strengthen
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {!canRun && (
         <div className="rounded-md bg-tertiary/10 border border-tertiary/20 px-4 py-3 text-sm text-tertiary">
-          Complete both Signal Collection and Data Analysis before generating narratives.
+          Complete both Market Intelligence and Data Insights before generating briefings.
         </div>
       )}
 
