@@ -2,6 +2,7 @@
 
 import json
 import logging
+import time
 from urllib.parse import urlparse
 
 from claude_client import call_claude_with_search, strip_code_fences
@@ -18,7 +19,7 @@ def _domain(url: str) -> str:
         return url
 
 
-def search_web(query: str, industry: str = "", limit: int = 10) -> list[dict]:
+def search_web(query: str, industry: str = "", limit: int = 5) -> list[dict]:
     """Search the web for recent industry content and return normalized post dicts.
 
     Uses Claude's built-in web search tool to find recent news, discussions,
@@ -43,6 +44,7 @@ def search_web(query: str, industry: str = "", limit: int = 10) -> list[dict]:
     )
 
     try:
+        time.sleep(2)  # Rate limit buffer when combined with Reddit/RSS
         raw = call_claude_with_search(system_prompt, user_message)
     except Exception:
         logger.exception("Web search call failed")
