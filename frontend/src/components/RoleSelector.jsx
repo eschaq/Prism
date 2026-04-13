@@ -16,6 +16,23 @@ const ROLE_ICONS = {
   risk_compliance: "shield",
   board: "corporate_fare",
   small_business: "store",
+  cio: "hub",
+};
+
+export const ROLE_COLORS = {
+  cfo: "#6366f1",
+  operations: "#14b8a6",
+  marketing: "#ec4899",
+  sales: "#f97316",
+  product: "#8b5cf6",
+  sales_engineer: "#06b6d4",
+  hr: "#22c55e",
+  supply_chain: "#f59e0b",
+  customer_success: "#10b981",
+  risk_compliance: "#ef4444",
+  board: "#3b82f6",
+  small_business: "#eab308",
+  cio: "#a855f7",
 };
 
 export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoadDemo }) {
@@ -111,20 +128,25 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {AUDIENCES.map((a) => {
             const icon = ROLE_ICONS[a.id] || "person";
+            const accent = ROLE_COLORS[a.id] || "#aebaff";
             return (
               <button
                 key={a.id}
                 onClick={() => onSelect(a.id)}
-                className="group relative overflow-hidden rounded-xl p-6 border border-[rgba(174,186,255,0.08)] hover:border-primary/30 transition-all duration-500 text-left focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-[12px]"
-                style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}
+                className="group relative overflow-hidden rounded-xl p-6 border border-[rgba(174,186,255,0.08)] border-l-2 transition-all duration-500 text-left focus:outline-none focus:ring-1 backdrop-blur-[12px]"
+                style={{
+                  backgroundColor: "rgba(22, 25, 34, 0.45)",
+                  borderLeftColor: accent,
+                  "--accent": accent,
+                }}
               >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 blur-[40px] group-hover:bg-primary/20 transition-all"></div>
+                <div className="absolute top-0 right-0 w-24 h-24 blur-[40px] transition-all opacity-10 group-hover:opacity-20" style={{ backgroundColor: accent }}></div>
                 <div className="flex items-start gap-3 relative">
-                  <div className="p-2 bg-primary/10 rounded-lg text-primary shrink-0">
+                  <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: `${accent}15`, color: accent }}>
                     <span className="material-symbols-outlined text-xl">{icon}</span>
                   </div>
                   <div>
-                    <div className="font-bold text-sm text-on-surface group-hover:text-primary transition-colors font-headline">
+                    <div className="font-bold text-sm text-on-surface transition-colors font-headline" style={{ "--hover-color": accent }}>
                       {a.label}
                     </div>
                     <div className="text-xs text-on-surface-variant mt-1 font-body leading-relaxed">

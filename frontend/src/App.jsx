@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import AUDIENCES from "./audiences";
 import { PATHS, STEP_META } from "./paths";
 import DEMO_CONFIG from "./demo";
-import RoleSelector from "./components/RoleSelector";
+import RoleSelector, { ROLE_COLORS } from "./components/RoleSelector";
 import PathSelector from "./components/PathSelector";
 import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
@@ -352,7 +352,9 @@ export default function App() {
         </div>
 
         <div className="flex flex-col gap-1 flex-1">
-          {steps.map((stepId, i) => {
+          {(() => {
+            const roleAccent = ROLE_COLORS[audience] || "#5C6BC0";
+            return steps.map((stepId, i) => {
             const meta = STEP_META[stepId];
             const isComplete = completionMap[stepId];
             const isActive = i === activeIndex;
@@ -366,13 +368,14 @@ export default function App() {
                 disabled={!clickable}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-left ${
                   isActive
-                    ? "bg-surface-container-low text-[#5C6BC0] border-l-4 border-[#5C6BC0]"
+                    ? "bg-surface-container-low border-l-4"
                     : isComplete
                     ? "text-secondary hover:bg-surface-container-low hover:text-white"
                     : clickable
                     ? "text-on-surface-variant hover:bg-surface-container-low hover:text-white"
                     : "text-on-surface-variant/40 cursor-not-allowed"
                 }`}
+                style={isActive ? { color: roleAccent, borderLeftColor: roleAccent } : undefined}
               >
                 <span className="material-symbols-outlined text-xl">
                   {isComplete ? "check_circle" : icon}
@@ -383,14 +386,16 @@ export default function App() {
                 </div>
               </button>
             );
-          })}
+          });
+          })()}
         </div>
 
         {/* Continue button */}
         {transitioning && nextStepLabel && (
           <button
             onClick={advanceNow}
-            className="mx-2 mt-2 w-[calc(100%-16px)] rounded-xl bg-[#5C6BC0] text-white py-2.5 font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            className="mx-2 mt-2 w-[calc(100%-16px)] rounded-xl text-white py-2.5 font-label font-bold text-sm shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            style={{ backgroundColor: ROLE_COLORS[audience] || "#5C6BC0" }}
           >
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
             Continue to {nextStepLabel}
