@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { Copy, Download, Mail } from "lucide-react";
+import { Copy, Download, Mail, X } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
 import AUDIENCES from "../audiences";
 
@@ -21,6 +21,13 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const [compareResult, setCompareResult] = useState(null);
   const [compareLoading, setCompareLoading] = useState(false);
   const [compareError, setCompareError] = useState(null);
+  const [allBriefs, setAllBriefs] = useState(null);
+  const [allBriefsLoading, setAllBriefsLoading] = useState(false);
+  const [allBriefsError, setAllBriefsError] = useState(null);
+  const [allBriefsProgress, setAllBriefsProgress] = useState(0);
+  const [expandedBrief, setExpandedBrief] = useState(null);
+  const [expandedCopied, setExpandedCopied] = useState(false);
+  const progressTimer = useRef(null);
 
   const canRun = signals && analysis;
   const audienceLabel = AUDIENCES.find((a) => a.id === audience)?.label ?? audience;
@@ -52,6 +59,41 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleGenerateAll() {
+    if (!canRun) return;
+    setAllBriefsLoading(true);
+    setAllBriefsError(null);
+    setAllBriefs(null);
+    setExpandedBrief(null);
+    setAllBriefsProgress(0);
+    // Simulate progress — advance every 4 seconds
+    progressTimer.current = setInterval(() => {
+      setAllBriefsProgress((prev) => Math.min(prev + 1, AUDIENCES.length - 1));
+    }, 4000);
+    try {
+      const res = await fetch(`${apiBase}/api/narrative/all`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signals, analysis, gaps, profile, visibility }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      setAllBriefs(data.briefs);
+    } catch (err) {
+      setAllBriefsError(err.message);
+    } finally {
+      clearInterval(progressTimer.current);
+      setAllBriefsLoading(false);
+      setAllBriefsProgress(0);
+    }
+  }
+
+  function getPreview(text) {
+    if (!text) return "";
+    const sentences = text.replace(/^[#*\s]+/gm, "").split(/(?<=[.!?])\s+/);
+    return sentences.slice(0, 2).join(" ");
   }
 
   async function handleCompare() {
@@ -306,13 +348,23 @@ ${briefingHtml}
         </div>
       )}
 
-      <button
-        onClick={handleGenerate}
-        disabled={!canRun || loading}
-        className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
-      >
-        {loading ? "Generating..." : `Generate ${audienceLabel} Briefing`}
-      </button>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleGenerate}
+          disabled={!canRun || loading}
+          className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
+        >
+          {loading ? "Generating..." : `Generate ${audienceLabel} Briefing`}
+        </button>
+        <button
+          onClick={handleGenerateAll}
+          disabled={!canRun || allBriefsLoading}
+          className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-4 py-2.5 hover:border-primary/30 hover:text-primary disabled:opacity-40 flex items-center gap-1.5"
+        >
+          {allBriefsLoading && <Spinner size="sm" />}
+          {allBriefsLoading ? `Generating ${allBriefsProgress + 1} of ${AUDIENCES.length}...` : `Generate All ${AUDIENCES.length} Briefs`}
+        </button>
+      </div>
 
       {error && (
         <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
@@ -518,6 +570,113 @@ ${briefingHtml}
         </>
         );
       })()}
+
+      {/* All Briefs error */}
+      {allBriefsError && (
+        <div className="rounded-md bg-error-container/20 border border-error-container px-4 py-3 text-sm text-on-error-container">
+          {allBriefsError}
+        </div>
+      )}
+
+      {/* All Briefs grid */}
+      {allBriefs && !allBriefsLoading && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-on-surface">All Audience Briefs</h3>
+            <span className="text-[10px] font-label text-outline">
+              {allBriefs.filter((b) => b.briefing).length} of {allBriefs.length} generated
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {allBriefs.map((brief) => {
+              const roleLabel = AUDIENCES.find((a) => a.id === brief.audience)?.label ?? brief.audience;
+              const wordCount = brief.briefing ? brief.briefing.split(/\s+/).length : 0;
+              const readTime = Math.ceil(wordCount / 200);
+              const preview = getPreview(brief.briefing);
+
+              return (
+                <div
+                  key={brief.audience}
+                  className="rounded-xl border border-[rgba(174,186,255,0.08)] p-4 backdrop-blur-[12px] space-y-2"
+                  style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-on-surface font-headline">{roleLabel}</span>
+                    {brief.briefing ? (
+                      <span className="text-[10px] text-outline">~{readTime} min</span>
+                    ) : (
+                      <span className="text-[10px] text-error">Failed</span>
+                    )}
+                  </div>
+                  {brief.briefing ? (
+                    <>
+                      <p className="text-[11px] text-on-surface-variant leading-relaxed line-clamp-3">
+                        {preview}
+                      </p>
+                      <button
+                        onClick={() => setExpandedBrief(brief.audience === expandedBrief ? null : brief.audience)}
+                        className="text-[10px] font-label text-primary hover:text-primary-fixed transition-colors"
+                      >
+                        {expandedBrief === brief.audience ? "Close" : "View Full Brief"}
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-[10px] text-error/70">{brief.error}</p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Expanded brief */}
+          {expandedBrief && (() => {
+            const brief = allBriefs.find((b) => b.audience === expandedBrief);
+            if (!brief?.briefing) return null;
+            const roleLabel = AUDIENCES.find((a) => a.id === brief.audience)?.label ?? brief.audience;
+
+            return (
+              <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-4" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-primary">{roleLabel} Briefing</h3>
+                    <span className="text-xs px-2 py-0.5 rounded-full border border-primary/20 text-primary">
+                      Prism Intelligence
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(brief.briefing).then(() => {
+                          setExpandedCopied(true);
+                          setTimeout(() => setExpandedCopied(false), 2000);
+                        });
+                      }}
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                        expandedCopied
+                          ? "border-secondary/30 text-secondary"
+                          : "border-outline-variant text-on-surface-variant hover:border-outline-variant hover:text-on-surface"
+                      }`}
+                    >
+                      <Copy size={12} />
+                      {expandedCopied ? "Copied" : "Copy"}
+                    </button>
+                    <button
+                      onClick={() => setExpandedBrief(null)}
+                      className="rounded-md border border-outline-variant p-1.5 text-on-surface-variant hover:text-on-surface transition-colors"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
+                <div className={PROSE_CLASSES}>
+                  <ReactMarkdown>{brief.briefing}</ReactMarkdown>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </div>
   );
 }

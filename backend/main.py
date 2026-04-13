@@ -80,6 +80,15 @@ class NarrativeRequest(BaseModel):
         return normalized
 
 
+class NarrativeAllRequest(BaseModel):
+    signals: dict
+    analysis: dict
+    gaps: Optional[dict] = None
+    profile: Optional[dict] = None
+    visibility: Optional[dict] = None
+        return normalized
+
+
 class FollowUpRequest(BaseModel):
     audience: str
     question: str = Field(..., min_length=1)
@@ -281,6 +290,40 @@ async def get_narrative(request: NarrativeRequest):
     except Exception as e:
         logger.exception("Unexpected error in /api/narrative")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# POST /api/narrative/all — Generate briefs for all audience roles
+# ---------------------------------------------------------------------------
+@app.post("/api/narrative/all", tags=["narrative"])
+async def get_all_narratives(request: NarrativeAllRequest):
+    if not request.signals or not request.analysis:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Both 'signals' and 'analysis' must be non-empty.",
+        )
+    briefs = []
+    for audience_key in AUDIENCE_PROMPTS:
+        try:
+            result = generate_narrative(
+                audience_key, request.signals, request.analysis,
+                request.gaps, request.profile, request.visibility,
+            )
+            briefs.append({
+                "audience": audience_key,
+                "briefing": result.get("briefing"),
+                "follow_up_questions": result.get("follow_up_questions", []),
+                "error": None,
+            })
+        except Exception as e:
+            logger.warning("Failed to generate narrative for %s: %s", audience_key, e)
+            briefs.append({
+                "audience": audience_key,
+                "briefing": None,
+                "follow_up_questions": [],
+                "error": str(e),
+            })
+    return {"briefs": briefs}
 
 
 # ---------------------------------------------------------------------------
