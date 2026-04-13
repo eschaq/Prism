@@ -556,7 +556,13 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
             </div>
           )}
 
-          {Array.isArray(result.themes) ? (() => {
+          {Array.isArray(result.themes) && result.themes.length === 0 ? (
+            <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] text-center space-y-2" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
+              <span className="material-symbols-outlined text-3xl text-outline">search_off</span>
+              <p className="text-sm text-on-surface-variant">No strong signals found.</p>
+              <p className="text-xs text-outline">Try adding more subreddits, broadening your search query, or enabling web search for additional sources.</p>
+            </div>
+          ) : Array.isArray(result.themes) ? (() => {
             const TIER_ORDER = { AWARENESS: 0, POST: 1, SERIES: 2, PRODUCT: 3 };
             const tiers = ["PRODUCT", "SERIES", "POST", "AWARENESS"];
 
@@ -685,6 +691,8 @@ function ThemeCard({ theme, delta }) {
   const color = sentimentColors[theme.sentiment] || sentimentColors.neutral;
   const ppsColor = PPS_COLORS[theme.pps_tier] || PPS_COLORS.AWARENESS;
   const deltaStyle = delta ? DELTA_STYLES[delta] : null;
+  const sentimentLabel = { positive: "Positive", negative: "Negative", mixed: "Mixed Sentiment", neutral: "Neutral" }[theme.sentiment] || theme.sentiment;
+  const frequencyLabel = { high: "High Frequency", medium: "Medium Frequency", low: "Low Frequency" }[theme.frequency] || theme.frequency;
 
   return (
     <div className="rounded-xl border border-[rgba(174,186,255,0.08)] p-6 backdrop-blur-[12px] space-y-2" style={{ backgroundColor: "rgba(22, 25, 34, 0.45)" }}>
@@ -697,10 +705,10 @@ function ThemeCard({ theme, delta }) {
             </span>
           )}
           <span className={`text-xs px-2 py-0.5 rounded-full border ${color}`}>
-            {theme.sentiment}
+            {sentimentLabel}
           </span>
           <span className="text-xs px-2 py-0.5 rounded-full border border-outline-variant text-on-surface-variant">
-            {theme.frequency}
+            {frequencyLabel}
           </span>
           {theme.pps_tier && (
             <span className={`text-xs px-2 py-0.5 rounded-full border ${ppsColor}`}>
