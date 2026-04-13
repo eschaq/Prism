@@ -25,6 +25,27 @@ def strip_code_fences(text: str) -> str:
     return stripped
 
 
+def call_claude_with_search(system_prompt: str, user_message: str, temperature: float = 0.3) -> str:
+    """Call Claude with the built-in web search tool enabled.
+
+    Handles multi-block responses — extracts the final text block after tool use.
+    """
+    message = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=4096,
+        temperature=temperature,
+        system=system_prompt,
+        messages=[{"role": "user", "content": user_message}],
+        tools=[{"type": "web_search_20250305", "name": "web_search"}],
+    )
+    # Extract text from the response — may contain tool_use and text blocks
+    text_parts = []
+    for block in message.content:
+        if hasattr(block, "text"):
+            text_parts.append(block.text)
+    return "\n".join(text_parts) if text_parts else ""
+
+
 def load_prompt(filename: str) -> str:
     prompts_dir = os.path.join(os.path.dirname(__file__), "prompts")
     with open(os.path.join(prompts_dir, filename), "r") as f:

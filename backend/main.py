@@ -50,6 +50,7 @@ class SignalRequest(BaseModel):
     limit: Optional[int] = Field(default=25, ge=1, le=100)
     profile: Optional[dict] = None
     rss_feeds: Optional[list[str]] = Field(default=None, max_length=10)
+    web_search: Optional[bool] = False
 
 
 class GapRequest(BaseModel):
@@ -137,7 +138,7 @@ async def get_signals(request: SignalRequest):
     try:
         competitors_raw = (request.profile or {}).get("competitors", "")
         competitors = [c.strip() for c in competitors_raw.split(",") if c.strip()] if competitors_raw else None
-        result = scrape_signals(request.subreddits, request.query, request.limit, request.profile, request.rss_feeds, competitors)
+        result = scrape_signals(request.subreddits, request.query, request.limit, request.profile, request.rss_feeds, competitors, request.web_search)
         return result
     except ValueError as e:
         # Bad subreddit name, private sub, etc. — caller's fault

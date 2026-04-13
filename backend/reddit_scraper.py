@@ -8,6 +8,7 @@ import prawcore
 from claude_client import call_claude, load_prompt, strip_code_fences
 from formatting import format_profile
 from rss_scraper import fetch_rss_feeds
+from web_search import search_web
 from scoring import (
     is_career_post,
     extract_query_terms,
@@ -131,8 +132,9 @@ def scrape_signals(
     profile: dict | None = None,
     rss_feeds: list[str] | None = None,
     competitors: list[str] | None = None,
+    web_search: bool = False,
 ) -> dict:
-    """Scrape Reddit and optional RSS feeds with filtering, PPS scoring, and comment enrichment."""
+    """Scrape Reddit, optional RSS feeds, and optional web search with filtering, PPS scoring, and comment enrichment."""
     reddit = _get_reddit_client()
 
     # --- Fetch posts from all subreddits ---
@@ -145,7 +147,13 @@ def scrape_signals(
     if rss_feeds:
         rss_items = fetch_rss_feeds(rss_feeds, query, limit)
 
-    if not submissions and not rss_items:
+    # --- Fetch web search results ---
+    web_items = []
+    if web_search:
+        industry = (profile or {}).get("industry", "")
+        web_items = search_web(query, industry, limit)
+
+    if not submissions and not rss_items and not web_items:
         return {
             "themes": [],
             "raw_posts": [],
@@ -164,8 +172,12 @@ def scrape_signals(
         item for item in rss_items
         if not is_career_post(item["title"], item["selftext"])
     ]
+    web_items = [
+        item for item in web_items
+        if not is_career_post(item["title"], item["selftext"])
+    ]
 
-    if not submissions and not rss_items:
+    if not submissions and not rss_items and not web_items:
         return {
             "themes": [],
             "raw_posts": [],
@@ -233,6 +245,33 @@ def scrape_signals(
             "comments_text": "",
         })
 
+    # Score web search items
+    for item in web_items:
+        text = f"{item['title']} {item['selftext']}"
+        relevance_tier = score_relevance(item["title"], item["selftext"], query_terms)
+        wtp_detected, wtp_matches = detect_wtp(text)
+        pain_patterns, pain_count = detect_pain_patterns(text)
+        pps_total, pps_label = calculate_pps(relevance_tier, pain_count, wtp_detected)
+
+        scored_posts.append({
+            "submission": None,
+            "title": item["title"],
+            "selftext": item["selftext"],
+            "score": item["score"],
+            "num_comments": item["num_comments"],
+            "url": item["url"],
+            "created": item["created"],
+            "source": item["source"],
+            "relevance_tier": relevance_tier,
+            "wtp_detected": wtp_detected,
+            "wtp_matches": wtp_matches,
+            "pain_patterns": pain_patterns,
+            "pain_count": pain_count,
+            "pps_total": pps_total,
+            "pps_label": pps_label,
+            "comments_text": "",
+        })
+
     # --- Step 3: Sort by PPS descending ---
     scored_posts.sort(key=lambda p: p["pps_total"], reverse=True)
 
@@ -261,6 +300,8 @@ def scrape_signals(
     source_parts = [f"r/{s}" for s in subreddits]
     if rss_feeds:
         source_parts.extend(f"RSS:{url}" for url in rss_feeds)
+    if web_search:
+        source_parts.append("Web Search")
     source_label = ", ".join(source_parts)
 
     post_sections = []
@@ -327,6 +368,7 @@ def scrape_signals(
         "raw_posts": raw_posts,
         "subreddits": subreddits,
         "rss_feeds": rss_feeds or [],
+        "web_search": web_search,
         "query": query,
         "post_count": len(raw_posts),
         "competitor_signals": competitor_signals,

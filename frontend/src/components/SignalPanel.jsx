@@ -45,6 +45,9 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
   );
   const [customInput, setCustomInput] = useState("");
   const [feeds, setFeeds] = useState(loadSavedFeeds);
+  const [webSearch, setWebSearch] = useState(() => {
+    try { return localStorage.getItem("prism_web_search") === "true"; } catch { return false; }
+  });
   const [feedInput, setFeedInput] = useState("");
   const [query, setQuery] = useState(() => initialConfig?.query || "");
   const [limit, setLimit] = useState(25);
@@ -186,6 +189,9 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
       const body = { subreddits: checkedSubreddits, query, limit, profile };
       if (checkedFeeds.length > 0) {
         body.rss_feeds = checkedFeeds;
+      }
+      if (webSearch) {
+        body.web_search = true;
       }
       const res = await fetch(`${apiBase}/api/signals`, {
         method: "POST",
@@ -356,6 +362,29 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           >
             Save feeds
           </button>
+        </div>
+
+        {/* Web Search toggle */}
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            checked={webSearch}
+            onChange={(e) => {
+              setWebSearch(e.target.checked);
+              localStorage.setItem("prism_web_search", String(e.target.checked));
+            }}
+            className="mt-0.5 h-4 w-4 rounded border-outline-variant bg-surface-container-high text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+          />
+          <div>
+            <label className="text-xs font-medium text-on-surface cursor-pointer" onClick={() => {
+              const next = !webSearch;
+              setWebSearch(next);
+              localStorage.setItem("prism_web_search", String(next));
+            }}>
+              Include web search
+            </label>
+            <p className="text-[10px] text-outline mt-0.5">Search recent industry news and discussions via AI-powered web search.</p>
+          </div>
         </div>
 
         <div>
