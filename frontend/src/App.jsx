@@ -7,6 +7,7 @@ import PathSelector from "./components/PathSelector";
 import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
 import AgenticProgress from "./components/AgenticProgress";
+import AgenticPreflight from "./components/AgenticPreflight";
 import prismLogo from "./assets/prism-logo.png";
 import prismBg from "./assets/prism-backround.png";
 
@@ -60,6 +61,7 @@ export default function App() {
   const [profile, setProfile] = useState(loadProfile);
   const [showSettings, setShowSettings] = useState(false);
   const [demoConfig, setDemoConfig] = useState(null);
+  const [agenticPreflight, setAgenticPreflight] = useState(false);
   const [agenticRunning, setAgenticRunning] = useState(false);
   const [agenticResult, setAgenticResult] = useState(null);
   const [agenticError, setAgenticError] = useState(null);
@@ -85,7 +87,13 @@ export default function App() {
     setDemoConfig({ subreddits: DEMO_CONFIG.subreddits, query: DEMO_CONFIG.query });
   }
 
-  async function handleAgenticMode() {
+  function handleStartAgentic() {
+    setAgenticPreflight(true);
+  }
+
+  async function handleAgenticMode({ query: userQuery, files: userFiles }) {
+    setAgenticPreflight(false);
+
     // Read saved sources from localStorage
     let subreddits = [];
     try {
@@ -105,20 +113,14 @@ export default function App() {
       }
     } catch { /* ignore */ }
 
-    // Derive query from profile industry
-    const industry = profile?.industry || "";
-    const query = industry
-      ? industry.toLowerCase().replace(/&/g, "").replace(/[^\w\s]/g, "").replace(/\s+/g, " ").trim() + " tools"
-      : "enterprise intelligence tools";
-
-    // If no subreddits saved, get defaults from industry
+    // If no subreddits saved, get defaults
     if (subreddits.length === 0) {
       subreddits = ["datascience", "analytics", "BusinessIntelligence"];
     }
 
     const config = {
       subreddits,
-      query,
+      query: userQuery,
       limit: 25,
       rss_feeds: rssFeeds.length > 0 ? rssFeeds : undefined,
       audience: audience || "cfo",
@@ -133,6 +135,9 @@ export default function App() {
     try {
       const form = new FormData();
       form.append("config", JSON.stringify(config));
+      if (userFiles && userFiles.length > 0) {
+        userFiles.forEach((f) => form.append("files", f));
+      }
 
       const res = await fetch(`${API_BASE}/api/run-all`, {
         method: "POST",
@@ -175,6 +180,7 @@ export default function App() {
     setAgenticRunning(false);
     setAgenticResult(null);
     setAgenticError(null);
+    setAgenticPreflight(false);
   }
 
   // Completion map
@@ -232,7 +238,7 @@ export default function App() {
 
   const audienceLabel = AUDIENCES.find((a) => a.id === audience)?.label ?? audience;
 
-  // Screen 2: Path selection
+  // Screen 2: Path selection / Agentic flow
   if (!path) {
     if (agenticRunning || agenticResult) {
       return (
@@ -250,7 +256,7 @@ export default function App() {
           <div className="max-w-md text-center space-y-4">
             <p className="text-error text-sm">{agenticError}</p>
             <button
-              onClick={() => setAgenticError(null)}
+              onClick={() => { setAgenticError(null); setAgenticPreflight(false); }}
               className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-6 py-2"
             >
               Back to Path Selection
@@ -260,7 +266,17 @@ export default function App() {
       );
     }
 
-    return <PathSelector audienceLabel={audienceLabel} onSelect={setPath} onHome={() => setAudience(null)} onAgenticMode={handleAgenticMode} />;
+    if (agenticPreflight) {
+      return (
+        <AgenticPreflight
+          profile={profile}
+          onRun={handleAgenticMode}
+          onBack={() => setAgenticPreflight(false)}
+        />
+      );
+    }
+
+    return <PathSelector audienceLabel={audienceLabel} onSelect={setPath} onHome={() => setAudience(null)} onAgenticMode={handleStartAgentic} />;
   }
 
   const pathLabel = activePath?.label ?? path;

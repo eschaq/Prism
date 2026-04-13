@@ -120,17 +120,13 @@ def run_full_pipeline(
         )
 
     # --- Step 5: Narrative Engine ---
-    if signals_result and analysis_result:
+    # Runs if signals exist; analysis/gaps/visibility are optional
+    if signals_result:
         narrative_result, steps_status["narrative"] = _run_step("narrative", lambda: generate_narrative(
-            audience, signals_result, analysis_result, gaps_result, profile, visibility_result,
+            audience, signals_result, analysis_result or {}, gaps_result, profile, visibility_result,
         ))
     else:
-        reasons = []
-        if not signals_result:
-            reasons.append("signals step failed or skipped")
-        if not analysis_result:
-            reasons.append("analysis step failed or skipped")
-        narrative_result, steps_status["narrative"] = _skip_step(" and ".join(reasons))
+        narrative_result, steps_status["narrative"] = _skip_step("signals step failed or skipped")
 
     total_duration = int((time.time() - pipeline_start) * 1000)
 
