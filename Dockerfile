@@ -5,6 +5,8 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 COPY frontend/ .
+RUN mkdir -p public/assets
+COPY frontend/public/assets/ ./public/assets/
 RUN npm run build
 
 # Stage 2: Python runtime
