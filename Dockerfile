@@ -5,8 +5,10 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 COPY frontend/ .
-RUN mkdir -p public/assets
-COPY frontend/public/assets/ ./public/assets/
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN mkdir -p public/assets && \
+    curl -L "https://huggingface.co/spaces/eschaq/Prism/resolve/main/frontend/public/assets/prism-logo.png" -o public/assets/prism-logo.png && \
+    curl -L "https://huggingface.co/spaces/eschaq/Prism/resolve/main/frontend/public/assets/prism-backround.png" -o public/assets/prism-backround.png
 RUN npm run build
 
 # Stage 2: Python runtime
@@ -24,11 +26,8 @@ COPY backend/ ./backend/
 # Copy data (demo CSVs, text files)
 COPY data/ ./data/
 
-# Copy built frontend from stage 1
+# Copy built frontend from stage 1 (includes downloaded assets)
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
-
-# Copy public assets (PNGs from xet storage) into served static folder
-COPY frontend/public/assets/ ./frontend/dist/assets/
 
 # Backend modules are imported directly from /app/backend
 ENV PYTHONPATH=/app/backend
