@@ -5,7 +5,7 @@ WORKDIR /app/frontend
 COPY frontend/package.json frontend/package-lock.json* ./
 RUN npm install
 COPY frontend/ .
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p public/assets && \
     curl -L "https://huggingface.co/spaces/eschaq/Prism/resolve/main/frontend/public/assets/prism-logo.png" -o public/assets/prism-logo.png && \
     curl -L "https://huggingface.co/spaces/eschaq/Prism/resolve/main/frontend/public/assets/prism-backround.png" -o public/assets/prism-backround.png
