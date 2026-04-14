@@ -25,6 +25,9 @@ COPY data/ ./data/
 # Copy built frontend from stage 1
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
+# Copy public assets (PNGs from xet storage) into served static folder
+COPY frontend/public/assets/ ./frontend/dist/assets/
+
 # Backend modules are imported directly from /app/backend
 ENV PYTHONPATH=/app/backend
 
