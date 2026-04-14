@@ -42,7 +42,7 @@ function PrismLogo() {
     <img
       src="/assets/prism-logo.png"
       alt="Prism"
-      className="h-12 w-auto"
+      className="w-32 h-auto"
       onError={() => setImgFailed(true)}
     />
   );

@@ -77,7 +77,7 @@ export default function AgenticProgress({ stepsStatus, running, onCancel }) {
       <div className="relative z-10 flex flex-col items-center gap-8 max-w-lg w-full px-8">
         {/* Logo */}
         <div className="mb-2">
-          <img src="/assets/prism-logo.png" alt="Prism" className="h-12 w-auto" onError={(e) => { e.target.style.display='none'; }} />
+          <img src="/assets/prism-logo.png" alt="Prism" className="w-48 h-auto" onError={(e) => { e.target.style.display='none'; }} />
         </div>
 
         {/* Heading */}

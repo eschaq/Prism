@@ -55,7 +55,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
       {/* Top bar: logo left, settings right */}
       <div className="absolute top-0 left-0 right-0 z-10 px-8 py-5 flex items-center justify-between">
         <div className="flex items-center">
-          <img src="/assets/prism-logo.png" alt="Prism" className="h-12 w-auto" onError={(e) => { e.target.style.display='none'; }} />
+          <img src="/assets/prism-logo.png" alt="Prism" className="w-48 h-auto" onError={(e) => { e.target.style.display='none'; }} />
         </div>
         <button
           onClick={onOpenSettings}
