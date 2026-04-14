@@ -364,7 +364,11 @@ async def scrape_signals(
     # --- Step 7: Competitive scanning (separate from main pipeline) ---
     competitor_signals = {}
     if competitors:
-        competitor_signals = await scan_competitors(competitors, subreddits, limit=10)
+        try:
+            competitor_signals = await scan_competitors(competitors, subreddits, limit=10)
+        except Exception:
+            logger.warning("Competitor scanning failed — proceeding without competitor signals")
+            competitor_signals = {}
 
     return {
         "themes": themes,
