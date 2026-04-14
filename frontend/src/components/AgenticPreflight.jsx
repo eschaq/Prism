@@ -74,7 +74,7 @@ export default function AgenticPreflight({ profile, onRun, onBack }) {
       {/* Top bar */}
       <div className="absolute top-0 left-0 right-0 z-10 px-8 py-5 flex items-center justify-between">
         <button onClick={onBack} className="hover:opacity-80 transition-opacity">
-          <img src={prismLogo} alt="Prism" className="h-10 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
+          <img src={prismLogo} alt="Prism" className="h-16 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
           <span className="text-2xl font-extrabold tracking-tighter text-white font-headline" style={{ display: "none" }}>🔮 prism</span>
         </button>
         <button
