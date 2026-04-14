@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import { PATHS } from "../paths";
+import prismLogo from "../assets/prism-logo.png";
+import prismBg from "../assets/prism-backround.png";
 
 const PATH_META = {
   signal_report: {
@@ -63,6 +65,7 @@ export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenti
   return (
     <div className="relative min-h-screen bg-surface text-on-surface font-body overflow-hidden">
       {/* Background image */}
+      <img src={prismBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none z-0" />
       {/* Background effects */}
       <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
       <div className="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
@@ -71,7 +74,8 @@ export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenti
       {/* Top bar: logo (clickable → home) */}
       <div className="absolute top-0 left-0 z-10 px-8 py-5">
         <button onClick={onHome} className="hover:opacity-80 transition-opacity">
-          <span className="text-2xl font-extrabold tracking-tighter text-white font-headline">🔮 prism</span>
+          <img src={prismLogo} alt="Prism" className="h-10 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
+          <span className="text-2xl font-extrabold tracking-tighter text-white font-headline" style={{ display: "none" }}>🔮 prism</span>
         </button>
       </div>
 

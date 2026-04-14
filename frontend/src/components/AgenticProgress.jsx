@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Spinner } from "./LoadingStates";
 import { STEP_META } from "../paths";
+import prismLogo from "../assets/prism-logo.png";
+import prismBg from "../assets/prism-backround.png";
 
 const PIPELINE_STEPS = ["signals", "analysis", "gaps", "visibility", "narrative"];
 const STEP_LABELS = {
@@ -69,6 +71,7 @@ export default function AgenticProgress({ stepsStatus, running, onCancel }) {
   return (
     <div className="fixed inset-0 z-50 bg-surface flex flex-col items-center justify-center overflow-hidden">
       {/* Background */}
+      <img src={prismBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center opacity-35 pointer-events-none z-0" />
       <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
       <div className="fixed top-[-10%] left-[10%] w-[600px] h-[600px] bg-secondary/5 blur-[120px] rounded-full pointer-events-none z-0" />
       <div className="fixed bottom-[-10%] right-[10%] w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
@@ -76,7 +79,8 @@ export default function AgenticProgress({ stepsStatus, running, onCancel }) {
       <div className="relative z-10 flex flex-col items-center gap-8 max-w-lg w-full px-8">
         {/* Logo */}
         <div className="mb-2">
-          <span className="text-3xl font-extrabold tracking-tighter text-white font-headline">🔮 prism</span>
+          <img src={prismLogo} alt="Prism" className="h-14 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
+          <span className="text-3xl font-extrabold tracking-tighter text-white font-headline" style={{ display: "none" }}>🔮 prism</span>
         </div>
 
         {/* Heading */}
