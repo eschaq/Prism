@@ -207,3 +207,4 @@ marimo/_lsp/
 __marimo__/
 frontend/node_modules/
 frontend/src/assets/*.png
+frontend/public/assets/*.png
