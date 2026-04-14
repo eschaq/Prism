@@ -206,3 +206,6 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 frontend/node_modules/
+*.png
+*.jpg
+*.webp
