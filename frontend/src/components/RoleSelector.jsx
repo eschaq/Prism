@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import AUDIENCES from "../audiences";
-const prismLogo = "/assets/prism-logo.png";
-const prismBg = "/assets/prism-backround.png";
 
 const ROLE_ICONS = {
   cfo: "account_balance",
@@ -48,7 +46,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
   return (
     <div className="relative min-h-screen bg-surface text-on-surface font-body overflow-hidden">
       {/* Background image */}
-      <img src={prismBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center opacity-35 pointer-events-none z-0" />
+      <img src="/assets/prism-backround.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none" style={{zIndex: 0}} />
       {/* Background effects */}
       <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
       <div className="fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
@@ -57,8 +55,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
       {/* Top bar: logo left, settings right */}
       <div className="absolute top-0 left-0 right-0 z-10 px-8 py-5 flex items-center justify-between">
         <div className="flex items-center">
-          <img src={prismLogo} alt="Prism" className="h-24 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
-          <span className="text-2xl font-extrabold tracking-tighter text-white font-headline" style={{ display: "none" }}>🔮 prism</span>
+          <img src="/assets/prism-logo.png" alt="Prism" className="h-12 w-auto" onError={(e) => { e.target.style.display='none'; }} />
         </div>
         <button
           onClick={onOpenSettings}

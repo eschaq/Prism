@@ -8,8 +8,6 @@ import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
 import AgenticProgress from "./components/AgenticProgress";
 import AgenticPreflight from "./components/AgenticPreflight";
-const prismLogo = "/assets/prism-logo.png";
-const prismBg = "/assets/prism-backround.png";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 const STORAGE_KEY = "prism_profile";
@@ -42,7 +40,7 @@ function PrismLogo() {
   }
   return (
     <img
-      src={prismLogo}
+      src="/assets/prism-logo.png"
       alt="Prism"
       className="h-12 w-auto"
       onError={() => setImgFailed(true)}
@@ -313,7 +311,7 @@ export default function App() {
     <div className="min-h-screen bg-surface text-on-surface font-body">
       {/* Background image + effects */}
       {/* Background effects */}
-      <img src={prismBg} alt="" className="fixed inset-0 w-full h-full object-cover opacity-35 pointer-events-none z-0" />
+      <img src="/assets/prism-backround.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-35 pointer-events-none" style={{zIndex: 0}} />
       <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
       <div className="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
       <div className="fixed bottom-[-10%] left-[20%] w-[500px] h-[500px] bg-tertiary/5 blur-[120px] rounded-full pointer-events-none z-0" />
