@@ -1,2 +1,0 @@
-*.png filter=xet diff=xet merge=xet -text
-*.jpg filter=xet diff=xet merge=xet -text

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import AUDIENCES from "../audiences";
-const prismLogo = "/assets/prism-logo.png";
-const prismBg = "/assets/prism-backround.png";
 
 const ROLE_ICONS = {
   cfo: "account_balance",
@@ -36,7 +34,6 @@ export const ROLE_COLORS = {
 };
 
 export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoadDemo }) {
-  const [logoFailed, setLogoFailed] = useState(false);
   const profileIncomplete = !profile || !profile.companyName || !profile.industry;
 
   // Auto-open profile settings on first visit if empty
@@ -49,7 +46,6 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
   return (
     <div className="relative min-h-screen bg-surface text-on-surface font-body overflow-hidden">
       {/* Background image */}
-      <img src={prismBg} alt="" className="absolute inset-0 w-full h-full object-cover object-center opacity-35 pointer-events-none z-0" />
       {/* Background effects */}
       <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
       <div className="fixed top-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
@@ -58,18 +54,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
       {/* Top bar: logo left, settings right */}
       <div className="absolute top-0 left-0 right-0 z-10 px-8 py-5 flex items-center justify-between">
         <div className="flex items-center">
-          {logoFailed ? (
-            <span className="material-symbols-outlined text-[#5C6BC0] text-7xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              filter_center_focus
-            </span>
-          ) : (
-            <img
-              src={prismLogo}
-              alt="Prism"
-              className="h-24 w-auto"
-              onError={() => setLogoFailed(true)}
-            />
-          )}
+          <span className="text-2xl font-extrabold tracking-tighter text-white font-headline">🔮 prism</span>
         </div>
         <button
           onClick={onOpenSettings}

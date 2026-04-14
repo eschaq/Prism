@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import { PATHS } from "../paths";
-const prismLogo = "/assets/prism-logo.png";
-const prismBg = "/assets/prism-backround.png";
 
 const PATH_META = {
   signal_report: {
@@ -62,12 +60,9 @@ const ACCENT_CLASSES = {
 };
 
 export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenticMode }) {
-  const [logoFailed, setLogoFailed] = useState(false);
-
   return (
     <div className="relative min-h-screen bg-surface text-on-surface font-body overflow-hidden">
       {/* Background image */}
-      <img src={prismBg} alt="" className="absolute inset-0 w-full h-full object-cover opacity-50 pointer-events-none z-0" />
       {/* Background effects */}
       <div className="fixed inset-0 dot-matrix pointer-events-none z-0" />
       <div className="fixed top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary/5 blur-[120px] rounded-full pointer-events-none z-0" />
@@ -76,18 +71,7 @@ export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenti
       {/* Top bar: logo (clickable → home) */}
       <div className="absolute top-0 left-0 z-10 px-8 py-5">
         <button onClick={onHome} className="hover:opacity-80 transition-opacity">
-          {logoFailed ? (
-            <span className="material-symbols-outlined text-[#5C6BC0] text-7xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              filter_center_focus
-            </span>
-          ) : (
-            <img
-              src={prismLogo}
-              alt="Prism"
-              className="h-24 w-auto"
-              onError={() => setLogoFailed(true)}
-            />
-          )}
+          <span className="text-2xl font-extrabold tracking-tighter text-white font-headline">🔮 prism</span>
         </button>
       </div>
 
