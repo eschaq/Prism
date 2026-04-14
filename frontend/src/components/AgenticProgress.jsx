@@ -79,7 +79,7 @@ export default function AgenticProgress({ stepsStatus, running, onCancel }) {
       <div className="relative z-10 flex flex-col items-center gap-8 max-w-lg w-full px-8">
         {/* Logo */}
         <div className="mb-2">
-          <img src={prismLogo} alt="Prism" className="h-16 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
+          <img src={prismLogo} alt="Prism" className="h-24 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
           <span className="text-3xl font-extrabold tracking-tighter text-white font-headline" style={{ display: "none" }}>🔮 prism</span>
         </div>
 

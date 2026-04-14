@@ -57,7 +57,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
       {/* Top bar: logo left, settings right */}
       <div className="absolute top-0 left-0 right-0 z-10 px-8 py-5 flex items-center justify-between">
         <div className="flex items-center">
-          <img src={prismLogo} alt="Prism" className="h-20 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
+          <img src={prismLogo} alt="Prism" className="h-24 w-auto" onError={(e) => { e.target.style.display = "none"; e.target.nextSibling.style.display = "inline"; }} />
           <span className="text-2xl font-extrabold tracking-tighter text-white font-headline" style={{ display: "none" }}>🔮 prism</span>
         </div>
         <button

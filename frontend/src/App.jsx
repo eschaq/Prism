@@ -44,7 +44,7 @@ function PrismLogo() {
     <img
       src={prismLogo}
       alt="Prism"
-      className="h-8 w-auto"
+      className="h-12 w-auto"
       onError={() => setImgFailed(true)}
     />
   );
