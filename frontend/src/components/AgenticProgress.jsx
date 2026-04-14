@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Spinner } from "./LoadingStates";
 import { STEP_META } from "../paths";
-import prismLogo from "../assets/prism-logo.png";
-import prismBg from "../assets/prism-backround.png";
+const prismLogo = "/assets/prism-logo.png";
+const prismBg = "/assets/prism-backround.png";
 
 const PIPELINE_STEPS = ["signals", "analysis", "gaps", "visibility", "narrative"];
 const STEP_LABELS = {

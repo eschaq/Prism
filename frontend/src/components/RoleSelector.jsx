@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AUDIENCES from "../audiences";
-import prismLogo from "../assets/prism-logo.png";
-import prismBg from "../assets/prism-backround.png";
+const prismLogo = "/assets/prism-logo.png";
+const prismBg = "/assets/prism-backround.png";
 
 const ROLE_ICONS = {
   cfo: "account_balance",

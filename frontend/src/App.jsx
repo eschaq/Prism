@@ -8,8 +8,8 @@ import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
 import AgenticProgress from "./components/AgenticProgress";
 import AgenticPreflight from "./components/AgenticPreflight";
-import prismLogo from "./assets/prism-logo.png";
-import prismBg from "./assets/prism-backround.png";
+const prismLogo = "/assets/prism-logo.png";
+const prismBg = "/assets/prism-backround.png";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 const STORAGE_KEY = "prism_profile";

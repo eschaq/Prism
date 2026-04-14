@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { X } from "lucide-react";
-import prismLogo from "../assets/prism-logo.png";
-import prismBg from "../assets/prism-backround.png";
+const prismLogo = "/assets/prism-logo.png";
+const prismBg = "/assets/prism-backround.png";
 
 const ACCEPTED_EXTENSIONS = [".csv", ".txt", ".md"];
 
