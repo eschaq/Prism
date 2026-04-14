@@ -1,7 +1,7 @@
 import React from "react";
 import { PATHS } from "../paths";
-import prismLogo from "../assets/prism-logo.png";
-import prismBg from "../assets/prism-backround.png";
+const prismLogo = "/assets/prism-logo.png";
+const prismBg = "/assets/prism-backround.png";
 
 const PATH_META = {
   signal_report: {
