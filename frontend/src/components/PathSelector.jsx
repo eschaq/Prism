@@ -98,7 +98,7 @@ export default function PathSelector({ audienceLabel, onSelect, onHome, onAgenti
         </header>
 
         {/* Bento grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div data-tour-id="path-grid" className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {PATHS.map((p) => {
             const meta = PATH_META[p.id] || PATH_META.signal_report;
             const a = ACCENT_CLASSES[meta.accent];

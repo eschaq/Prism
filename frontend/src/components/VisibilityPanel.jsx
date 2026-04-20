@@ -80,6 +80,7 @@ export default function VisibilityPanel({ apiBase, profile, onVisibility }) {
 
       <button
         onClick={handleRun}
+        data-tour-id="visibility-run"
         disabled={!canRun || loading}
         className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
       >

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { X, ChevronDown, ChevronUp, Lock } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
@@ -13,7 +13,7 @@ function isAcceptedFile(name) {
   return ACCEPTED_EXTENSIONS.some((ext) => lower.endsWith(ext));
 }
 
-export default function DataPanel({ apiBase, profile, onAnalysis }) {
+export default function DataPanel({ apiBase, profile, onAnalysis, onDataLoadedChange, onAnalysisLoadingChange }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,6 +25,12 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
   const [loadingDemos, setLoadingDemos] = useState(false);
   const [pastedText, setPastedText] = useState("");
   const [showPasteArea, setShowPasteArea] = useState(false);
+
+  // Bubble data-loaded state to parent for tour
+  useEffect(() => { onDataLoadedChange?.(files.length > 0); }, [files]);
+
+  // Bubble loading state to parent for tour
+  useEffect(() => { onAnalysisLoadingChange?.(loading); }, [loading]);
 
   function addFiles(fileList) {
     const newFiles = Array.from(fileList).filter((f) => {
@@ -135,6 +141,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
 
       {/* File drop zone */}
       <div
+        data-tour-id="data-upload"
         onDrop={handleDrop}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
@@ -273,6 +280,7 @@ export default function DataPanel({ apiBase, profile, onAnalysis }) {
           )}
           <button
             onClick={handleAnalyze}
+            data-tour-id="data-analyze"
             disabled={loading || !canAnalyze}
             className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
           >

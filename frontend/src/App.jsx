@@ -8,6 +8,7 @@ import ProfileSettings from "./components/ProfileSettings";
 import Wizard from "./components/Wizard";
 import AgenticProgress from "./components/AgenticProgress";
 import AgenticPreflight from "./components/AgenticPreflight";
+import TourOverlay from "./components/TourOverlay";
 
 const API_BASE = import.meta.env.VITE_API_URL || "";
 const STORAGE_KEY = "prism_profile";
@@ -59,6 +60,20 @@ export default function App() {
   const [profile, setProfile] = useState(loadProfile);
   const [showSettings, setShowSettings] = useState(false);
   const [demoConfig, setDemoConfig] = useState(null);
+  const [tourOpen, setTourOpen] = useState(false);
+  const [tourStepIndex, setTourStepIndex] = useState(0);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [signalTopicEntered, setSignalTopicEntered] = useState(false);
+  const [signalsRunning, setSignalsRunning] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [analysisRunning, setAnalysisRunning] = useState(false);
+  const [gapsRunning, setGapsRunning] = useState(false);
+  const [briefGenerating, setBriefGenerating] = useState(false);
+
+  useEffect(() => {
+    try { if (localStorage.getItem("prism_tour_completed") !== "true") setTourOpen(true); }
+    catch { /* ignore */ }
+  }, []);
   const [agenticPreflight, setAgenticPreflight] = useState(false);
   const [agenticRunning, setAgenticRunning] = useState(false);
   const [agenticResult, setAgenticResult] = useState(null);
@@ -73,6 +88,8 @@ export default function App() {
     setProfile(data);
     if (data) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 500);
     } else {
       localStorage.removeItem(STORAGE_KEY);
     }
@@ -217,6 +234,31 @@ export default function App() {
     }
   }, [signals, analysis, gaps, narrative, visibility]);
 
+  const tourProps = {
+    isOpen: tourOpen,
+    onClose: () => setTourOpen(false),
+    onComplete: () => setTourOpen(false),
+    stepIndex: tourStepIndex,
+    setStepIndex: setTourStepIndex,
+    profileSaved: !!profile,
+    audience,
+    path,
+    agenticPreflight,
+    agenticRunning,
+    agenticResult,
+    dataLoaded,
+    signalTopicEntered,
+    signalsRunning,
+    analysisRunning,
+    gapsRunning,
+    visibilityRunning: visibility !== null,
+  };
+
+  function handleLaunchTour() {
+    setTourStepIndex(0);
+    setTourOpen(true);
+  }
+
   // Screen 1: Role selection
   if (!audience) {
     return (
@@ -230,6 +272,7 @@ export default function App() {
             onClose={() => setShowSettings(false)}
           />
         )}
+        <TourOverlay {...tourProps} />
       </>
     );
   }
@@ -240,41 +283,55 @@ export default function App() {
   if (!path) {
     if (agenticRunning || agenticResult) {
       return (
-        <AgenticProgress
-          stepsStatus={agenticResult?.steps_status || null}
-          running={agenticRunning}
-          onCancel={handleCancelAgentic}
-        />
+        <>
+          <AgenticProgress
+            stepsStatus={agenticResult?.steps_status || null}
+            running={agenticRunning}
+            onCancel={handleCancelAgentic}
+          />
+          <TourOverlay {...tourProps} />
+        </>
       );
     }
 
     if (agenticError) {
       return (
-        <div className="min-h-screen bg-surface flex items-center justify-center">
-          <div className="max-w-md text-center space-y-4">
-            <p className="text-error text-sm">{agenticError}</p>
-            <button
-              onClick={() => { setAgenticError(null); setAgenticPreflight(false); }}
-              className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-6 py-2"
-            >
-              Back to Path Selection
-            </button>
+        <>
+          <div className="min-h-screen bg-surface flex items-center justify-center">
+            <div className="max-w-md text-center space-y-4">
+              <p className="text-error text-sm">{agenticError}</p>
+              <button
+                onClick={() => { setAgenticError(null); setAgenticPreflight(false); }}
+                className="rounded-xl bg-surface-container-high border border-outline-variant hover:bg-surface-bright text-on-surface font-label text-xs transition-all px-6 py-2"
+              >
+                Back to Path Selection
+              </button>
+            </div>
           </div>
-        </div>
+          <TourOverlay {...tourProps} />
+        </>
       );
     }
 
     if (agenticPreflight) {
       return (
-        <AgenticPreflight
-          profile={profile}
-          onRun={handleAgenticMode}
-          onBack={() => setAgenticPreflight(false)}
-        />
+        <>
+          <AgenticPreflight
+            profile={profile}
+            onRun={handleAgenticMode}
+            onBack={() => setAgenticPreflight(false)}
+          />
+          <TourOverlay {...tourProps} />
+        </>
       );
     }
 
-    return <PathSelector audienceLabel={audienceLabel} onSelect={setPath} onHome={() => setAudience(null)} onAgenticMode={handleStartAgentic} />;
+    return (
+      <>
+        <PathSelector audienceLabel={audienceLabel} onSelect={setPath} onHome={() => setAudience(null)} onAgenticMode={handleStartAgentic} />
+        <TourOverlay {...tourProps} />
+      </>
+    );
   }
 
   const pathLabel = activePath?.label ?? path;
@@ -350,7 +407,15 @@ export default function App() {
         </div>
         <div className="flex items-center gap-4">
           <button
+            onClick={handleLaunchTour}
+            className="p-2 text-on-surface-variant hover:text-white hover:bg-surface-container-low rounded-lg transition-all"
+            title="Launch Tour"
+          >
+            <span className="material-symbols-outlined text-sm">tour</span>
+          </button>
+          <button
             onClick={() => setShowSettings(true)}
+            data-tour-id="profile"
             className="relative p-2 text-on-surface-variant hover:text-white hover:bg-surface-container-low rounded-lg transition-all"
           >
             <span className="material-symbols-outlined">settings</span>
@@ -479,6 +544,12 @@ export default function App() {
           onGaps={setGaps}
           onNarrative={setNarrative}
           onVisibility={setVisibility}
+          onSignalTopicChange={setSignalTopicEntered}
+          onSignalsLoadingChange={setSignalsRunning}
+          onDataLoadedChange={setDataLoaded}
+          onAnalysisLoadingChange={setAnalysisRunning}
+          onGapsLoadingChange={setGapsRunning}
+          onBriefLoadingChange={setBriefGenerating}
         />
       </main>
 
@@ -490,6 +561,8 @@ export default function App() {
           onClose={() => setShowSettings(false)}
         />
       )}
+
+      <TourOverlay {...tourProps} />
     </div>
   );
 }

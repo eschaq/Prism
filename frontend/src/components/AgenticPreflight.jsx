@@ -181,6 +181,7 @@ export default function AgenticPreflight({ profile, onRun, onBack }) {
           {/* Run button */}
           <button
             onClick={handleRun}
+            data-tour-id="agentic-config"
             disabled={!query.trim()}
             className="w-full bg-[#5C6BC0] text-white py-3 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40"
           >

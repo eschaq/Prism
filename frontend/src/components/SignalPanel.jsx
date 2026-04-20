@@ -39,7 +39,7 @@ function feedDisplayName(url) {
   }
 }
 
-export default function SignalPanel({ apiBase, profile, initialConfig, onSignals }) {
+export default function SignalPanel({ apiBase, profile, initialConfig, onSignals, onSignalTopicChange, onSignalsLoadingChange }) {
   const [subreddits, setSubreddits] = useState(
     () => initialConfig?.subreddits || loadSavedSubreddits()
   );
@@ -57,6 +57,12 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [loadingFeeds, setLoadingFeeds] = useState(false);
   const queryManuallyEdited = useRef(!!initialConfig?.query);
+
+  // Bubble query state to parent for tour
+  useEffect(() => { onSignalTopicChange?.(query.trim().length > 0); }, [query]);
+
+  // Bubble loading state to parent for tour
+  useEffect(() => { onSignalsLoadingChange?.(loading); }, [loading]);
 
   // Fetch subreddit suggestions on industry change
   useEffect(() => {
@@ -406,7 +412,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           </div>
         </div>
 
-        <div>
+        <div data-tour-id="signal-topic">
           <label className="block text-xs font-medium text-on-surface-variant mb-1">
             Search Query
           </label>
@@ -434,6 +440,7 @@ export default function SignalPanel({ apiBase, profile, initialConfig, onSignals
           </div>
           <button
             type="submit"
+            data-tour-id="signals-run"
             disabled={loading || totalSources === 0}
             className="mt-5 bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-50"
           >

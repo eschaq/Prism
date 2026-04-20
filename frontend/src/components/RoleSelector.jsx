@@ -111,7 +111,7 @@ export default function RoleSelector({ onSelect, profile, onOpenSettings, onLoad
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
+        <div data-tour-id="role-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {AUDIENCES.map((a) => {
             const icon = ROLE_ICONS[a.id] || "person";
             const accent = ROLE_COLORS[a.id] || "#aebaff";

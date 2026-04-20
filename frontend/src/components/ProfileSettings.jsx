@@ -41,12 +41,38 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
   });
   const [suggestions, setSuggestions] = useState([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [errors, setErrors] = useState({});
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  }
+
+  function validate() {
+    const next = {};
+    if (!form.companyName.trim()) next.companyName = "Required";
+    if (!form.industry) next.industry = "Required";
+    if (form.industry === "Other" && !form.industryOther.trim()) {
+      next.industryOther = "Required";
+    }
+    if (!form.subIndustry.trim()) next.subIndustry = "Required";
+    if (!form.competitors.trim()) next.competitors = "Required";
+    if (!form.companySize) next.companySize = "Required";
+    if (!form.context.trim()) next.context = "Required";
+    return next;
   }
 
   function handleSave() {
+    const found = validate();
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+
     const resolvedIndustry =
       form.industry === "Other" ? form.industryOther.trim() : form.industry;
 
@@ -58,10 +84,7 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
       companySize: form.companySize,
       context: form.context.trim(),
     };
-    const hasContent =
-      trimmed.companyName || trimmed.industry || trimmed.subIndustry ||
-      trimmed.competitors || trimmed.companySize || trimmed.context;
-    onSave(hasContent ? trimmed : null);
+    onSave(trimmed);
     onClose();
   }
 
@@ -118,7 +141,7 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-gray-950 border-l border-gray-800 shadow-2xl flex flex-col">
+      <div data-tour-id="profile" className="relative w-full max-w-md bg-gray-950 border-l border-gray-800 shadow-2xl flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
           <h2 className="text-lg font-semibold text-gray-100">Company Profile</h2>
           <button
@@ -136,24 +159,29 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Company Name
+              Company Name <span className="text-[#71D7CD]">*</span>
             </label>
             <input
+              required
               value={form.companyName}
               onChange={(e) => handleChange("companyName", e.target.value)}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className={`w-full rounded-md bg-gray-800 border px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.companyName ? "border-[#71D7CD]" : "border-gray-700"}`}
               placeholder="e.g. Acme Corp"
             />
+            {errors.companyName && (
+              <p className="mt-1 text-xs text-[#71D7CD]">{errors.companyName}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Industry
+              Industry <span className="text-[#71D7CD]">*</span>
             </label>
             <select
+              required
               value={form.industry}
               onChange={(e) => handleChange("industry", e.target.value)}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className={`w-full rounded-md bg-gray-800 border px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.industry ? "border-[#71D7CD]" : "border-gray-700"}`}
             >
               <option value="">Select industry...</option>
               {INDUSTRIES.map((ind) => (
@@ -162,44 +190,60 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
                 </option>
               ))}
             </select>
+            {errors.industry && (
+              <p className="mt-1 text-xs text-[#71D7CD]">{errors.industry}</p>
+            )}
           </div>
 
           {form.industry === "Other" && (
             <div>
               <label className="block text-xs font-medium text-gray-400 mb-1">
-                Specify industry
+                Specify industry <span className="text-[#71D7CD]">*</span>
               </label>
               <input
+                required
                 value={form.industryOther}
                 onChange={(e) => handleChange("industryOther", e.target.value)}
-                className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className={`w-full rounded-md bg-gray-800 border px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.industryOther ? "border-[#71D7CD]" : "border-gray-700"}`}
                 placeholder="e.g. Healthcare logistics, Legal tech"
               />
+              {errors.industryOther && (
+                <p className="mt-1 text-xs text-[#71D7CD]">{errors.industryOther}</p>
+              )}
             </div>
           )}
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Sub-industry (optional)
+              Sub-industry <span className="text-[#71D7CD]">*</span>
             </label>
             <input
+              required
               value={form.subIndustry}
               onChange={(e) => handleChange("subIndustry", e.target.value)}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className={`w-full rounded-md bg-gray-800 border px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.subIndustry ? "border-[#71D7CD]" : "border-gray-700"}`}
               placeholder="e.g. Revenue analytics, B2B payments"
             />
+            {errors.subIndustry && (
+              <p className="mt-1 text-xs text-[#71D7CD]">{errors.subIndustry}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Primary Competitors (optional, max 8)
+              Primary Competitors <span className="text-[#71D7CD]">*</span>
+              <span className="text-gray-500 font-normal"> (max 8)</span>
             </label>
             <input
+              required
               value={form.competitors}
               onChange={(e) => handleChange("competitors", e.target.value)}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className={`w-full rounded-md bg-gray-800 border px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.competitors ? "border-[#71D7CD]" : "border-gray-700"}`}
               placeholder="e.g. Tableau, Looker, Metabase"
             />
+            {errors.competitors && (
+              <p className="mt-1 text-xs text-[#71D7CD]">{errors.competitors}</p>
+            )}
             <button
               type="button"
               onClick={handleSuggestCompetitors}
@@ -260,12 +304,13 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Company Size
+              Company Size <span className="text-[#71D7CD]">*</span>
             </label>
             <select
+              required
               value={form.companySize}
               onChange={(e) => handleChange("companySize", e.target.value)}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className={`w-full rounded-md bg-gray-800 border px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 ${errors.companySize ? "border-[#71D7CD]" : "border-gray-700"}`}
             >
               <option value="">Select size...</option>
               {COMPANY_SIZES.map((size) => (
@@ -274,19 +319,26 @@ export default function ProfileSettings({ apiBase, profile, onSave, onClose }) {
                 </option>
               ))}
             </select>
+            {errors.companySize && (
+              <p className="mt-1 text-xs text-[#71D7CD]">{errors.companySize}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-xs font-medium text-gray-400 mb-1">
-              Additional Context
+              Additional Context <span className="text-[#71D7CD]">*</span>
             </label>
             <textarea
+              required
               value={form.context}
               onChange={(e) => handleChange("context", e.target.value)}
               rows={4}
-              className="w-full rounded-md bg-gray-800 border border-gray-700 px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className={`w-full rounded-md bg-gray-800 border px-3 py-2 text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none ${errors.context ? "border-[#71D7CD]" : "border-gray-700"}`}
               placeholder="e.g. Expanding into APAC, main competitor is Globex, focused on mid-market customers"
             />
+            {errors.context && (
+              <p className="mt-1 text-xs text-[#71D7CD]">{errors.context}</p>
+            )}
           </div>
         </div>
 

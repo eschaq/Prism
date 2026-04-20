@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import { Copy, ChevronDown, ChevronUp } from "lucide-react";
 import { StepProgress, Spinner } from "./LoadingStates";
@@ -19,7 +19,7 @@ const GAP_SECTIONS = [
   { key: "competitive_contrast", label: "Competitive Contrast", fieldMain: "finding", fieldDetail: "evidence", accent: "border-tertiary/20 bg-tertiary/10", labelColor: "text-tertiary" },
 ];
 
-export default function GapAnalysis({ apiBase, profile, signals, analysis, onGaps }) {
+export default function GapAnalysis({ apiBase, profile, signals, analysis, onGaps, onGapsLoadingChange }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -31,6 +31,9 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
   const [stressTest, setStressTest] = useState(null);
   const [stressTestLoading, setStressTestLoading] = useState(false);
   const [stressTestError, setStressTestError] = useState(null);
+
+  // Bubble loading state to parent for tour
+  useEffect(() => { onGapsLoadingChange?.(loading); }, [loading]);
 
   const canRun = signals && analysis;
 
@@ -130,6 +133,7 @@ export default function GapAnalysis({ apiBase, profile, signals, analysis, onGap
 
       <button
         onClick={handleRun}
+        data-tour-id="gaps-run"
         disabled={!canRun || loading}
         className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
       >

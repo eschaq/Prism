@@ -6,7 +6,7 @@ import AUDIENCES from "../audiences";
 
 const PROSE_CLASSES = "prose prose-sm prose-invert prose-headings:text-on-surface prose-headings:text-sm prose-headings:font-semibold prose-headings:mb-2 prose-headings:mt-4 prose-p:text-on-surface-variant prose-p:leading-relaxed prose-strong:text-on-surface prose-ul:text-on-surface-variant prose-ol:text-on-surface-variant prose-li:text-on-surface-variant max-w-none";
 
-export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, visibility, onNarrative }) {
+export default function NarrativePanel({ apiBase, audience, profile, signals, analysis, gaps, visibility, onNarrative, onBriefLoadingChange }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
@@ -30,6 +30,9 @@ export default function NarrativePanel({ apiBase, audience, profile, signals, an
   const [expandedCopied, setExpandedCopied] = useState(false);
   const [showEvidence, setShowEvidence] = useState(false);
   const progressTimer = useRef(null);
+
+  // Bubble loading state to parent for tour
+  useEffect(() => { onBriefLoadingChange?.(loading); }, [loading]);
 
   const canRun = !!(signals || analysis);
   const audienceLabel = AUDIENCES.find((a) => a.id === audience)?.label ?? audience;
@@ -379,6 +382,7 @@ ${briefingHtml}
       <div className="flex items-center gap-3">
         <button
           onClick={handleGenerate}
+          data-tour-id="narrative-generate"
           disabled={!canRun || loading}
           className="bg-[#5C6BC0] text-white px-6 py-2.5 rounded-xl font-label font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 disabled:opacity-40"
         >

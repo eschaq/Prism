@@ -22,16 +22,22 @@ export default function Wizard({
   onGaps,
   onNarrative,
   onVisibility,
+  onSignalTopicChange,
+  onSignalsLoadingChange,
+  onDataLoadedChange,
+  onAnalysisLoadingChange,
+  onGapsLoadingChange,
+  onBriefLoadingChange,
 }) {
   const activeStep = steps[activeIndex];
 
   return (
     <div>
       {activeStep === "signals" && (
-        <SignalPanel apiBase={apiBase} profile={profile} initialConfig={initialConfig} onSignals={onSignals} />
+        <SignalPanel apiBase={apiBase} profile={profile} initialConfig={initialConfig} onSignals={onSignals} onSignalTopicChange={onSignalTopicChange} onSignalsLoadingChange={onSignalsLoadingChange} />
       )}
       {activeStep === "data" && (
-        <DataPanel apiBase={apiBase} profile={profile} onAnalysis={onAnalysis} />
+        <DataPanel apiBase={apiBase} profile={profile} onAnalysis={onAnalysis} onDataLoadedChange={onDataLoadedChange} onAnalysisLoadingChange={onAnalysisLoadingChange} />
       )}
       {activeStep === "gaps" && (
         <GapAnalysis
@@ -40,6 +46,7 @@ export default function Wizard({
           signals={signals}
           analysis={analysis}
           onGaps={onGaps}
+          onGapsLoadingChange={onGapsLoadingChange}
         />
       )}
       {activeStep === "narrative" && (
@@ -52,6 +59,7 @@ export default function Wizard({
           gaps={gaps}
           visibility={visibility}
           onNarrative={onNarrative}
+          onBriefLoadingChange={onBriefLoadingChange}
         />
       )}
       {activeStep === "visibility" && (

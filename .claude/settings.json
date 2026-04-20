@@ -13,7 +13,9 @@
       "Bash(npx tailwindcss:*)",
       "Bash(ls postcss.config.*)",
       "Bash(node -e \":*)",
-      "Bash(ls *.config.*)"
+      "Bash(ls *.config.*)",
+      "Bash(npx vite *)",
+      "Bash(echo \"started pid=$!\")"
     ],
     "additionalDirectories": [
       "/home/eschachter/Prism/http:/localhost:8000/api"
